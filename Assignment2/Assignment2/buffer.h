@@ -41,6 +41,7 @@ Function list: b_create(), b_addc(), b_reset(), b_destroy(), b_isfull(), b_getsi
 #define ADDITIVE 1			/*Additive mode*/
 #define MULTIPLICATIVE -1	/*Multiplicative mode*/
 #define FIXED 0				/*Fixed mode*/
+#define ONEHUNDRED 100		/*Use for calculating new capacity8?
 
 
 

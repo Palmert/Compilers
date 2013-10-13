@@ -104,13 +104,13 @@ Algorithm: Declare temporary variables, validate parameters, check if character 
 			symbol to buffer at offset location, else determine operational mode and increase capacity using
 			realloc accordingly, check if location of character buffer has changed and set r_flag if it is,
 			add symbol to buffer at offset
+			*It is assumed that capacity and addc_offset are the same size*
 **********************************************************************************************************/
 Buffer * b_addc(Buffer * const pBD, char symbol)
 {
 	short nCapacity = ZERO;			/*Used to store and calculate new capacity*/
-	short spaceAvail = ZERO;		/*Stores how much space is available between SHRT_MAX and the current capacity*/
+	float spaceAvail = ZERO;		/*Stores how much space is available between SHRT_MAX and the current capacity*/
 	short increment = ZERO;			/*Used to store and calculate new increment*/
-	float oneHundred = MAX_MULT;	/*Denominator when calculating new increment*/
 	char * newHead = NULL;			/*Used to safely realloc pBD->ca_head and compare change in address*/
 	
 	/*Check for invalid parameters*/
@@ -118,7 +118,10 @@ Buffer * b_addc(Buffer * const pBD, char symbol)
 	{
 		return NULL;
 	}
-
+	if(b_isfull(pBD))
+	{ 
+		return NULL;
+	}
 	pBD->r_flag = ZERO;	
 
 	/*Check if char buffer has room to add symbol*/
@@ -144,13 +147,12 @@ Buffer * b_addc(Buffer * const pBD, char symbol)
 			{
 				return NULL;
 			}
-			pBD->capacity = nCapacity;
 			break;
 		case MULTIPLICATIVE: 
 			/*Calculate amount of space available to increase buffer*/
 			spaceAvail = SHRT_MAX - pBD->capacity;
 			/*Calculate new increment*/
-			increment  = (short)(spaceAvail * pBD->inc_factor / oneHundred);
+			increment  = (short)(spaceAvail * pBD->inc_factor / ONEHUNDRED);
 			/*Calculate new capacity and test for validity*/
 			nCapacity  = pBD->capacity + increment;
 			/*Assign pBD->capacity to max buffer size if nCapacity was unable to increase*/
@@ -158,16 +160,9 @@ Buffer * b_addc(Buffer * const pBD, char symbol)
 			{
 			pBD->capacity = SHRT_MAX;
 			}
-			else
-			{
-			pBD->capacity = nCapacity;
-			}			
 			break;
 	}	
-	if(b_isfull(pBD))
-	{ 
-		return NULL;
-	}
+	pBD->capacity = nCapacity;
 	/*realloc char*buffer based on new capacity and check for success*/
 	newHead = (char*)realloc((char*)pBD->ca_head, pBD->capacity);
 	if(newHead == NULL)
