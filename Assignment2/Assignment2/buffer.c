@@ -197,7 +197,11 @@ int b_reset(Buffer * const pBD)
 	{
 		return R_FAIL_1;
 	}
+	pBD->mark_offset = ZERO;
 	pBD->addc_offset = ZERO;
+	pBD->getc_offset = ZERO;
+	pBD->eob		 = ZERO;
+	pBD->r_flag		 = ZERO;
 	return ONE;
 }
 /**********************************************************************************************************
