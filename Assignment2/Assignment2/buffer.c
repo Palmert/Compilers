@@ -219,12 +219,7 @@ void b_destroy(Buffer * const pBD)
 	{
 		return;
 	}
-	if(pBD->ca_head == NULL)
-	{
-		return;
-	}
 	free(pBD->ca_head);
-	pBD->ca_head = NULL;
 	free((Buffer*)pBD);
 }
 /**********************************************************************************************************
@@ -234,7 +229,7 @@ History/Versions: 1.0
 Called functions: none
 Parameters: Buffer * const pBD
 Return value: int ONE if full, int ZERO if not full, int R_FAIL_1 on failure
-Algorithm:
+Algorithm: *Assume that pBD->capacity and pBD->addc_offset are the same measurement*
 **********************************************************************************************************/
 #ifndef B_FULL
 int b_isfull(Buffer * const pBD) 
@@ -295,7 +290,7 @@ History/Versions: 1.0
 Called functions: none
 Parameters: Buffer * const pBD, short mark
 Return value: int ONE on success, int R_FAIL_1 on failur
-Algorithm: 
+Algorithm: *Assume mark and pBD->capacity are the same measurements*
 **********************************************************************************************************/
 int b_setmark(Buffer * const pBD, short mark)
 {
@@ -303,9 +298,12 @@ int b_setmark(Buffer * const pBD, short mark)
 	{
 		return R_FAIL_1;
 	}
-	pBD->mark_offset = mark;
-	return ONE;
-
+	if(mark<=pBD->capacity)
+	{
+		pBD->mark_offset = mark;
+		return ONE;
+	}
+	return R_FAIL_1;
 }
 /**********************************************************************************************************
 Purpose: Return mark_offset to the calling function
@@ -330,14 +328,14 @@ Author: Thom Palmer
 History/Versions: 1.0 
 Called functions: none
 Parameters: Buffer * const pBD 
-Return value: int pBD->mode on success, int R_FAIL_1 on failure
+Return value: int pBD->mode on success, int R_FAIL_2 on failure
 Algorithm: 
 **********************************************************************************************************/
 int b_getmode(Buffer * const pBD)
 {
 	if(pBD==NULL)
 	{
-		return R_FAIL_1;
+		return R_FAIL_2;
 	}
 	return pBD->mode;
 }
@@ -356,6 +354,10 @@ int b_load(FILE *const fi, Buffer * const pBD)
 	char charToAdd;			/*Current character to add to the buffer*/
 	int charsAdded = ZERO;	/*Number of characters added*/
 
+	if(fi==NULL)
+	{
+		return R_FAIL_1;
+	}
 	if(pBD==NULL)
 	{
 		return R_FAIL_1;
@@ -472,11 +474,9 @@ int b_print(Buffer * const pBD)
 	{
 		printf("The buffer is empty.");
 	}
-	/*Call b_set_getc_offset and check for success*/
-	if(b_set_getc_offset(pBD, ZERO) == R_FAIL_1)
-	{
-		return R_FAIL_1;
-	}	
+	/*Call b_set_getc_offset*/
+	b_set_getc_offset(pBD, ZERO);
+	
 	/*Use a do{}While; loops ensures that b_getc will be called and eob will be reset appropriately*/
 	/*Get a character from the buffer, print it, and increment charsPrinted while !b_eob*/
 	do 
@@ -508,6 +508,7 @@ Parameters: Buffer * const pBD
 Return value: Buffer *pBD on success, NULL on failure
 Algorithm: Validate parameters, set the capacity to addc_offest + 1, resize char buffer using realloc,
 			return Buffer * pBD
+			*Assume that pBD->capacity and pBD->addc_offset are the same measurements*
 **********************************************************************************************************/
 Buffer *b_pack(Buffer * const pBD)
 {
@@ -518,11 +519,12 @@ Buffer *b_pack(Buffer * const pBD)
 	{
 		return NULL;
 	}
-	if (pBD->capacity == SHRT_MAX)
+	if (pBD->addc_offset == SHRT_MAX)
 	{
 		return NULL;
 	}
-	
+	/*Reset r_flag*/
+	pBD->r_flag = ZERO;
 	/*Set new capacity and realloc*/
 	pBD->capacity = pBD->addc_offset + ONE;
 	if(pBD->capacity <= ZERO)
