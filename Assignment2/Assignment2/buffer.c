@@ -18,7 +18,7 @@ Function list: b_create(), b_addc(), b_reset(), b_destroy(), b_isfull(), b_getsi
 Purpose: Attempts to dynamically allocate memory for both a Buffer struct and a character buffer
 Author: Thom Palmer
 History/Versions: 1.0 
-Called functions: calloc(), malloc()
+Called functions: calloc(), malloc(), free()
 Parameters: short init_capacity,char inc_factor,char o_mode 
 Return value: Buffer * newbuffer on success, NULL on failure
 Algorithm: Validate parameters, allocate memory for Buffer struct and character array,and initialize buffer
@@ -27,9 +27,18 @@ Algorithm: Validate parameters, allocate memory for Buffer struct and character 
 
 Buffer * b_create(short init_capacity,char inc_factor,char o_mode){
 	Buffer * newbuffer = NULL; /*Temporary Buffer* for memory allocation*/
-	
+	switch(o_mode)
+	{ 
+		case 'f':
+		case 'a':
+		case 'm':
+			break;
+		default:
+			return NULL;
+	}
+		
 	/*Check that the inc_factor is invalid if o_mode is 'm'*/
-	if (o_mode == 'm' && ZERO > inc_factor > MAX_MULT )
+	if (o_mode == 'm' && (inc_factor < ZERO || inc_factor > MAX_MULT ))
 	{
 		return NULL;
 	}
@@ -39,6 +48,11 @@ Buffer * b_create(short init_capacity,char inc_factor,char o_mode){
 	if(init_capacity < ONE )
 	{
 		return NULL;
+	}
+	/*Change mode to f if inc_factor is 0*/
+	if (inc_factor == 0)
+	{
+		o_mode = 'f';
 	}
 	/*Allocate memory for one newBuffer* using calloc*/
 	newbuffer = (Buffer*)calloc( ONE, sizeof(Buffer));
@@ -54,7 +68,7 @@ Buffer * b_create(short init_capacity,char inc_factor,char o_mode){
 	{
 		free((Buffer*)newbuffer);
 		return NULL; 
-	}
+	}	
 	/*Initialize newbuffer mode and inc_factor based on o_mode*/
 	switch (o_mode)
 	{
@@ -64,28 +78,14 @@ Buffer * b_create(short init_capacity,char inc_factor,char o_mode){
 			newbuffer->inc_factor = ZERO;				 
 			break;
 		/*Additive mode*/
-		case 'a':
-			if(inc_factor == ZERO)
-			{
-				newbuffer->mode = FIXED;
-			}
-			else
-			{
-				newbuffer->mode = ADDITIVE;
-				newbuffer->inc_factor = inc_factor;
-			}
+		case 'a':			
+			newbuffer->mode = ADDITIVE;
+			newbuffer->inc_factor = (unsigned char)inc_factor;			
 			break;
 		/*Multiplicative mode*/
-		case 'm': 
-			if(inc_factor == ZERO)
-			{
-				newbuffer->mode = FIXED;
-			}
-			else
-			{
+		case 'm': 			
 			newbuffer->mode = MULTIPLICATIVE;
-			newbuffer->inc_factor = (unsigned char)inc_factor;
-			}
+			newbuffer->inc_factor = inc_factor;
 			break;
 	}
 	/*Initialize newbuffer capacity to init_capacity*/
