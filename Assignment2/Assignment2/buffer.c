@@ -581,7 +581,7 @@ int b_retract(Buffer * const pBD)
 	{
 		return R_FAIL_1;
 	}
-	pBD->getc_offset -= ONE;
+	--pBD->getc_offset;
 	return ONE;
 }
 /**********************************************************************************************************
@@ -608,11 +608,15 @@ History/Versions: 1.0
 Called functions: none
 Parameters: Buffer * const pBD, short offset
 Return value: int pBD->getc_offset on success, int R_FAIL_1 on failure
-Algorithm: 
+Algorithm: *Assume that offset and pBD->capacity are the same measurements*
 **********************************************************************************************************/
 int b_set_getc_offset(Buffer * const pBD, short offset)
 {
 	if(pBD == NULL)
+	{
+		return R_FAIL_1;
+	}
+	if(offset > pBD->capacity || offset < ZERO);
 	{
 		return R_FAIL_1;
 	}
@@ -626,7 +630,7 @@ History/Versions: 1.0
 Called functions: none
 Parameters: Buffer * const pBD, short offset 
 Return value: char * ptr on success, NULL on failure
-Algorithm: 
+Algorithm: *Assume that of
 **********************************************************************************************************/
 char * b_get_chmemloc(Buffer * const pBD, short offset)
 {
@@ -637,11 +641,11 @@ char * b_get_chmemloc(Buffer * const pBD, short offset)
 		return NULL;
 	}
 	/*Check that offset will not throw an out of bounds exception*/
-	if(ZERO > offset >= pBD->capacity)
+	if(offset < ZERO || offset >= pBD->capacity)
 	{ 
 		return NULL;
 	}
-	ptr = &pBD->ca_head[offset];;
+	ptr = &pBD->ca_head[offset];
 	return ptr;
 }
 
