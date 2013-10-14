@@ -118,7 +118,7 @@ Buffer * b_addc(Buffer * const pBD, char symbol)
 	{
 		return NULL;
 	}
-	if(b_isfull(pBD))
+	if(b_isfull(pBD) && pBD->capacity == SHRT_MAX)
 	{ 
 		return NULL;
 	}
@@ -156,13 +156,17 @@ Buffer * b_addc(Buffer * const pBD, char symbol)
 			/*Calculate new capacity and test for validity*/
 			nCapacity  = pBD->capacity + increment;
 			/*Assign pBD->capacity to max buffer size if nCapacity was unable to increase*/
-			if(pBD->capacity == nCapacity && nCapacity < SHRT_MAX) 
-			{
-			pBD->capacity = SHRT_MAX;
-			}
+			
 			break;
 	}	
-	pBD->capacity = nCapacity;
+	if(pBD->capacity == nCapacity && nCapacity < SHRT_MAX) 
+	{
+		pBD->capacity = SHRT_MAX;
+	}
+	else
+	{
+		pBD->capacity = nCapacity;
+	}
 	/*realloc char*buffer based on new capacity and check for success*/
 	newHead = (char*)realloc((char*)pBD->ca_head, pBD->capacity);
 	if(newHead == NULL)
@@ -298,7 +302,7 @@ int b_setmark(Buffer * const pBD, short mark)
 	{
 		return R_FAIL_1;
 	}
-	if(mark<=pBD->capacity)
+	if(mark<pBD->capacity)
 	{
 		pBD->mark_offset = mark;
 		return ONE;
@@ -616,7 +620,7 @@ int b_set_getc_offset(Buffer * const pBD, short offset)
 	{
 		return R_FAIL_1;
 	}
-	if(offset > pBD->capacity || offset < ZERO);
+	if(offset > pBD->capacity || offset < ZERO)
 	{
 		return R_FAIL_1;
 	}
@@ -630,7 +634,7 @@ History/Versions: 1.0
 Called functions: none
 Parameters: Buffer * const pBD, short offset 
 Return value: char * ptr on success, NULL on failure
-Algorithm: *Assume that of
+Algorithm: *Assume that offset and pBD->capacity are the same measurements*
 **********************************************************************************************************/
 char * b_get_chmemloc(Buffer * const pBD, short offset)
 {
