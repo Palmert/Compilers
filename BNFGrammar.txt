@@ -45,9 +45,9 @@ Program Start
 2.4 VARIABLE IDENTIFIERS
 
 	<veriable identifier> -> 
-		<arithmetic variabel identifier> | <string variabel identifier> but not <keywords>
+		<arithmetic variable identifier> | <string variable identifier> but not <keywords>
 	
-	<arithmetic variabel identifier> ->
+	<arithmetic variable identifier> ->
 		<letter> <opt_letters or digits>
 	
 	<letter or digits> ->
@@ -62,8 +62,8 @@ Program Start
 	<letter or digit> one of
 		<letter>  <digit>
 		
-	<string variabel identifier>
-		<arithmetic variabel identifier>#
+	<string variable identifier>
+		<arithmetic variable identifier>#
 		
 2.5 KEYWORDS
 
@@ -92,6 +92,9 @@ Program Start
 	
 	<octal digit> -> one of
 		0...7  
+		
+	<non zero octal digit> -> one of
+		1...7
 		
 	<octal digits> ->
 		<octal digit> | <octal digits> <octal digit>
@@ -176,10 +179,10 @@ Program Start
 3.2.4 Input Statement
 
 	<input statement> ->
-		INPUT (<variabel identifier>);
+		INPUT (<variable list>);
 
 	<variable list> ->
-		<variabel identifier>|<variable list>,<variabel identifier>
+		<variable identifier>|<variable list>,<variable identifier>
 	
 3.2.5 Output Statement
 
@@ -232,7 +235,7 @@ Program Start
 
 	<logical AND expression> ->
 		<logical AND expression> .AND. <logical OR expression>
-		|<logical OR expression>
+		|<relational expression>
 
 3.3.4 Relational Expression
 
@@ -250,11 +253,11 @@ Program Start
 		<floating-point literal>
 		|<integer literal>
 		|<octal literal>
-		|<AVID>
+		|<arithmetic variable identifier>
 		
 	<primary s_relational expression> ->
-		"<string literal>"
-		|<SVID>
+		 <string literal>
+		|<string variable identifier>
 		
 
 		
