@@ -245,10 +245,7 @@ int b_isfull(Buffer * const pBD)
 	{
 		return ONE;
 	}
-	else
-	{
-		return ZERO;
-	}
+	return ZERO;
 }
 #endif
 /**********************************************************************************************************
