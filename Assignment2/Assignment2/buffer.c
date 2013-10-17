@@ -469,6 +469,7 @@ int b_print(Buffer * const pBD)
 	if(b_isempty(pBD))
 	{
 		printf("The buffer is empty.");
+		return charsPrinted;
 	}
 	/*Call b_set_getc_offset*/
 	b_set_getc_offset(pBD, ZERO);
