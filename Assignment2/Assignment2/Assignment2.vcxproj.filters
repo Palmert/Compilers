@@ -18,9 +18,21 @@
     <ClCompile Include="buffer.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Project Setup Resources\Assignment2MPTF\platy_st.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Project Setup Resources\Assignment2PF\scanner.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="buffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Project Setup Resources\Assignment2PF\table.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Project Setup Resources\Assignment2PF\token.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

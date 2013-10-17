@@ -78,9 +78,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\Project Setup Resources\Assignment2MPTF\platy_st.c" />
+    <ClCompile Include="..\..\Project Setup Resources\Assignment2PF\scanner.c" />
     <ClCompile Include="buffer.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\Project Setup Resources\Assignment2PF\table.h" />
+    <ClInclude Include="..\..\Project Setup Resources\Assignment2PF\token.h" />
     <ClInclude Include="buffer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
