@@ -35,7 +35,7 @@ Function list:
  
 
 //REPLACE *ESN* WITH YOUR ERROR STATE NUMBER 
-#define ES -2		/* Error state */
+#define ES 12		/* Error state */
 #define IS -1		/* Inavalid state */
 
 /* State transition table definition */
@@ -45,30 +45,45 @@ Function list:
 #define TABLE_COLUMNS 9
 /*transition table - type of states defined in separate table */
 int  st_table[ ][TABLE_COLUMNS] = {
-/* State 0 */  {  0, 1, 6, 4,-2,-2,-2,-2,23 },
-/* State 1 */  {  1, 1, 1, 1,-2,-2, 3, 2,23 },
-/* State 2 */  {  2,-1,-1,-1,-1,-1,-1,-1,21 },
-/* State 3 */  {  3,-1,-1,-1,-1,-1,-1,-1,22 },
-/* State 4 */  {  4,-2, 4, 4,-1, 7, 5, 5,23 },
-/* State 5 */  {  5,-1,-1,-1,-1,-1,-1,-1,21 },
-/* State 6 */  {  6,-2,10,-2, 9, 7,-2, 5,23 },
-/* State 7 */  {  7,-2, 7, 7,-2,-2, 8, 8,23 },
-/* State 8 */  {  8,-1,-1,-1,-1,-1,-1,-1,21 },
-/* State 9 */  {  9,-2, 9,-2, 9,-2,-2,11,23 },
-/* State 10*/  { 10,-1,-1,-1,-1,-1,-1,-1,22 },
-/* State 11*/  { 11,-1,-1,-1,-1,-1,-1,-1,21 },
-/* State 12*/  { 12,-1,-1,-1,-1,-1,-1,-1,22 },
-/* State 13*/  { 13,-1,-1,-1,-1,-1,-1,-1,21 }
+/* State 0 */  {  1, 6, 4,ES,ES,ES,ES },
+/* State 1 */  {  1, 1, 1,ES,ES, 3, 2 },
+/* State 2 */  { IS,IS,IS,IS,IS,IS,IS },
+/* State 3 */  { IS,IS,IS,IS,IS,IS,IS },
+/* State 4 */  { ES, 4, 4,IS, 7, 5, 5 },
+/* State 5 */  { IS,IS,IS,IS,IS,IS,IS },
+/* State 6 */  { ES,10,ES, 9, 7,ES, 5 },
+/* State 7 */  { ES, 7, 7,ES,ES, 8, 8 },
+/* State 8 */  { IS,IS,IS,IS,IS,IS,IS },
+/* State 9 */  { ES, 9,ES, 9,ES,ES,11 },
+/* State 10*/  { 11,11,11,11,11,11,11 },
+/* State 11*/  { IS,IS,IS,IS,IS,IS,IS },
+/* State 12*/  { IS,IS,IS,IS,IS,IS,IS },
+/* State 13*/  { IS,IS,IS,IS,IS,IS,IS }
 };
 
  
 /* Accepting state table definition */
 //REPLACE *N1*, *N2*, and *N3* WITH YOUR NUMBERS
-#define ASWR    21  /* accepting state with retract */
-#define ASNR    22 /* accepting state with no retract */
-#define NOAS    23  /* not accepting state */
+#define ASWR    1  /* accepting state with retract */
+#define ASNR    2 /* accepting state with no retract */
+#define NOAS    3  /* not accepting state */
 
-int as_table[ ] = { ASWR, ASNR, NOAS };
+int as_table[ ] = { 
+	NOAS, 
+	NOAS, 
+	ASWR, 
+	ASNR, 
+	NOAS, 
+	ASWR, 
+	NOAS, 
+	NOAS, 
+	ASWR, 
+	NOAS, 
+	NOAS, 
+	ASWR, 
+	ASNR, 
+	ASWR 
+};
 
 /* Accepting action function declarations */
 
@@ -76,9 +91,13 @@ int as_table[ ] = { ASWR, ASNR, NOAS };
 //ONE FUNCTION PROTOTYPE. THEY ALL RETURN Token AND TAKE
 //ONE ARGUMENT: A string REPRESENTING A TOKEN LEXEME. 
 
-Token aa_func21(char *lexeme); 
-Token aa_func22(char *lexeme);
-Token aa_func23(char *lexeme);
+Token aa_func02(char *lexeme); 
+Token aa_func03(char *lexeme);
+Token aa_func05(char *lexeme);
+Token aa_func08(char *lexeme);
+Token aa_func11(char *lexeme);
+Token aa_func12(char *lexeme);
+Token aa_func13(char *lexeme);
 
 
 //Replace XX with the number of the accepting state: 02, 03 and so on.
@@ -100,9 +119,20 @@ typedef Token (*PTR_AAF)(char *lexeme);
 //ACCEPTING FUNCTIONS (FOR THE STATES MARKED AS ACCEPTING IN as_table[]).
 //THE REST OF THE ELEMENTS MUST BE SET TO NULL.
 PTR_AAF aa_table[ ] = {
-	aa_func21,
-	aa_func22,
-	NULL
+	NULL,
+	NULL,
+	aa_func02,
+	aa_func03,
+	NULL,
+	aa_func05,
+	NULL,
+	NULL,
+	aa_func08,
+	NULL,
+	NULL,
+	aa_func11,
+	aa_func12,
+	aa_func13
 };
 
 /* Keyword lookup table (.AND. and .OR. are not keywords) */
