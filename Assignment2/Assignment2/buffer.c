@@ -50,7 +50,7 @@ Buffer * b_create(short init_capacity,char inc_factor,char o_mode){
 		return NULL;
 	}
 	/*Change mode to f if inc_factor is 0*/
-	if (inc_factor == 0)
+	if (inc_factor == ZERO)
 	{
 		o_mode = 'f';
 	}
@@ -156,19 +156,15 @@ Buffer * b_addc(Buffer * const pBD, char symbol)
 			/*Calculate new capacity and test for validity*/
 			nCapacity  = pBD->capacity + increment;
 			/*Assign pBD->capacity to max buffer size if nCapacity was unable to increase*/
-			
+			if(pBD->capacity == nCapacity && nCapacity < SHRT_MAX) 
+			{
+				nCapacity = SHRT_MAX;
+			}
+
 			break;
 	}	
-	if(pBD->capacity == nCapacity && nCapacity < SHRT_MAX) 
-	{
-		pBD->capacity = SHRT_MAX;
-	}
-	else
-	{
-		pBD->capacity = nCapacity;
-	}
 	/*realloc char*buffer based on new capacity and check for success*/
-	newHead = (char*)realloc((char*)pBD->ca_head, pBD->capacity);
+	newHead = (char*)realloc((char*)pBD->ca_head, nCapacity);
 	if(newHead == NULL)
 	{
 		return NULL;
@@ -179,6 +175,8 @@ Buffer * b_addc(Buffer * const pBD, char symbol)
 		pBD->ca_head = newHead;
 		pBD->r_flag = SET_R_FLAG;		
 	}
+	/* Set the new capacity of the buffer after every possible fail case to ensure the buffer descriptor is accurate*/	 
+	pBD->capacity = nCapacity;
 
 	/*Add symbol to char*buffer at offset location*/
 	pBD->ca_head[pBD->addc_offset] = symbol;	
