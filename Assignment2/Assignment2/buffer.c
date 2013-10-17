@@ -394,10 +394,7 @@ int b_isempty(Buffer * const pBD)
 	{
 		return ONE;
 	}
-	else
-	{
-		return ZERO;
-	}
+	return ZERO;
 }
 /**********************************************************************************************************
 Purpose: Return eob flag to calling function
