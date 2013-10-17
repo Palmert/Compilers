@@ -78,14 +78,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\Project Setup Resources\Assignment2MPTF\platy_st.c" />
-    <ClCompile Include="..\..\Project Setup Resources\Assignment2PF\scanner.c" />
-    <ClCompile Include="buffer.c" />
+    <ClInclude Include="buffer.h" />
+    <ClInclude Include="table.h" />
+    <ClInclude Include="token.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\Project Setup Resources\Assignment2PF\table.h" />
-    <ClInclude Include="..\..\Project Setup Resources\Assignment2PF\token.h" />
-    <ClInclude Include="buffer.h" />
+    <ClCompile Include="buffer.c" />
+    <ClCompile Include="platy_st.c" />
+    <ClCompile Include="scanner.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
