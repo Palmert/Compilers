@@ -297,7 +297,7 @@ int b_setmark(Buffer * const pBD, short mark)
 	{
 		return R_FAIL_1;
 	}
-	if(mark<pBD->capacity)
+	if(mark<pBD->capacity && mark>=0)
 	{
 		pBD->mark_offset = mark;
 		return ONE;
