@@ -66,7 +66,6 @@ Token mlwpar_next_token(Buffer * sc_buf)
 {
    Token t; /* token to return after recognition */
    unsigned char c; /* input symbol */
-   unsigned char nextC; /*The next character in the buffer used to peak forward for leximes that are more than 1 character. */
    int state = 0; /* initial state of the FSM */
    short lexstart;  /*start offset of a lexeme in the input buffer */
    short lexend;    /*end   offset of a lexeme in the input buffer */
@@ -105,16 +104,16 @@ which is being processed by the scanner.
 
 		/*  Single-lexeme tokens processed separately one by one
  *  in the token-driven part of the scanner
- *    *       space
- *   , ',' , '"' , ';' ,
+ *   
+ *   '"' , ';' ,
  *  .AND., .OR. , SEOF, 'wrong symbol',
  */
-	lexstart = b_getmark(sc_buf);
+	lexstart = b_get_getc_offset(sc_buf);
    switch(c)
    {
 	case '=':
-		nextC = b_getc(sc_buf);
-		if(nextC == '=')
+		c = b_getc(sc_buf);
+		if(c == '=')
 		{
 		t.code = REL_OP_T;
 		t.attribute.rel_op = EQ;
@@ -125,32 +124,32 @@ which is being processed by the scanner.
 		return t;
 	/*If the token starts wiht ! it can either be a comment or the != relational operator, so peak forward and act appropriatly. */
 	case '!':
-		nextC = b_getc(sc_buf);
+		c = b_getc(sc_buf);
 		/*If the next token is < then we have a comment and ifnot everything till the newline character is hit. */
 		if(c == '<')
 	    {
 			do
 		    {
 				c = b_getc(sc_buf);
-		    }while ( nextC != '\n');
+		    }while ( c != '\n');
 			// If output doesn't match revert to his logic as follows
 			// IF (c == '!') TRY TO PROCESS COMMENT
 			//IF THE FOLLOWING IS NOT CHAR IS NOT < REPORT AN ERROR
 			//ELSE IN A LOOP SKIP CHARACTERS UNTIL \n THEN continue;
 			t.code = COM_T;
+			++line;
 			return t ;
 	   }
 		/*If it's the != relation operator set the proper values and return.  */
-	   if(nextC == '=')
+	   if(c == '=')
 	   {
 		   t.code = REL_OP_T;
 		   t.attribute.rel_op = NE ;
 		   return t;
 	   }
-	   /*If the token is incrrect retract and report the error. */
 	   t.code = ERR_T;
-	   t.attribute.err_lex[0] = c;
-	   t.attribute.err_lex[1] = nextC;
+
+
 	   return t;
 
 	case '+':
@@ -206,7 +205,20 @@ which is being processed by the scanner.
 		t.attribute.rel_op = GT;
 		return t;
 
+	case '\n':
+		++line;
+		continue;
 
+	case ',':
+		t.code = COM_T;  // |"| , ';'  .AND., .OR. , SEOF, 'wrong symbol',
+		return t;
+
+	case'"':
+		
+		for(nextC = b_getc(sc_buf);nextC!='"';nextC = b_getc(sc_buf))
+		{
+
+		}
 
 
 
