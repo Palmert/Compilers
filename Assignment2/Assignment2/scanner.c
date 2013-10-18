@@ -66,6 +66,7 @@ Token mlwpar_next_token(Buffer * sc_buf)
 {
    Token t; /* token to return after recognition */
    unsigned char c; /* input symbol */
+   char tempString [5];
    int state = 0; /* initial state of the FSM */
    short lexstart;  /*start offset of a lexeme in the input buffer */
    short lexend;    /*end   offset of a lexeme in the input buffer */
@@ -223,19 +224,37 @@ which is being processed by the scanner.
 
 	case'.':
 
+		lexstart = b_get_getc_offset(sc_buf) -1;
 		c = b_getc(sc_buf);
 
+		char orString [] ={'.','O','R','.'};
+		char andString[] ={'.','A','N','D','.'};
+
+		for (int i = 0; 1 < 5; i++)
+		{
+			tempString[i] = b_getc(sc_buf);
+		}
 		switch (c) {
 
 		case'A' :
-
+			if( strncmp(tempString,andString, 5)==0)
+			{
+				t.code = LOG_OP_T;
+				t.attribute.log_op = AND;
+				return t;
+			}
 		case'O':
-
+			if( strncmp(tempString,orString, 4)==0)
+			{
+				t.code = LOG_OP_T;
+				t.attribute.log_op = OR;
+				return t;
+			}
 		default:
+			b_set_getc_offset(sc_buf, lexstart +1);
 			t.code = ERR_T;
+			return t;
 		}
-
-		return t;
 
 	case'"':
 		
