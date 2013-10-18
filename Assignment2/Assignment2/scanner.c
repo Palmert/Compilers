@@ -66,7 +66,6 @@ Token mlwpar_next_token(Buffer * sc_buf)
 {
    Token t; /* token to return after recognition */
    unsigned char c; /* input symbol */
-   unsigned char nextC;
    int state = 0; /* initial state of the FSM */
    short lexstart;  /*start offset of a lexeme in the input buffer */
    short lexend;    /*end   offset of a lexeme in the input buffer */
@@ -102,49 +101,6 @@ which is being processed by the scanner.
 //WHAT FOLLOWS IS A PSEUDO CODE. YOU CAN USE switch STATEMENT
 //INSTEAD OF if-else TO PROCESS THE SPECIAL CASES
 //DO NOT FORGET TO COUNT THE PROGRAM LINES
-   
-   //         
-   if (c == '!')
-   {
-	   nextC = b_getc(sc_buf);
-	   if(nextC == '<')
-	   {
-		   do
-		   { 
-			   nextC = b_getc(sc_buf);
-		   }while ( c != '\n');
-		t.code = COM_T;
-		return t ;
-	   }
-	   if(nextC == '='){
-		   t.code = REL_OP_T;
-		   t.attribute.rel_op = NE ;
-	   }
-	   t.code = ERR_T;
-	   t.attribute.err_lex[0] = c;
-	   t.attribute.err_lex[1] = nextC;
-	   return t;
-
-	
-   }
-   switch(c)
-   {
-	case '=':
-		c=b_getc(sc_buf);
-		if(c == '=')
-		{
-		t.code = REL_OP_T;
-		t.attribute.rel_op = EQ;
-		return t;
-		}
-		t.code = ASS_OP_T;
-		return t;
-	case ' ':
-		continue;
-
-//WHAT FOLLOWS IS A PSEUDO CODE. YOU CAN USE switch STATEMENT
-//INSTEAD OF if-else TO PROCESS THE SPECIAL CASES
-//DO NOT FORGET TO COUNT THE PROGRAM LINES
 
 		/*  Single-lexeme tokens processed separately one by one
  *  in the token-driven part of the scanner
@@ -165,6 +121,29 @@ which is being processed by the scanner.
 		}
 		t.code = ASS_OP_T;
 		return t;
+
+	case '!':
+		c = b_getc(sc_buf);
+		if(c == '<')
+	    {
+			do
+		    {
+				c = b_getc(sc_buf);
+		    }while ( c != '\n');
+			
+			t.code = COM_T;
+			return t ;
+	   }
+
+	   if(c == '=')
+	   {
+		   t.code = REL_OP_T;
+		   t.attribute.rel_op = NE ;
+	   }
+	   t.code = ERR_T;
+	   t.attribute.err_lex[0] = c;
+	   return t;
+
 	case ' ':
 		continue;
 
