@@ -68,10 +68,11 @@ Token mlwpar_next_token(Buffer * sc_buf)
 {
    Token t; /* token to return after recognition */
    unsigned char c; /* input symbol */
+   unsigned char nextC;
    int state = 0; /* initial state of the FSM */
    short lexstart;  /*start offset of a lexeme in the input buffer */
    short lexend;    /*end   offset of a lexeme in the input buffer */
-   int accept = NOAS; /* type of state - initially not accepting */                                     
+   int accept = NOAS; /* type of state - initially not accepting */  
 /* 
 lexstart is the offset from the beginning of the char buffer of the
 input buffer (sc_buf) to the first character of the current lexeme,
@@ -83,28 +84,51 @@ which is being processed by the scanner.
 */ 
         
         
-        DECLARE YOUR VARIABLES HERE IF NEEDED 
+        //DECLARE YOUR VARIABLES HERE IF NEEDED 
         
                 
         while (1){ /* endless loop broken by token returns it will generate a warning */
                 
-        GET THE NEXT SYMBOL FROM THE INPUT BUFFER 
+        //GET THE NEXT SYMBOL FROM THE INPUT BUFFER 
         
-        c = c = b_getc(sc_buf);
+        c = b_getc(sc_buf);
 
 
               
 /* special cases or token driven processing */
 
-WRITE YOUR CODE FOR PROCESSING THE SPECIAL CASES HERE. 
-COMMENTS AND STRING LITERALS ARE ALSO PROCESSED HERE.
+//WRITE YOUR CODE FOR PROCESSING THE SPECIAL CASES HERE. 
+//COMMENTS AND STRING LITERALS ARE ALSO PROCESSED HERE.
 
-WHAT FOLLOWS IS A PSEUDO CODE. YOU CAN USE switch STATEMENT
-INSTEAD OF if-else TO PROCESS THE SPECIAL CASES
-DO NOT FORGET TO COUNT THE PROGRAM LINES
+//WHAT FOLLOWS IS A PSEUDO CODE. YOU CAN USE switch STATEMENT
+//INSTEAD OF if-else TO PROCESS THE SPECIAL CASES
+//DO NOT FORGET TO COUNT THE PROGRAM LINES
    
-             
-   IF (c == SOME CHARACTER)  
+   //         
+   if (c == '!')
+   {
+	   nextC = b_getc(sc_buf);
+	   if(nextC == '<')
+	   {
+		   do
+		   { 
+			   nextC = b_getc(sc_buf);
+		   }while ( c != '\n');
+		t.code = COM_T;
+		return t ;
+	   }
+	   if(nextC == '='){
+		   t.code = REL_OP_T;
+		   t.attribute.rel_op = NE ;
+	   }
+	   t.code = ERR_T;
+	   t.attribute.err_lex[0] = c;
+	   t.attribute.err_lex[1] = nextC;
+	   return t;
+
+	
+   }
+
                        ...
        SKIP CHARACTER (FOR EXAMPLE SPACE)
        continue;      
