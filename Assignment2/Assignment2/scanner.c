@@ -105,9 +105,9 @@ which is being processed by the scanner.
 
 		/*  Single-lexeme tokens processed separately one by one
  *  in the token-driven part of the scanner
- *  '=' , ' ' , '(' , ')' , '{' , '}' , == , != , '>' , '<' ,
+ *  '=' , ' ' , '(' , ')'  , == , != , '>' , '<' ,
  *       space
- *  !<comment , ',' , '"' , ';' , '-' , '+' , '*' , '/', <> ,
+ *   , ',' , '"' , ';' , '-' , '+' , '*' , '/', <> ,
  *  .AND., .OR. , SEOF, 'wrong symbol',
  */
 	lexstart = b_getmark(sc_buf);
@@ -153,6 +153,36 @@ which is being processed by the scanner.
 	   t.attribute.err_lex[0] = c;
 	   t.attribute.err_lex[1] = nextC;
 	   return t;
+
+	case '+':
+		t.code = ART_OP_T;
+		t.attribute.arr_op = PLUS;
+		return t;
+
+	case '-':
+		t.code = ART_OP_T;
+		t.attribute.arr_op = MINUS;
+		return t;
+
+	case '*':
+		t.code = ART_OP_T;
+		t.attribute.arr_op =MULT;
+		return t;
+
+	case'/':
+		t.code = ART_OP_T;
+		t.attribute.arr_op = DIV;
+		return t;
+
+	case'{':
+		t.code = RBR_T;
+		return t;
+
+	case'}':
+		t.code = LBR_T;
+		return t;
+
+
 
 	case ' ':
 		continue;
