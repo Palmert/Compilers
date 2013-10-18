@@ -23,7 +23,11 @@ Program Start
 2.2 WHITE SPACE
 
 	<white space> ->
-		SP | HT | VT | FF | <line terminator>
+		 the ASCII SP character, also known as "space"
+		|the ASCII HT character, also known as "horizontal tab"
+		|the ASCII VT character, also known as "vertical tab"
+		|the ASCII FF character, also known as "form feed"
+		|<line terminator>
 	
 	<line terminator> ->
 		CR | LF | CR LF
@@ -44,7 +48,7 @@ Program Start
 		
 2.4 VARIABLE IDENTIFIERS
 
-	<veriable identifier> -> 
+	<variable identifier> -> 
 		<arithmetic variable identifier> | <string variable identifier> but not <keywords>
 	
 	<arithmetic variable identifier> ->
@@ -158,9 +162,9 @@ Program Start
 3.2.1 ASSIGNMENT STATEMENT
 	
 	<assignment statement> ->
-		<assigment expression>;
+		<assignment expression>;
 	
-	<assigment expression> ->
+	<assignment expression> ->
 		AVID = <arithmetic expression> 
 		| SVID = <string expression>
 		
@@ -213,7 +217,7 @@ Program Start
 	<primary arithmetic expression>
 		 <arithmetic variable identifier>
 		|<floating-point literal>
-		|<intiger literal>
+		|<integer literal>
 		|(<arithmetic expression>)
 
 3.3.2 String Expression
@@ -258,21 +262,3 @@ Program Start
 	<primary s_relational expression> ->
 		 <string literal>
 		|<string variable identifier>
-		
-
-		
-			
-			
-	
-		
-	
-		
-
-		
-		
-			
-
-		
-		
-		
-		
