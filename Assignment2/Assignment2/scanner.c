@@ -87,15 +87,10 @@ which is being processed by the scanner.
                 
         while (1){ /* endless loop broken by token returns it will generate a warning */
                 
-<<<<<<< HEAD
-        //GET THE NEXT SYMBOL FROM THE INPUT BUFFER 
-        
-        c = b_getc(sc_buf);
-=======
        // GET THE NEXT SYMBOL FROM THE INPUT BUFFER 
         
 		c = b_getc(sc_buf);
->>>>>>> 07f66428cbbfc8f441fa8efdc54f790f8b5a025a
+
 
 
               
@@ -103,7 +98,6 @@ which is being processed by the scanner.
 
 //WRITE YOUR CODE FOR PROCESSING THE SPECIAL CASES HERE. 
 //COMMENTS AND STRING LITERALS ARE ALSO PROCESSED HERE.
-<<<<<<< HEAD
 
 //WHAT FOLLOWS IS A PSEUDO CODE. YOU CAN USE switch STATEMENT
 //INSTEAD OF if-else TO PROCESS THE SPECIAL CASES
@@ -133,8 +127,20 @@ which is being processed by the scanner.
 
 	
    }
-
-=======
+   switch(c)
+   {
+	case '=':
+		c=b_getc(sc_buf);
+		if(c == '=')
+		{
+		t.code = REL_OP_T;
+		t.attribute.rel_op = EQ;
+		return t;
+		}
+		t.code = ASS_OP_T;
+		return t;
+	case ' ':
+		continue;
 
 //WHAT FOLLOWS IS A PSEUDO CODE. YOU CAN USE switch STATEMENT
 //INSTEAD OF if-else TO PROCESS THE SPECIAL CASES
@@ -162,9 +168,10 @@ which is being processed by the scanner.
 	case ' ':
 		continue;
 
+
              
    IF (c == SOME CHARACTER)  
->>>>>>> 07f66428cbbfc8f441fa8efdc54f790f8b5a025a
+
                        ...
        SKIP CHARACTER (FOR EXAMPLE SPACE)
        continue;      
