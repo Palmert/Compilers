@@ -105,9 +105,8 @@ which is being processed by the scanner.
 
 		/*  Single-lexeme tokens processed separately one by one
  *  in the token-driven part of the scanner
- *  '=' , ' ' , '(' , ')'  , == , != , '>' , '<' ,
- *       space
- *   , ',' , '"' , ';' , '-' , '+' , '*' , '/', <> ,
+ *    *       space
+ *   , ',' , '"' , ';' ,
  *  .AND., .OR. , SEOF, 'wrong symbol',
  */
 	lexstart = b_getmark(sc_buf);
@@ -181,6 +180,33 @@ which is being processed by the scanner.
 	case'}':
 		t.code = LBR_T;
 		return t;
+
+	case '(':
+		t.code = LPR_T;
+		return t;
+
+	case ')':
+		t.code = RPR_T;
+		return t;
+
+	case '<':
+		nextC = b_getc(sc_buf);
+
+		if(nextC == '>'){
+			t.code = SCC_OP_T;
+			return t;
+		}
+		t.code = REL_OP_T;
+		t.attribute.rel_op = LT;
+		b_retract(sc_buf);
+		return t;
+
+	case '>':
+		t.code = REL_OP_T;
+		t.attribute.rel_op = GT;
+		return t;
+
+
 
 
 
