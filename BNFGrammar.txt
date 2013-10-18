@@ -18,7 +18,7 @@ Program Start
 		
 	<token> ->
 		<variable identifier> | <keyword> | <floating-point literal>
-		| <integer literal> | <string literal> | <seperator> | <operator>
+		| <integer literal> | <string literal> | <separator> | <operator>
 	
 2.2 WHITE SPACE
 
