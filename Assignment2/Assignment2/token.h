@@ -40,6 +40,7 @@
 #define KW_T     16  /* Keyword token */
 #define COM_T    17  /* Comma token */
 #define EOS_T    18  /* End of statement *(semi - colon) */
+#define WS_T	 19	 /* Whitespace */
 
 
 /* Operators token attributes */
