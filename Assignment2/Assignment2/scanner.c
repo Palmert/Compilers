@@ -66,6 +66,7 @@ Token mlwpar_next_token(Buffer * sc_buf)
 {
    Token t; /* token to return after recognition */
    unsigned char c; /* input symbol */
+   unsigned char nextC; /*The next character in the buffer used to peak forward for leximes that are more than 1 character. */
    int state = 0; /* initial state of the FSM */
    short lexstart;  /*start offset of a lexeme in the input buffer */
    short lexend;    /*end   offset of a lexeme in the input buffer */
@@ -109,39 +110,48 @@ which is being processed by the scanner.
  *  !<comment , ',' , '"' , ';' , '-' , '+' , '*' , '/', <> ,
  *  .AND., .OR. , SEOF, 'wrong symbol',
  */
+	lexstart = b_getmark(sc_buf);
    switch(c)
    {
 	case '=':
-		c=b_getc(sc_buf);
-		if(c == '=')
+		nextC = b_getc(sc_buf);
+		if(nextC == '=')
 		{
 		t.code = REL_OP_T;
 		t.attribute.rel_op = EQ;
 		return t;
 		}
+		b_retract(sc_buf);
 		t.code = ASS_OP_T;
 		return t;
-
+	/*If the token starts wiht ! it can either be a comment or the != relational operator, so peak forward and act appropriatly. */
 	case '!':
-		c = b_getc(sc_buf);
+		nextC = b_getc(sc_buf);
+		/*If the next token is < then we have a comment and ifnot everything till the newline character is hit. */
 		if(c == '<')
 	    {
 			do
 		    {
 				c = b_getc(sc_buf);
-		    }while ( c != '\n');
-			
+		    }while ( nextC != '\n');
+			// If output doesn't match revert to his logic as follows
+			// IF (c == '!') TRY TO PROCESS COMMENT
+			//IF THE FOLLOWING IS NOT CHAR IS NOT < REPORT AN ERROR
+			//ELSE IN A LOOP SKIP CHARACTERS UNTIL \n THEN continue;
 			t.code = COM_T;
 			return t ;
 	   }
-
-	   if(c == '=')
+		/*If it's the != relation operator set the proper values and return.  */
+	   if(nextC == '=')
 	   {
 		   t.code = REL_OP_T;
 		   t.attribute.rel_op = NE ;
+		   return t;
 	   }
+	   /*If the token is incrrect retract and report the error. */
 	   t.code = ERR_T;
 	   t.attribute.err_lex[0] = c;
+	   t.attribute.err_lex[1] = nextC;
 	   return t;
 
 	case ' ':
@@ -165,9 +175,7 @@ which is being processed by the scanner.
    IF (c == '.') TRY TO PROCESS .AND. or .OR.
    IF SOMETHING ELSE FOLLOWS . OR THE LAST . IS MISSING
    RETURN AN ERROR TOKEN                                               
-   IF (c == '!') TRY TO PROCESS COMMENT
-   IF THE FOLLOWING IS NOT CHAR IS NOT < REPORT AN ERROR
-   ELSE IN A LOOP SKIP CHARACTERS UNTIL \n THEN continue;
+
    ...
    IF STRING (FOR EXAMPLE, "text") IS FOUND      
       SET MARK TO MARK THE BEGINNING OF THE STRING
