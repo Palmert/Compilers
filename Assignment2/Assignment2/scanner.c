@@ -1,16 +1,14 @@
-/* Filename: scanner.c
-/* PURPOSE:
- *    SCANNER.C: Functions implementing a Lexical Analyzer (Scanner)
- *    as required for CST8152, Assignment #2
- *    scanner_init() must be called before using the scanner.
- *    The file is incomplete;
- *    Provided by: Svillen Ranev
- *    Version: 1.13.02
- *    Date: 25 September 2013
- *******************************************************************
- *    REPLACE THIS HEADER WITH YOUR HEADER
- *******************************************************************
- */
+/*********************************************************************************************************
+File name: scanner.c
+Compiler: MS Visual Studio 2110
+Authors: Thom Palmer - 023 713 234 and Chris Whitten - 040 611 350 
+Course: CST 8152 – Compilers, Lab Section: 401
+Assignment: Assignment 2 
+Date: Oct. 25th 2013
+Professor: Sv. Ranev
+Purpose: Functions implementing a Lexical Analyzer (Scanner) as required for CST8152, Assignment #2
+Function list: 
+*********************************************************************************************************/
 
 /* The #define _CRT_SECURE_NO_WARNINGS should be used in MS Visual Studio projects
  * to suppress the warnings about using "unsafe" functions like fopen()
@@ -89,9 +87,15 @@ which is being processed by the scanner.
                 
         while (1){ /* endless loop broken by token returns it will generate a warning */
                 
+<<<<<<< HEAD
         //GET THE NEXT SYMBOL FROM THE INPUT BUFFER 
         
         c = b_getc(sc_buf);
+=======
+       // GET THE NEXT SYMBOL FROM THE INPUT BUFFER 
+        
+		c = b_getc(sc_buf);
+>>>>>>> 07f66428cbbfc8f441fa8efdc54f790f8b5a025a
 
 
               
@@ -99,6 +103,7 @@ which is being processed by the scanner.
 
 //WRITE YOUR CODE FOR PROCESSING THE SPECIAL CASES HERE. 
 //COMMENTS AND STRING LITERALS ARE ALSO PROCESSED HERE.
+<<<<<<< HEAD
 
 //WHAT FOLLOWS IS A PSEUDO CODE. YOU CAN USE switch STATEMENT
 //INSTEAD OF if-else TO PROCESS THE SPECIAL CASES
@@ -129,6 +134,37 @@ which is being processed by the scanner.
 	
    }
 
+=======
+
+//WHAT FOLLOWS IS A PSEUDO CODE. YOU CAN USE switch STATEMENT
+//INSTEAD OF if-else TO PROCESS THE SPECIAL CASES
+//DO NOT FORGET TO COUNT THE PROGRAM LINES
+
+		/*  Single-lexeme tokens processed separately one by one
+ *  in the token-driven part of the scanner
+ *  '=' , ' ' , '(' , ')' , '{' , '}' , == , != , '>' , '<' ,
+ *       space
+ *  !<comment , ',' , '"' , ';' , '-' , '+' , '*' , '/', <> ,
+ *  .AND., .OR. , SEOF, 'wrong symbol',
+ */
+   switch(c)
+   {
+	case '=':
+		c=b_getc(sc_buf);
+		if(c == '=')
+		{
+		t.code = REL_OP_T;
+		t.attribute.rel_op = EQ;
+		return t;
+		}
+		t.code = ASS_OP_T;
+		return t;
+	case ' ':
+		continue;
+
+             
+   IF (c == SOME CHARACTER)  
+>>>>>>> 07f66428cbbfc8f441fa8efdc54f790f8b5a025a
                        ...
        SKIP CHARACTER (FOR EXAMPLE SPACE)
        continue;      

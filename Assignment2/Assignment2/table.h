@@ -1,14 +1,14 @@
 /*********************************************************************************************************
 File name: table.h
 Compiler: MS Visual Studio 2110
-Author: Thom Palmer, 023 713 234 
-Course: CST 8152 – Compilers, Lab Section: 231
+Authors: Thom Palmer - 023 713 234 and Chris Whitten - 040 611 350 
+Course: CST 8152 – Compilers, Lab Section: 401
 Assignment: Assignment 2 
-Date: Oct. 25th 2113
+Date: Oct. 25th 2013
 Professor: Sv. Ranev
 Purpose: Transition Table and function declarations necessary for the scanner implementation  
 		 as required for CST8152 - Assignment #2.
-Function list:
+Function list: a_func21(), aa_func22(), aa_func23()
 *********************************************************************************************************/
 #ifndef  TABLE_H_
 #define  TABLE_H_ 
@@ -24,7 +24,12 @@ Function list:
 /*   Source end-of-file (SEOF) sentinel symbol
  *    '\0' or only one of the folowing constants: 255, 0xFF , EOF
  */
+#ifndef SEOF
+#define SEOF(c) ((unsigned char)c==0xFF || c==EOF || c=='\0')
+#endif
 
+
+int Get
 /*  Single-lexeme tokens processed separately one by one
  *  in the token-driven part of the scanner
  *  '=' , ' ' , '(' , ')' , '{' , '}' , == , != , '>' , '<' ,
