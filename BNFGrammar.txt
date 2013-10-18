@@ -44,7 +44,7 @@ Program Start
 		
 2.4 VARIABLE IDENTIFIERS
 
-	<variable identifier> -> 
+	<veriable identifier> -> 
 		<arithmetic variable identifier> | <string variable identifier> but not <keywords>
 	
 	<arithmetic variable identifier> ->
@@ -158,9 +158,9 @@ Program Start
 3.2.1 ASSIGNMENT STATEMENT
 	
 	<assignment statement> ->
-		<assignment expression>;
+		<assigment expression>;
 	
-	<assignment expression> ->
+	<assigment expression> ->
 		AVID = <arithmetic expression> 
 		| SVID = <string expression>
 		
@@ -213,7 +213,7 @@ Program Start
 	<primary arithmetic expression>
 		 <arithmetic variable identifier>
 		|<floating-point literal>
-		|<integer literal>
+		|<intiger literal>
 		|(<arithmetic expression>)
 
 3.3.2 String Expression
@@ -258,3 +258,21 @@ Program Start
 	<primary s_relational expression> ->
 		 <string literal>
 		|<string variable identifier>
+		
+
+		
+			
+			
+	
+		
+	
+		
+
+		
+		
+			
+
+		
+		
+		
+		
