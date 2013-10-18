@@ -124,6 +124,7 @@ which is being processed by the scanner.
 		return t;
 	/*If the token starts wiht ! it can either be a comment or the != relational operator, so peak forward and act appropriatly. */
 	case '!':
+		b_setmark(sc_buf, b_get_getc_offset(sc_buf)-1);
 		c = b_getc(sc_buf);
 		/*If the next token is < then we have a comment and ifnot everything till the newline character is hit. */
 		if(c == '<')
@@ -138,7 +139,7 @@ which is being processed by the scanner.
 			//ELSE IN A LOOP SKIP CHARACTERS UNTIL \n THEN continue;
 			t.code = COM_T;
 			++line;
-			return t ;
+			return t;
 	   }
 		/*If it's the != relation operator set the proper values and return.  */
 	   if(c == '=')
@@ -147,8 +148,16 @@ which is being processed by the scanner.
 		   t.attribute.rel_op = NE ;
 		   return t;
 	   }
-	   t.code = ERR_T;
 
+	   lexend = b_get_getc_offset(sc_buf);
+	   b_set_getc_offset(sc_buf, lexstart);
+
+	   for(int i = 0; i < lexend - lexstart; i ++)
+	   {
+		   t.attribute.err_lex[i] = b_getc(sc_buf);
+	   }
+	   b_retract(sc_buf);
+	   t.code = ERR_T;
 
 	   return t;
 
@@ -189,9 +198,8 @@ which is being processed by the scanner.
 		return t;
 
 	case '<':
-		nextC = b_getc(sc_buf);
-
-		if(nextC == '>'){
+		c = b_getc(sc_buf);
+		if(c == '>'){
 			t.code = SCC_OP_T;
 			return t;
 		}
@@ -213,9 +221,25 @@ which is being processed by the scanner.
 		t.code = COM_T;  // |"| , ';'  .AND., .OR. , SEOF, 'wrong symbol',
 		return t;
 
+	case'.':
+
+		c = b_getc(sc_buf);
+
+		switch (c) {
+
+		case'A' :
+
+		case'O':
+
+		default:
+			t.code = ERR_T;
+		}
+
+		return t;
+
 	case'"':
 		
-		for(nextC = b_getc(sc_buf);nextC!='"';nextC = b_getc(sc_buf))
+		for(c = b_getc(sc_buf);c != '"';c = b_getc(sc_buf))
 		{
 
 		}
