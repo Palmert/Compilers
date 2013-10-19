@@ -534,17 +534,21 @@ Token aa_func11(char lexeme[]){
   return t;
 }
 
-ACCEPTING FUNCTION FOR THE ERROR TOKEN 
+//ACCEPTING FUNCTION FOR THE ERROR TOKEN 
 
 Token aa_func12(char lexeme[]){
-
-THE FUNCTION SETS THE ERROR TOKEN. lexeme[] CONTAINS THE ERROR
-THE ATTRIBUTE OF THE ERROR TOKEN IS THE lexeme ITSELF
-AND IT MUST BE STORED in err_lex.  IF THE ERROR LEXEME IS LONGER
-than ERR_LEN caharacters, only the first ERR_LEN character are
-stored in err_lex.
-
-  return t;
+	Token t;
+	int i;
+	t.code = ERR_T;
+	for(i = 0; i < strlen(lexeme); i++)
+	{
+		t.attribute.err_lex[i] = lexeme[i];
+		if(i == strlen(lexeme) ||   i == ERR_LEN)
+		{
+			t.attribute.err_lex[i] = '\0';
+		}
+	}
+	return t;
 }
 
 
