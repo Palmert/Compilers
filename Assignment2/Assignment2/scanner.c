@@ -398,37 +398,42 @@ Token aa_func02(char lexeme[]){
 		}
 	}
 	t.code = AVID_T;
-	
 	for(int i = 0; i < strlen(lexeme); i++)
 	{
 		t.attribute.vid_lex[i] = lexeme[i];
-
 		if(strlen(lexeme) == i || VID_LEN == i )
 		{
-			t.attribute.vid_lex[i+1] = '\0';
+			t.attribute.vid_lex[i] = '\0';
 			return t;
 		}
-	}
-		
+	}	
 }
 
 
 
-//
+
+
 //ACCEPTING FUNCTION FOR THE string variable identifier (VID - SVID)
 //REPLACE XX WITH THE CORRESPONDING ACCEPTING STATE NUMBER
 
-Token aa_func03(char lexeme[]){
-	Token t;
-//WHEN CALLED THE FUNCTION MUST
-//1. SET a SVID TOKEN.
-//   IF THE lexeme IS LONGER than VID_LEN characters,
-//   ONLY FIRST VID_LEN-1 CHARACTERS ARE STORED
-//   INTO THE VARIABLE ATTRIBUTE ARRAY vid_lex[],
-//   AND THEN THE # CHARACTER IS APPENDED TO THE NAME.
-//   ADD \0 AT THE END TO MAKE A C-type STRING.
-  
-  return t;
+Token aa_func03(char lexeme[])
+{
+    Token t;
+	t.code = SVID_T;
+	for(int i = 0; i < strlen(lexeme); i++)
+	{
+		t.attribute.vid_lex[i] = lexeme[i];
+		if(VID_LEN-1 == i )
+		{
+			t.attribute.vid_lex[i] = '#';
+		}
+		if(strlen(lexeme) == i || VID_LEN == i )
+		{
+			t.attribute.vid_lex[i] = '\0';
+			return t;
+		}
+	}
+
 }
 
 //ACCEPTING FUNCTION FOR THE floating-point literal (FPL)
