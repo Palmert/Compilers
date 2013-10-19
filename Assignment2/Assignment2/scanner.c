@@ -414,50 +414,82 @@ Token aa_func02(char lexeme[]){
 
 
 
-
-ACCEPTING FUNCTION FOR THE string variable identifier (VID - SVID)
-REPLACE XX WITH THE CORRESPONDING ACCEPTING STATE NUMBER
+//
+//ACCEPTING FUNCTION FOR THE string variable identifier (VID - SVID)
+//REPLACE XX WITH THE CORRESPONDING ACCEPTING STATE NUMBER
 
 Token aa_func03(char lexeme[]){
-
-WHEN CALLED THE FUNCTION MUST
-1. SET a SVID TOKEN.
-   IF THE lexeme IS LONGER than VID_LEN characters,
-   ONLY FIRST VID_LEN-1 CHARACTERS ARE STORED
-   INTO THE VARIABLE ATTRIBUTE ARRAY vid_lex[],
-   AND THEN THE # CHARACTER IS APPENDED TO THE NAME.
-   ADD \0 AT THE END TO MAKE A C-type STRING.
+	Token t;
+//WHEN CALLED THE FUNCTION MUST
+//1. SET a SVID TOKEN.
+//   IF THE lexeme IS LONGER than VID_LEN characters,
+//   ONLY FIRST VID_LEN-1 CHARACTERS ARE STORED
+//   INTO THE VARIABLE ATTRIBUTE ARRAY vid_lex[],
+//   AND THEN THE # CHARACTER IS APPENDED TO THE NAME.
+//   ADD \0 AT THE END TO MAKE A C-type STRING.
   
   return t;
 }
 
-ACCEPTING FUNCTION FOR THE floating-point literal (FPL)
+//ACCEPTING FUNCTION FOR THE floating-point literal (FPL)
 
-Token aa_funcXX(char lexeme[]){
-
-THE FUNCTION MUST CONVERT THE LEXEME TO A FLOATING POINT VALUE,
-WHICH IS THE ATTRIBUTE FOR THE TOKEN.
-THE VALUE MUST BE IN THE SAME RANGE AS the value of 4-byte float in C.
-IN CASE OF ERROR (OUT OF RANGE) THE FUNCTION MUST RETURN ERROR TOKEN
-THE ERROR TOKEN ATTRIBUTE IS  lexeme
-  return t;
+Token aa_func08(char lexeme[])
+{
+	Token t;
+	 return t;
+//THE FUNCTION MUST CONVERT THE LEXEME TO A FLOATING POINT VALUE,
+//WHICH IS THE ATTRIBUTE FOR THE TOKEN.
+//THE VALUE MUST BE IN THE SAME RANGE AS the value of 4-byte float in C.
+//IN CASE OF ERROR (OUT OF RANGE) THE FUNCTION MUST RETURN ERROR TOKEN
+//THE ERROR TOKEN ATTRIBUTE IS  lexeme
+ 
 }
 
-ACCEPTING FUNCTION FOR THE integer literal(IL) - decimal constant (DIL)
+//ACCEPTING FUNCTION FOR THE integer literal(IL) - decimal constant (DIL)
 
-Token aa_funcXX(char lexeme[]){
+Token aa_func05(char lexeme[]){
+	Token t;		/*Token to be returned*/
+	int total = 0;	/*Store the total value */
+	int digit = 0;	/*The current index of the array converted to an int*/
+	int i = 0;		/*Used as an iterator*/
+	int j = 0;		/*Used as an iterator*/
 
-THE FUNCTION MUST CONVERT THE LEXEME REPRESENTING A DECIMAL CONSTANT
-TO A DECIMAL INTEGER VALUE, WHICH IS THE ATTRIBUTE FOR THE TOKEN.
-THE VALUE MUST BE IN THE SAME RANGE AS the value of 2-byte int in C.
-IN CASE OF ERROR (OUT OF RANGE) THE FUNCTION MUST RETURN ERROR TOKEN
-THE ERROR TOKEN ATTRIBUTE IS  lexeme
-  return t;
+	/*Iterate ove the full input array. */
+	for(i = 0; i <strlen(lexeme); i++)
+    {
+		/*Convert the current index of the array to an int. */
+		digit = lexeme[i] - '0';
+		/*Determine the power of the current digit by finding its index in the array. */
+		for(j=1; j< strlen(lexeme) -i; j++)
+		{
+			digit *=10;
+		}
+		/*Add the current digit to the total. */
+		total+= digit;
+	}
+	if(total > SHRT_MAX || total < 0)
+	{
+		t.code = ERR_T;
+		for(int i = 0; i < strlen(lexeme); i++)
+		{
+			t.attribute.vid_lex[i] = lexeme[i];
+
+			if(strlen(lexeme) == i || ERR_LEN == i )
+			{
+				t.attribute.vid_lex[i+1] = '\0';
+				return t;
+			}
+		}
+		return t;
+	}
+	
+	t.code = INL_T;
+	t.attribute.int_value = total;
 }
 
 ACCEPTING FUNCTION FOR THE integer literal(IL) - octal constant (OIL)
 
-Token aa_funcXX(char lexeme[]){
+Token aa_func11(char lexeme[]){
 
 THE FUNCTION MUST CONVERT THE LEXEME REPRESENTING AN OCTAL CONSTANT
 TO A DECIMAL INTEGER VALUE WHICH IS THE ATTRIBUTE FOR THE TOKEN.
@@ -475,7 +507,7 @@ THE ERROR TOKEN ATTRIBUTE IS  lexeme
 
 ACCEPTING FUNCTION FOR THE ERROR TOKEN 
 
-Token aa_funcXX(char lexeme[]){
+Token aa_func12(char lexeme[]){
 
 THE FUNCTION SETS THE ERROR TOKEN. lexeme[] CONTAINS THE ERROR
 THE ATTRIBUTE OF THE ERROR TOKEN IS THE lexeme ITSELF
