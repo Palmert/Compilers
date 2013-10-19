@@ -100,7 +100,7 @@ Token aa_func05(char *lexeme);
 Token aa_func08(char *lexeme);
 Token aa_func11(char *lexeme);
 Token aa_func12(char *lexeme);
-Token aa_func13(char *lexeme);
+//Token aa_func13(char *lexeme);
 
 
 //Replace XX with the number of the accepting state: 02, 03 and so on.
@@ -135,7 +135,7 @@ PTR_AAF aa_table[ ] = {
 	NULL,
 	aa_func11,
 	aa_func12,
-	aa_func13
+	NULL
 };
 
 /* Keyword lookup table (.AND. and .OR. are not keywords) */
