@@ -285,7 +285,7 @@ which is being processed by the scanner.
 		t.code = SEOF_T;
 		return t;
 	}
-	if (isalpha(c))
+	if (isalnum)
 	{
 		b_setmark(sc_buf,b_get_getc_offset(sc_buf));
 		state = get_next_state(state,c,&accept);
@@ -366,15 +366,29 @@ or #undef DEBUF is used - see the top of the file.
 int char_class (char c)
 {
         int val;
-
-//THIS FUNCTION RETURNS THE COLUMN NUMBER IN THE TRANSITION
-//TABLE st_table FOR THE INPUT CHARACTER c.
-//SOME COLUMNS MAY REPRESENT A CHARACTER CLASS .
-//FOR EXAMPLE IF COLUMN 1 REPRESENTS [A-Z]
-//THE FUNCTION RETURNS 1 EVERY TIME c IS ONE
-//OF THE LETTERS A,B,...,Z.
-        
-        return val;
+		val = 5;
+		if(isalpha(c))
+		{
+			val = 0;
+		}
+		if(isdigit(c))
+		{
+			val = 2;
+			if(c == '0')
+			{
+				val = 1;
+			}
+		}
+		if(c=='.')
+		{
+			val = 3;
+		}
+		if(c=='#')
+		{
+			val = 4;
+		}
+		return val;
+		
 }
 
 
@@ -387,16 +401,8 @@ int char_class (char c)
 
 Token aa_func02(char lexeme[]){
 	Token t;
-
-	for(int i = 0; i < KWT_SIZE; i++)
-	{
-		if( strcmp(lexeme, kw_table[i]) ==0)
-		{
-			t.code = KW_T;
-			t.attribute.kwt_idx = i;
-			return t;
-		}
-	}
+	return t;
+	
 	t.code = AVID_T;
 	for(int i = 0; i < strlen(lexeme); i++)
 	{
@@ -416,6 +422,14 @@ Token aa_func02(char lexeme[]){
 Token aa_func03(char lexeme[])
 {
     Token t;
+	int kwIndex = iskeyword(lexeme);
+	if( kwIndex >=0)
+	{
+		t.code = KW_T;
+		t.attribute.kwt_idx = kwIndex;
+		return t;
+	}
+
 	t.code = SVID_T;
 	for(int i = 0; i < strlen(lexeme); i++)
 	{
@@ -572,7 +586,7 @@ Token aa_func11(char lexeme[]){
   return t;
 }
 
-ACCEPTING FUNCTION FOR THE ERROR TOKEN 
+//ACCEPTING FUNCTION FOR THE ERROR TOKEN 
 
 Token aa_func12(char lexeme[]){
 
@@ -597,4 +611,16 @@ REPRESENTING AN OCTAL INTEGER CONSTANT TO INTEGER VALUE
 HERE YOU WRITE YOUR ADDITIONAL FUNCTIONS (IF ANY).
 FOR EXAMPLE
 
-int iskeyword(char * kw_lexeme){}
+int iskeyword(char * kw_lexeme)
+{
+	int i;
+	for( i = 0; i < KWT_SIZE; i++)
+	{
+		if( strcmp(lexeme, kw_table[i]) ==0)
+		{
+			return i;			
+		}
+	}
+	i = -1;
+	return i;
+}
