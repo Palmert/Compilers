@@ -45,7 +45,7 @@ Function list: a_func21(), aa_func22(), aa_func23()
 
 //REPLACE *CN* WITH YOUR COLUMN NUMBER  
 
-#define TABLE_COLUMNS 9
+#define TABLE_COLUMNS 7
 /*transition table - type of states defined in separate table */
 int  st_table[ ][TABLE_COLUMNS] = {
 /* State 0 */  {  1, 6, 4,ES,ES,ES,ES },
