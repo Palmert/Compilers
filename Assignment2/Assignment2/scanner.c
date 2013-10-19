@@ -396,11 +396,19 @@ Token aa_func02(char lexeme[]){
 			t.attribute.kwt_idx = i;
 			return t;
 		}
-		t.code = AVID_T;
-		if(strlen(lexeme) > VID_LEN )
-		{
+	}
+	t.code = AVID_T;
+	
+	for(int i = 0; i < strlen(lexeme); i++)
+	{
+		t.attribute.vid_lex[i] = lexeme[i];
 
+		if(strlen(lexeme) == i || VID_LEN == i )
+		{
+			t.attribute.vid_lex[i+1] = '\0';
+			return t;
 		}
+	}
 		
 
 	}
