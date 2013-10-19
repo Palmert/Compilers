@@ -288,7 +288,7 @@ Author: Thom Palmer
 History/Versions: 1.0 
 Called functions: none
 Parameters: Buffer * const pBD, short mark
-Return value: int ONE on success, int R_FAIL_1 on failur
+Return value: int ONE on success, int R_FAIL_1 on failure
 Algorithm: *Assume mark and pBD->capacity are the same measurements*
 **********************************************************************************************************/
 int b_setmark(Buffer * const pBD, short mark)
