@@ -28,8 +28,6 @@ Function list: a_func21(), aa_func22(), aa_func23()
 #define SEOF(c) ((unsigned char)c==0xFF || c==EOF || c=='\0')
 #endif
 
-
-int Get
 /*  Single-lexeme tokens processed separately one by one
  *  in the token-driven part of the scanner
  *  '=' , ' ' , '(' , ')' , '{' , '}' , == , != , '>' , '<' ,
