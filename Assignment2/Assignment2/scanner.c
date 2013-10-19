@@ -276,6 +276,9 @@ which is being processed by the scanner.
 		return t;
 
 	case ' ':
+	case '\t':
+	case '\v':
+	case '\f':
 		continue;
 
 	}
@@ -288,23 +291,24 @@ which is being processed by the scanner.
 	{
 		b_setmark(sc_buf,b_get_getc_offset(sc_buf));
 		state = get_next_state(state,c,&accept);
-		for(b_getc(sc_buf);accept==NOAS;b_getc(sc_buf))
+		for(c = b_getc(sc_buf);accept==NOAS;c = b_getc(sc_buf))
 		{
 			state = get_next_state(state,c,&accept);
 		}
 		lexstart = b_getmark(sc_buf)-1;
 		lex_buf = b_create(b_get_getc_offset(sc_buf) - lexstart,1,'a');
-		if(state==ASWR)
+		if(accept==ASWR)
 		{
 			b_retract(sc_buf);
 		}
 		lexend = b_get_getc_offset(sc_buf);
+		b_set_getc_offset(sc_buf,lexstart);
 		for( i = 0;i<lexend-lexstart;i++)
 		{
 			b_addc(lex_buf,b_getc(sc_buf));
 		}
 
-		aa_table[state](lex_buf->ca_head);
+		t = aa_table[accept](lex_buf->ca_head);
 		b_destroy(lex_buf);
 		return t;
 	}
