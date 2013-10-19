@@ -301,19 +301,21 @@ which is being processed by the scanner.
 		{
 			b_retract(sc_buf);
 		}
-		lexend = b_get_getc_offset(sc_buf);
+		lexend = b_get_getc_offset(sc_buf)-1;
 		b_set_getc_offset(sc_buf,lexstart);
 		for( i = 0;i<lexend-lexstart;i++)
 		{
 			b_addc(lex_buf,b_getc(sc_buf));
 		}
-
-		t = aa_table[accept](lex_buf->ca_head);
+		b_pack(lex_buf);
+		t = aa_table[state](lex_buf->ca_head);
 		b_destroy(lex_buf);
+		++line;
 		return t;
 	}
 	t.code = ERR_T;
 	t.attribute.err_lex[0] = c;
+	t.attribute.err_lex[1] = '\0'; /*Probably a better way to do this.*/
 	return t;             
    }
 }
@@ -369,7 +371,7 @@ or #undef DEBUF is used - see the top of the file.
 int char_class (char c)
 {
         int val;
-		val = 5;
+		val = 6;
 		if(isalpha(c))
 		{
 			val = 0;
@@ -381,14 +383,16 @@ int char_class (char c)
 			{
 				val = 1;
 			}
+			if(c == '8' || c == '9')
+				val = 3;
 		}
 		if(c=='.')
 		{
-			val = 3;
+			val = 4;
 		}
 		if(c=='#')
 		{
-			val = 4;
+			val = 5;
 		}
 		return val;
 		
