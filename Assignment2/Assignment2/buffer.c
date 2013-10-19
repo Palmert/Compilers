@@ -150,7 +150,7 @@ Buffer * b_addc(Buffer * const pBD, char symbol)
 			break;
 		case MULTIPLICATIVE: 
 			/*Calculate amount of space available to increase buffer*/
-			spaceAvail = SHRT_MAX - pBD->capacity;
+			spaceAvail = (float)(SHRT_MAX - pBD->capacity);
 			/*Calculate new increment*/
 			increment  = (short)(spaceAvail * pBD->inc_factor / ONEHUNDRED);
 			/*Calculate new capacity and test for validity*/

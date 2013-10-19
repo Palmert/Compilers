@@ -285,7 +285,7 @@ which is being processed by the scanner.
 		t.code = SEOF_T;
 		return t;
 	}
-	if (isalnum)
+	if (isalnum(c))
 	{
 		b_setmark(sc_buf,b_get_getc_offset(sc_buf));
 		state = get_next_state(state,c,&accept);
@@ -401,7 +401,7 @@ int char_class (char c)
 
 Token aa_func02(char lexeme[]){
 	Token t;
-	int i;
+	unsigned int i;
 	int kwIndex = iskeyword(lexeme);
 	if( kwIndex >=0)
 	{
@@ -428,7 +428,7 @@ Token aa_func02(char lexeme[]){
 Token aa_func03(char lexeme[])
 {
     Token t;
-	int i;
+	unsigned int i;
 	t.code = SVID_T;	
 
 	for( i = 0; i < strlen(lexeme); i++)
@@ -453,8 +453,8 @@ Token aa_func08(char lexeme[])
 	Token t;
 	double digit = 0.0;
 	double total = 0.0;
-	int i;
-	int j;
+	unsigned int i;
+	unsigned int j;
 	int decimalFound = 0;
 	for( i = 0;i<strlen(lexeme);i++)
 	{
@@ -478,7 +478,7 @@ Token aa_func08(char lexeme[])
 			}
 			total += digit;
 		}
-		if(decimalFound -i<0)
+		if(decimalFound -(signed)i<0)
 		{
 			for ( j = 0; j<i-decimalFound;j++)
 			{
@@ -504,8 +504,8 @@ Token aa_func05(char lexeme[]){
 	Token t;		/*Token to be returned*/
 	int total = 0;	/*Store the total value */
 	int digit = 0;	/*The current index of the array converted to an int*/
-	int i = 0;		/*Used as an iterator*/
-	int j = 0;		/*Used as an iterator*/
+	unsigned int i = 0;		/*Used as an iterator*/
+	unsigned int j = 0;		/*Used as an iterator*/
 
 	/*Iterate ove the full input array. */
 	for(i = 0; i <strlen(lexeme); i++)
@@ -547,8 +547,8 @@ Token aa_func11(char lexeme[]){
 	Token t;		/*Token to be returned*/
 	int total = 0;	/*Store the total value */
 	int digit = 0;	/*The current index of the array converted to an int*/
-	int i = 0;		/*Used as an iterator*/
-	int j = 0;		/*Used as an iterator*/
+	unsigned int i = 0;		/*Used as an iterator*/
+	unsigned int j = 0;		/*Used as an iterator*/
 
 	/*Iterate ove the full input array. */
 	for(i = 0; i <strlen(lexeme); i++)
@@ -589,7 +589,7 @@ Token aa_func11(char lexeme[]){
 
 Token aa_func12(char lexeme[]){
 	Token t;
-	int i;
+	unsigned int i;
 	t.code = ERR_T;
 	for(i = 0; i < strlen(lexeme); i++)
 	{
@@ -605,11 +605,11 @@ Token aa_func12(char lexeme[]){
 
 //CONVERSION FUNCTION
 
-long atool(char * lexeme){
+//long atool(char * lexeme){
 
 //THE FUNCTION CONVERTS AN ASCII STRING
 //REPRESENTING AN OCTAL INTEGER CONSTANT TO INTEGER VALUE
-}
+//}
 
 //HERE YOU WRITE YOUR ADDITIONAL FUNCTIONS (IF ANY).
 //FOR EXAMPLE
