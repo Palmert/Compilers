@@ -296,7 +296,7 @@ which is being processed by the scanner.
 			state = get_next_state(state,c,&accept);
 		}
 		lexstart = b_getmark(sc_buf)-1;
-		lex_buf = b_create(b_get_getc_offset(sc_buf) - lexstart,1,'a');
+		lex_buf = b_create(100,1,'a');
 		if(accept==ASWR)
 		{
 			b_retract(sc_buf);
@@ -308,6 +308,7 @@ which is being processed by the scanner.
 			b_addc(lex_buf,b_getc(sc_buf));
 		}
 		b_pack(lex_buf);
+		b_addc(lex_buf,'\0');
 		t = aa_table[state](lex_buf->ca_head);
 		b_destroy(lex_buf);
 		++line;
@@ -424,7 +425,9 @@ Token aa_func02(char lexeme[]){
 			t.attribute.vid_lex[i] = '\0';
 			return t;
 		}
-	}	
+	}
+	t.attribute.vid_lex[i] = '\0';
+	return t;
 }
 
 
@@ -450,6 +453,8 @@ Token aa_func03(char lexeme[])
 			return t;
 		}
 	}
+	t.attribute.vid_lex[i] = '\0';
+	return t;
 }
 
 //ACCEPTING FUNCTION FOR THE floating-point literal (FPL)
@@ -544,6 +549,8 @@ Token aa_func05(char lexeme[]){
 	
 	t.code = INL_T;
 	t.attribute.int_value = total;
+	t.attribute.vid_lex[i] = '\0';
+	return t;
 }
 
 //ACCEPTING FUNCTION FOR THE integer literal(IL) - octal constant (OIL)
@@ -605,6 +612,7 @@ Token aa_func12(char lexeme[]){
 			t.attribute.err_lex[i] = '\0';
 		}
 	}
+	t.attribute.vid_lex[i] = '\0';
 	return t;
 }
 
