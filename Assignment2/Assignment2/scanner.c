@@ -122,9 +122,8 @@ which is being processed by the scanner.
 			// IF (c == '!') TRY TO PROCESS COMMENT
 			//IF THE FOLLOWING IS NOT CHAR IS NOT < REPORT AN ERROR
 			//ELSE IN A LOOP SKIP CHARACTERS UNTIL \n THEN continue;
-			t.code = COM_T;
 			++line;
-			return t ;
+			continue;
 	   }
 		/*If it's the != relation operator set the proper values and return.  */
 	   if(c == '=')
