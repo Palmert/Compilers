@@ -410,9 +410,6 @@ Token aa_func02(char lexeme[]){
 }
 
 
-
-
-
 //ACCEPTING FUNCTION FOR THE string variable identifier (VID - SVID)
 //REPLACE XX WITH THE CORRESPONDING ACCEPTING STATE NUMBER
 
@@ -530,20 +527,47 @@ Token aa_func05(char lexeme[]){
 	t.attribute.int_value = total;
 }
 
-ACCEPTING FUNCTION FOR THE integer literal(IL) - octal constant (OIL)
+//ACCEPTING FUNCTION FOR THE integer literal(IL) - octal constant (OIL)
 
 Token aa_func11(char lexeme[]){
 
-THE FUNCTION MUST CONVERT THE LEXEME REPRESENTING AN OCTAL CONSTANT
-TO A DECIMAL INTEGER VALUE WHICH IS THE ATTRIBUTE FOR THE TOKEN.
-THE VALUE MUST BE IN THE SAME RANGE AS the value of 2-byte int in C.
-THIS FUNCTION IS SIMILAR TO THE FUNCTION ABOVE AND THEY CAN BE
-COMBINED INTO ONE FUNCTION
-THE MAIN DIFFERENCE IE THAT THIS FUNCTION CALLS
-THE FUNCTION atool(char * lexeme) WHICH CONVERTS AN ASCII STRING
-REPRESENTING AN OCTAL NUMBER TO INTEGER VALUE
-IN CASE OF ERROR (OUT OF RANGE) THE FUNCTION MUST RETURN ERROR TOKEN
-THE ERROR TOKEN ATTRIBUTE IS  lexeme
+	Token t;		/*Token to be returned*/
+	int total = 0;	/*Store the total value */
+	int digit = 0;	/*The current index of the array converted to an int*/
+	int i = 0;		/*Used as an iterator*/
+	int j = 0;		/*Used as an iterator*/
+
+	/*Iterate ove the full input array. */
+	for(i = 0; i <strlen(lexeme); i++)
+    {
+		/*Convert the current index of the array to an int. */
+		digit = lexeme[i] - '0';
+		/*Determine the power of the current digit by finding its index in the array. */
+		for(j=1; j< strlen(lexeme) -i; j++)
+		{
+			digit *=10;
+		}
+		/*Add the current digit to the total. */
+		total+= digit;
+	}
+	if(total > SHRT_MAX || total < 0)
+	{
+		t.code = ERR_T;
+		for(int i = 0; i < strlen(lexeme); i++)
+		{
+			t.attribute.vid_lex[i] = lexeme[i];
+
+			if(strlen(lexeme) == i || ERR_LEN == i )
+			{
+				t.attribute.vid_lex[i+1] = '\0';
+				return t;
+			}
+		}
+		return t;
+	}
+	
+	t.code = INL_T;
+	t.attribute.int_value = total;
 
   return t;
 }
