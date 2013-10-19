@@ -441,7 +441,45 @@ Token aa_func03(char lexeme[])
 Token aa_func08(char lexeme[])
 {
 	Token t;
-	 return t;
+	double digit = 0.0;
+	double total = 0.0;
+	int i;
+	int j;
+	int decimalFound = 0;
+	for( i = 0;i<strlen(lexeme);i++)
+	{
+		if(lexeme[i] == '.')
+		{			
+			decimalFound= i;
+			continue;
+		}
+	}
+	for( i = 0;i<strlen(lexeme);i++)
+	{
+		if(lexeme[i] == '.')
+			continue;
+		digit = 0.0;		
+		digit = (lexeme[i]-'0');
+		if(decimalFound - i > 0)
+		{
+			for ( j = 1; j<decimalFound-i;j++)
+			{
+				digit *=10.0;
+			}
+			total += digit;
+		}
+		if(decimalFound -i<0)
+		{
+			for ( j = 0; j<i-decimalFound;j++)
+			{
+				digit /=10.0;
+			}
+			total += digit;
+		}
+
+	}
+	t.attribute.flt_value = (float)total;
+	return t;
 //THE FUNCTION MUST CONVERT THE LEXEME TO A FLOATING POINT VALUE,
 //WHICH IS THE ATTRIBUTE FOR THE TOKEN.
 //THE VALUE MUST BE IN THE SAME RANGE AS the value of 4-byte float in C.
