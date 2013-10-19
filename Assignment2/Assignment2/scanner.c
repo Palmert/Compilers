@@ -394,7 +394,6 @@ int char_class (char c)
 
 
 //HERE YOU WRITE THE DEFINITIONS FOR YOUR ACCEPTING FUNCTIONS. 
-//************************************************************
 //
 //ACCEPTING FUNCTION FOR THE arithmentic variable identifier AND keywords (VID - AVID/KW)
 //REPLACE XX WITH THE CORRESPONDING ACCEPTING STATE NUMBER
