@@ -70,6 +70,10 @@ Token mlwpar_next_token(Buffer * sc_buf)
    short lexstart;  /*start offset of a lexeme in the input buffer */
    short lexend;    /*end   offset of a lexeme in the input buffer */
    int accept = NOAS; /* type of state - initially not accepting */  
+   int i;
+   char tempString[5];
+   char orString [] ={'.','O','R','.'};
+   char andString[] ={'.','A','N','D','.'};
 /* 
 lexstart is the offset from the beginning of the char buffer of the
 input buffer (sc_buf) to the first character of the current lexeme,
@@ -144,14 +148,10 @@ which is being processed by the scanner.
 		t.attribute.arr_op = MINUS;
 		return t;
 		case'.':
-		char tempString[5];
 		lexstart = b_get_getc_offset(sc_buf) -1;
 		c = b_getc(sc_buf);
 
-		char orString [] ={'.','O','R','.'};
-		char andString[] ={'.','A','N','D','.'};
-
-		for (int i = 0; 1 < 5; i++)
+		for (i = 0; 1 < 5; i++)
 		{
 			tempString[i] = b_getc(sc_buf);
 		}
@@ -247,7 +247,7 @@ which is being processed by the scanner.
 			if(b_eob(sc_buf))
 			{				
 				b_set_getc_offset(sc_buf,lexstart);
-				for(int i = 0; i<lexend;i++)
+				for( i = 0; i<lexend;i++)
 				{
 					if(i==ERR_LEN+1)
 					{
@@ -266,7 +266,7 @@ which is being processed by the scanner.
 		}
 		b_set_getc_offset(sc_buf,lexstart);
 		t.attribute.str_offset = str_LTBL->addc_offset;
-		for( int i = 0; i<lexend-lexstart;i++)
+		for(  i = 0; i<lexend-lexstart;i++)
 		{
 			c = b_getc(sc_buf);
 			b_addc(str_LTBL,c);
@@ -300,7 +300,7 @@ which is being processed by the scanner.
 			b_retract(sc_buf);
 		}
 		lexend = b_get_getc_offset(sc_buf);
-		for(int i = 0;i<lexend-lexstart;i++)
+		for( i = 0;i<lexend-lexstart;i++)
 		{
 			b_addc(lex_buf,b_getc(sc_buf));
 		}
@@ -401,10 +401,16 @@ int char_class (char c)
 
 Token aa_func02(char lexeme[]){
 	Token t;
-	return t;
-	
+	int i;
+	int kwIndex = iskeyword(lexeme);
+	if( kwIndex >=0)
+	{
+		t.code = KW_T;
+		t.attribute.kwt_idx = kwIndex;
+		return t;
+	}
 	t.code = AVID_T;
-	for(int i = 0; i < strlen(lexeme); i++)
+	for( i = 0; i < strlen(lexeme); i++)
 	{
 		t.attribute.vid_lex[i] = lexeme[i];
 		if(strlen(lexeme) == i || VID_LEN == i )
@@ -422,16 +428,10 @@ Token aa_func02(char lexeme[]){
 Token aa_func03(char lexeme[])
 {
     Token t;
-	int kwIndex = iskeyword(lexeme);
-	if( kwIndex >=0)
-	{
-		t.code = KW_T;
-		t.attribute.kwt_idx = kwIndex;
-		return t;
-	}
+	int i;
+	t.code = SVID_T;	
 
-	t.code = SVID_T;
-	for(int i = 0; i < strlen(lexeme); i++)
+	for( i = 0; i < strlen(lexeme); i++)
 	{
 		t.attribute.vid_lex[i] = lexeme[i];
 		if(VID_LEN-1 == i )
@@ -444,7 +444,6 @@ Token aa_func03(char lexeme[])
 			return t;
 		}
 	}
-
 }
 
 //ACCEPTING FUNCTION FOR THE floating-point literal (FPL)
@@ -524,7 +523,7 @@ Token aa_func05(char lexeme[]){
 	if(total > SHRT_MAX || total < 0)
 	{
 		t.code = ERR_T;
-		for(int i = 0; i < strlen(lexeme); i++)
+		for( i = 0; i < strlen(lexeme); i++)
 		{
 			t.attribute.vid_lex[i] = lexeme[i];
 
@@ -567,7 +566,7 @@ Token aa_func11(char lexeme[]){
 	if(total > SHRT_MAX || total < 0)
 	{
 		t.code = ERR_T;
-		for(int i = 0; i < strlen(lexeme); i++)
+		for( i = 0; i < strlen(lexeme); i++)
 		{
 			t.attribute.vid_lex[i] = lexeme[i];
 
@@ -589,34 +588,38 @@ Token aa_func11(char lexeme[]){
 //ACCEPTING FUNCTION FOR THE ERROR TOKEN 
 
 Token aa_func12(char lexeme[]){
-
-THE FUNCTION SETS THE ERROR TOKEN. lexeme[] CONTAINS THE ERROR
-THE ATTRIBUTE OF THE ERROR TOKEN IS THE lexeme ITSELF
-AND IT MUST BE STORED in err_lex.  IF THE ERROR LEXEME IS LONGER
-than ERR_LEN caharacters, only the first ERR_LEN character are
-stored in err_lex.
-
-  return t;
+	Token t;
+	int i;
+	t.code = ERR_T;
+	for(i = 0; i < strlen(lexeme); i++)
+	{
+		t.attribute.err_lex[i] = lexeme[i];
+		if(i == strlen(lexeme) ||   i == ERR_LEN)
+		{
+			t.attribute.err_lex[i] = '\0';
+		}
+	}
+	return t;
 }
 
 
-CONVERSION FUNCTION
+//CONVERSION FUNCTION
 
 long atool(char * lexeme){
 
-THE FUNCTION CONVERTS AN ASCII STRING
-REPRESENTING AN OCTAL INTEGER CONSTANT TO INTEGER VALUE
+//THE FUNCTION CONVERTS AN ASCII STRING
+//REPRESENTING AN OCTAL INTEGER CONSTANT TO INTEGER VALUE
 }
 
-HERE YOU WRITE YOUR ADDITIONAL FUNCTIONS (IF ANY).
-FOR EXAMPLE
+//HERE YOU WRITE YOUR ADDITIONAL FUNCTIONS (IF ANY).
+//FOR EXAMPLE
 
 int iskeyword(char * kw_lexeme)
 {
 	int i;
 	for( i = 0; i < KWT_SIZE; i++)
 	{
-		if( strcmp(lexeme, kw_table[i]) ==0)
+		if( strcmp(kw_lexeme, kw_table[i]) ==0)
 		{
 			return i;			
 		}
