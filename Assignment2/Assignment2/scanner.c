@@ -162,6 +162,44 @@ which is being processed by the scanner.
 		t.code = ART_OP_T;
 		t.attribute.arr_op = MINUS;
 		return t;
+		case'.':
+		char tempString[5];
+		lexstart = b_get_getc_offset(sc_buf) -1;
+		c = b_getc(sc_buf);
+
+		char orString [] ={'.','O','R','.'};
+		char andString[] ={'.','A','N','D','.'};
+
+		for (int i = 0; 1 < 5; i++)
+		{
+			tempString[i] = b_getc(sc_buf);
+		}
+		switch (c) {
+
+		case'A' :
+
+			if( strncmp(tempString,andString, 5)==0)
+			{
+				t.code = LOG_OP_T;
+				t.attribute.log_op = AND;
+				return t;
+			}
+		case'O':
+
+			if( strncmp(tempString,orString, 4)==0)
+			{
+				t.code = LOG_OP_T;
+				t.attribute.log_op = OR;
+				return t;
+			}
+		default:
+			b_set_getc_offset(sc_buf, lexstart +1);
+			t.code = ERR_T;
+			return t;
+		}
+
+		return t;
+
 
 	case '*':
 		t.code = ART_OP_T;
