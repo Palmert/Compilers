@@ -233,7 +233,7 @@ which is being processed by the scanner.
 		t.code = COM_T;  //   SEOF, 'wrong symbol',
 		return t;
 
-	
+	case ';':
 		t.code = EOS_T;
 		return t;
 
@@ -266,7 +266,7 @@ which is being processed by the scanner.
 		}
 		b_set_getc_offset(sc_buf,lexstart);
 		t.attribute.str_offset = str_LTBL->addc_offset;
-		for( int i = 0; i<lexend;i++)
+		for( int i = 0; i<lexend-lexstart;i++)
 		{
 			c = b_getc(sc_buf);
 			b_addc(str_LTBL,c);
@@ -424,7 +424,7 @@ Token aa_func02(char lexeme[]){
 ACCEPTING FUNCTION FOR THE string variable identifier (VID - SVID)
 REPLACE XX WITH THE CORRESPONDING ACCEPTING STATE NUMBER
 
-Token aa_funcXX(char lexeme[]){
+Token aa_func03(char lexeme[]){
 
 WHEN CALLED THE FUNCTION MUST
 1. SET a SVID TOKEN.
