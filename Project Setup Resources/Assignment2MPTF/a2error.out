@@ -58,8 +58,8 @@ ERR_T		#
 AVID_T		OR
 ERR_T		$
 ERR_T		|
-ERR_T		Not#h
-AVID_T		ere
+SVID_T		Not#
+AVID_T		here
 ERR_T		.
 ERR_T		~
 FPL_T		2.000000

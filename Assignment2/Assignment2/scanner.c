@@ -94,7 +94,11 @@ which is being processed by the scanner.
         
 	c = b_getc(sc_buf); 
 	
-
+	if(SEOF(c)))
+	{
+		t.code = SEOF_T;
+		return t;
+	}
    switch(c)
    {
   
@@ -292,11 +296,8 @@ which is being processed by the scanner.
 		continue;
 
 	}
-	if(c == '\0')
-	{
-		t.code = SEOF_T;
-		return t;
-	}
+
+	
 	if (isalnum(c))
 	{
 		b_setmark(sc_buf,b_get_getc_offset(sc_buf));

@@ -25,7 +25,7 @@ Function list: a_func21(), aa_func22(), aa_func23()
  *    '\0' or only one of the folowing constants: 255, 0xFF , EOF
  */
 #ifndef SEOF
-#define SEOF(c) (c==0xFF || c==EOF ||((signed char) c=='\0')
+#define SEOF(c) (c==0xFF || c==EOF ||( c=='\0')
 #endif
 
 /*  Single-lexeme tokens processed separately one by one
