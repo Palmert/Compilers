@@ -150,9 +150,10 @@ which is being processed by the scanner.
 
 		case'.':
 		lexstart = b_get_getc_offset(sc_buf) -1;
+		tempString[0] = c;
 		c = b_getc(sc_buf);
-
-		for (i = 0; i < 5; i++)
+		tempString[1] = c;
+		for (i = 2; i < 5; i++)
 		{
 			tempString[i] = b_getc(sc_buf);
 		}
@@ -244,9 +245,10 @@ which is being processed by the scanner.
 		return t;
 
 	case'"':
-		//need to handle \n within string
-		b_setmark(sc_buf, b_get_getc_offset(sc_buf));
-		lexstart = b_getmark(sc_buf);
+		//need to handle \n within 
+		lexstart = b_get_getc_offset(sc_buf) -1;
+
+		c = b_getc(sc_buf);
 		for(c = b_getc(sc_buf);c!='"';c = b_getc(sc_buf))
 		{
 			lexend = b_get_getc_offset(sc_buf);
@@ -270,6 +272,7 @@ which is being processed by the scanner.
 				return t;
 			}
 		}
+		
 		b_set_getc_offset(sc_buf,lexstart);
 		t.attribute.str_offset = str_LTBL->addc_offset;
 		for(  i = 0; i<lexend-lexstart;i++)
