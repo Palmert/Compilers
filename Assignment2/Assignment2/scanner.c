@@ -199,11 +199,11 @@ which is being processed by the scanner.
 		return t;
 
 	case'{':
-		t.code = RBR_T;
+		t.code = LBR_T;
 		return t;
 
 	case'}':
-		t.code = LBR_T;
+		t.code = RBR_T;
 		return t;
 
 	case '(':
