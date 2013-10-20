@@ -93,12 +93,16 @@ which is being processed by the scanner.
        // GET THE NEXT SYMBOL FROM THE INPUT BUFFER 
         
 	c = b_getc(sc_buf); 
+	b_setmark(sc_buf, b_get_getc_offset(sc_buf));
+	lexstart = b_getmark(sc_buf);
 	
 	if(SEOF(c)))
 	{
 		t.code = SEOF_T;
 		return t;
 	}
+
+
    switch(c)
    {
   
@@ -153,7 +157,6 @@ which is being processed by the scanner.
 		return t;
 
 		case'.':
-		lexstart = b_get_getc_offset(sc_buf) -1;
 		tempString[0] = c;
 		c = b_getc(sc_buf);
 		tempString[1] = c;
@@ -169,6 +172,7 @@ which is being processed by the scanner.
 			{
 				t.code = LOG_OP_T;
 				t.attribute.log_op = AND;
+				b_retract(sc_buf);
 				return t;
 			}
 		case'O':
@@ -177,10 +181,11 @@ which is being processed by the scanner.
 			{
 				t.code = LOG_OP_T;
 				t.attribute.log_op = OR;
+				b_retract(sc_buf);
 				return t;
 			}
 		default:
-			b_set_getc_offset(sc_buf, lexstart +1);
+			b_set_getc_offset(sc_buf, lexstart);
 			t.code = ERR_T;
 			t.attribute.err_lex[0] = '.';
 			t.attribute.err_lex[1] = '\0';
@@ -250,16 +255,15 @@ which is being processed by the scanner.
 
 	case'"':
 		//need to handle \n within 
-		lexstart = b_get_getc_offset(sc_buf) -1;
-
-		c = b_getc(sc_buf);
-		for(c = b_getc(sc_buf);c!='"';c = b_getc(sc_buf))
-		{
+		lexstart = b_get_getc_offset(sc_buf);
+		do
+		{	
+			c = b_getc(sc_buf);
 			lexend = b_get_getc_offset(sc_buf);
 			if(b_eob(sc_buf))
 			{				
 				b_set_getc_offset(sc_buf,lexstart);
-				for( i = 0; i<lexend;i++)
+				for( i = 0; i<lexend- lexstart;i++)
 				{
 					if(i==ERR_LEN+1)
 					{
@@ -275,15 +279,16 @@ which is being processed by the scanner.
 				t.code = ERR_T;
 				return t;
 			}
-		}
+		}while(c!='"');
 		
 		b_set_getc_offset(sc_buf,lexstart);
 		t.attribute.str_offset = str_LTBL->addc_offset;
 		for(  i = 0; i<lexend-lexstart;i++)
 		{
+			
 			c = b_getc(sc_buf);
+			if(c != '"')
 			b_addc(str_LTBL,c);
-		
 		}
 		b_addc(str_LTBL,'\0');
 		t.code = STR_T;
@@ -296,8 +301,11 @@ which is being processed by the scanner.
 		continue;
 
 	}
-
-	
+	if(c == '\0')
+	{
+		t.code = SEOF_T;
+		return t;
+	}
 	if (isalnum(c))
 	{
 		b_setmark(sc_buf,b_get_getc_offset(sc_buf));
