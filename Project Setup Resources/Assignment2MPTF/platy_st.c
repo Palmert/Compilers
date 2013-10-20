@@ -1,4 +1,10 @@
-
+/* File name: platy_st.c
+ *  Purpose:This is the main program for Assignment #2 - Scanner
+ *  CST8152 - Compilers
+ *  Version: 1.13.02
+ *  Author: Svillen Ranev
+ *  Date: 25 September 2013
+ */ 
 
 /* The #define _CRT_SECURE_NO_WARNINGS should be used in MS Visual Studio projects
  * to suppress the warnings about using "unsafe" functions like fopen()
