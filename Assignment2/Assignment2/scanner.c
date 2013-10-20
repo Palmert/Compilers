@@ -297,10 +297,10 @@ which is being processed by the scanner.
 	if (isalnum(c))
 	{
 		b_setmark(sc_buf,b_get_getc_offset(sc_buf));
-		state = get_next_state(state,c,&accept);
-		for(c = b_getc(sc_buf);accept==NOAS;c = b_getc(sc_buf))
+
+		for(state = get_next_state(state,c,&accept);accept==NOAS; state = get_next_state(state,c,&accept))
 		{
-			state = get_next_state(state,c,&accept);
+			c = b_getc(sc_buf);
 		}
 		/*if (state == 3 )
 		{
@@ -539,7 +539,7 @@ Token aa_func08(char lexeme[])
 
 			if(strlen(lexeme) == i || ERR_LEN == i )
 			{
-				t.attribute.err_lex[i+1] = '\0';
+				t.attribute.err_lex[i] = '\0';
 				return t;
 			}
 		}
