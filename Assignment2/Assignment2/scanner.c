@@ -289,7 +289,7 @@ which is being processed by the scanner.
 		continue;
 
 	}
-	if((signed char)c == '\0')
+	if(c == '\0')
 	{
 		t.code = SEOF_T;
 		return t;

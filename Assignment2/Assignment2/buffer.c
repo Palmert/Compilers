@@ -468,7 +468,7 @@ int b_print(Buffer * const pBD)
 	/*Call b_isempty and print if the buffer is empty*/
 	if(b_isempty(pBD))
 	{
-		printf("The buffer is empty.");
+		printf("The buffer is empty.\n");
 		return charsPrinted;
 	}
 	/*Call b_set_getc_offset*/
