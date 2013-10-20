@@ -97,6 +97,7 @@ which is being processed by the scanner.
 
    switch(c)
    {
+  
 	case '=':
 		c = b_getc(sc_buf);
 		if(c == '=')
@@ -146,11 +147,12 @@ which is being processed by the scanner.
 		t.code = ART_OP_T;
 		t.attribute.arr_op = MINUS;
 		return t;
+
 		case'.':
 		lexstart = b_get_getc_offset(sc_buf) -1;
 		c = b_getc(sc_buf);
 
-		for (i = 0; 1 < 5; i++)
+		for (i = 0; i < 5; i++)
 		{
 			tempString[i] = b_getc(sc_buf);
 		}
@@ -175,9 +177,14 @@ which is being processed by the scanner.
 		default:
 			b_set_getc_offset(sc_buf, lexstart +1);
 			t.code = ERR_T;
+			t.attribute.err_lex[0] = '.';
+			t.attribute.err_lex[1] = '\0';
 			return t;
 		}
-
+		b_set_getc_offset(sc_buf, lexstart +1);
+		t.code = ERR_T;
+		t.attribute.err_lex[0] = '.';
+		t.attribute.err_lex[1] = '\0';
 		return t;
 
 
@@ -282,7 +289,7 @@ which is being processed by the scanner.
 		continue;
 
 	}
-	if(SEOF(c))
+	if((signed char)c == '\0')
 	{
 		t.code = SEOF_T;
 		return t;
@@ -295,13 +302,35 @@ which is being processed by the scanner.
 		{
 			state = get_next_state(state,c,&accept);
 		}
+		/*if (state == 3 )
+		{
+			lexend = b_get_getc_offset(sc_buf)-1;
+			if (isalpha(c))
+			{
+			b_set_getc_offset(sc_buf, b_getmark(sc_buf)-1);
+			t.code = ERR_T;
+			for(i = 0;i<(lexend-b_getmark(sc_buf)-1);i++)
+			{
+				t.attribute.err_lex[i] = b_getc(sc_buf);
+				if( ERR_LEN == i )
+				{
+				t.attribute.err_lex[i] = '\0';
+				return t;
+				}
+				
+			}
+			t.attribute.err_lex[i] = '\0';
+			return t;
+			}
+		}*/
+			
 		lexstart = b_getmark(sc_buf)-1;
 		lex_buf = b_create(100,1,'a');
 		if(accept==ASWR)
 		{
 			b_retract(sc_buf);
 		}
-		lexend = b_get_getc_offset(sc_buf)-1;
+		lexend = b_get_getc_offset(sc_buf);
 		b_set_getc_offset(sc_buf,lexstart);
 		for( i = 0;i<lexend-lexstart;i++)
 		{
@@ -464,8 +493,8 @@ Token aa_func08(char lexeme[])
 	Token t;
 	double digit = 0.0;
 	double total = 0.0;
-	unsigned int i;
-	unsigned int j;
+	int i;
+	int j;
 	int decimalFound = 0;
 	for( i = 0;i<strlen(lexeme);i++)
 	{
@@ -499,8 +528,28 @@ Token aa_func08(char lexeme[])
 		}
 
 	}
+	t.code = FPL_T;
 	t.attribute.flt_value = (float)total;
-	return t;
+	if(total > FLT_MAX || total < FLT_MIN)
+	{
+		t.code = ERR_T;
+		for( i = 0; i < strlen(lexeme); i++)
+		{
+			t.attribute.err_lex[i] = lexeme[i];
+
+			if(strlen(lexeme) == i || ERR_LEN == i )
+			{
+				t.attribute.err_lex[i+1] = '\0';
+				return t;
+			}
+		}
+		return t;
+	}
+	
+
+return t;
+	
+
 //THE FUNCTION MUST CONVERT THE LEXEME TO A FLOATING POINT VALUE,
 //WHICH IS THE ATTRIBUTE FOR THE TOKEN.
 //THE VALUE MUST BE IN THE SAME RANGE AS the value of 4-byte float in C.
@@ -540,10 +589,11 @@ Token aa_func05(char lexeme[]){
 
 			if(strlen(lexeme) == i || ERR_LEN == i )
 			{
-				t.attribute.vid_lex[i+1] = '\0';
+				t.attribute.err_lex[i] = '\0';
 				return t;
 			}
 		}
+		t.attribute.err_lex[i] = '\0';
 		return t;
 	}
 	
@@ -585,10 +635,11 @@ Token aa_func11(char lexeme[]){
 
 			if(strlen(lexeme) == i || ERR_LEN == i )
 			{
-				t.attribute.vid_lex[i+1] = '\0';
+				t.attribute.vid_lex[i] = '\0';
 				return t;
 			}
 		}
+		t.attribute.vid_lex[i] = '\0';
 		return t;
 	}
 	

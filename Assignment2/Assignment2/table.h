@@ -25,7 +25,7 @@ Function list: a_func21(), aa_func22(), aa_func23()
  *    '\0' or only one of the folowing constants: 255, 0xFF , EOF
  */
 #ifndef SEOF
-#define SEOF(c) ((unsigned char)c==0xFF || c==EOF || c=='\0')
+#define SEOF(c) (c==0xFF || c==EOF ||((signed char) c=='\0')
 #endif
 
 /*  Single-lexeme tokens processed separately one by one
@@ -48,16 +48,16 @@ Function list: a_func21(), aa_func22(), aa_func23()
 #define TABLE_COLUMNS 7
 /*transition table - type of states defined in separate table */
 int  st_table[ ][TABLE_COLUMNS] = {
-/* State 0 */  {  1, 6, 4,ES,ES,ES,ES },
-/* State 1 */  {  1, 1, 1,ES,ES, 3, 2 },
+/* State 0 */  {  1, 6, 4, 4,ES,ES,ES },
+/* State 1 */  {  1, 1, 1, 1,ES, 3, 2 },
 /* State 2 */  { IS,IS,IS,IS,IS,IS,IS },
 /* State 3 */  { IS,IS,IS,IS,IS,IS,IS },
-/* State 4 */  { ES, 4, 4,IS, 7, 5, 5 },
+/* State 4 */  { ES, 4, 4, 4, 7, 5, 5 },
 /* State 5 */  { IS,IS,IS,IS,IS,IS,IS },
-/* State 6 */  { ES,10,ES, 9, 7,ES, 5 },
-/* State 7 */  { ES, 7, 7,ES,ES, 8, 8 },
+/* State 6 */  { ES,10, 9,ES, 7,ES, 5 },
+/* State 7 */  { ES, 7, 7, 7,ES, 8, 8 },
 /* State 8 */  { IS,IS,IS,IS,IS,IS,IS },
-/* State 9 */  { ES, 9,ES, 9,ES,ES,11 },
+/* State 9 */  { ES, 9, 9,ES,ES,ES,11 },
 /* State 10*/  { 11,11,11,11,11,11,11 },
 /* State 11*/  { IS,IS,IS,IS,IS,IS,IS },
 /* State 12*/  { IS,IS,IS,IS,IS,IS,IS },
