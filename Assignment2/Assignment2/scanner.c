@@ -272,23 +272,30 @@ which is being processed by the scanner.
 			lexend = b_get_getc_offset(sc_buf);
 			if(b_eob(sc_buf))
 			{				
-				b_set_getc_offset(sc_buf,lexstart);
+				b_set_getc_offset(sc_buf,lexstart-1);
 				for( i = 0; i<lexend- lexstart;i++)
-				{
-					if(i==ERR_LEN+1)
-					{
-						break;
-					}
+				{				
 					c = b_getc(sc_buf);
-					t.attribute.err_lex[i] = c;
-					if(i>=17)
+					if(i<=ERR_LEN)
 					{
-						t.attribute.err_lex[i] = '.';
+						if(i<=16)
+						t.attribute.err_lex[i] = c;
+						if(i>16 && i<ERR_LEN)
+						{
+							t.attribute.err_lex[i] = '.';
+						}
+						if (i==ERR_LEN)
+						{
+							t.attribute.err_lex[i]= '\0';
+						}
+
 					}
+					
 				}
-				t.code = ERR_T;
+				t.code = ERR_T;							
 				return t;
 			}
+			
 		}while(c!='"');
 		
 		b_set_getc_offset(sc_buf,lexstart);
@@ -517,7 +524,7 @@ Token aa_func08(char lexeme[])
 
 	t.code = FPL_T;
 	t.attribute.flt_value = (float)number;
-	if(number > FLT_MAX || number < FLT_MIN)
+	if(number > FLT_MAX || number < -FLT_MIN)
 	{
 		t.code = ERR_T;
 		for( i = 0; i < strlen(lexeme); i++)
