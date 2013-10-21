@@ -123,7 +123,9 @@ which is being processed by the scanner.
 		/*If the next token is < then we have a comment and ifnot everything till the newline character is hit. */
 		if(c == '<')
 	    {
-			do
+			
+		}
+		do
 		    {
 				c = b_getc(sc_buf);
 		    }while ( c != '\n');
@@ -133,7 +135,6 @@ which is being processed by the scanner.
 			//ELSE IN A LOOP SKIP CHARACTERS UNTIL \n THEN continue;
 			++line;
 			continue;
-	   }
 		/*If it's the != relation operator set the proper values and return.  */
 	   if(c == '=')
 	   {
@@ -309,7 +310,6 @@ which is being processed by the scanner.
 	}
 	if (isalnum(c))
 	{
-		b_setmark(sc_buf,b_get_getc_offset(sc_buf));
 
 		for(state = get_next_state(state,c,&accept);accept==NOAS; state = get_next_state(state,c,&accept))
 		{
@@ -337,7 +337,7 @@ which is being processed by the scanner.
 			}
 		}*/
 			
-		lexstart = b_getmark(sc_buf)-1;
+		lexstart = b_getmark(sc_buf);
 		lex_buf = b_create(100,1,'a');
 		if(accept==ASWR)
 		{
@@ -601,7 +601,7 @@ Token aa_func11(char lexeme[]){
 		/*Determine the power of the current digit by finding its index in the array. */
 		for(j=1; j< strlen(lexeme) -i; j++)
 		{
-			digit *=10;
+			digit *=8;
 		}
 		/*Add the current digit to the total. */
 		total+= digit;
