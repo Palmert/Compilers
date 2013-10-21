@@ -152,12 +152,12 @@ which is being processed by the scanner.
 		   ++line;
 		   return t;
 
-		case NEG:
+		case POS:
 			t.code = ART_OP_T;
 			t.attribute.arr_op = PLUS;
 			return t;
 
-		case POS:
+		case NEG:
 			t.code = ART_OP_T;
 			t.attribute.arr_op = MINUS;
 			return t;
@@ -229,7 +229,7 @@ which is being processed by the scanner.
 			t.code = RPR_T;
 			return t;
 
-		case GRTRTHN:
+		case LESSTHN:
 			c = b_getc(sc_buf);
 
 			if(c == '>'){
@@ -241,7 +241,7 @@ which is being processed by the scanner.
 			b_retract(sc_buf);
 			return t;
 
-		case LESSTHN:
+		case GRTRTHN:
 			t.code = REL_OP_T;
 			t.attribute.rel_op = GT;
 			return t;
@@ -486,36 +486,6 @@ Token aa_func03(char lexeme[])
 	return t;
 }
 
-//ACCEPTING FUNCTION FOR THE floating-point literal (FPL)
-
-Token aa_func08(char lexeme[])
-{
-	Token t;
-	double number = atof(lexeme);
-
-	t.code = FPL_T;
-	t.attribute.flt_value = (float)number;
-	if(number == 0.0 )
-	{
-		return t;
-	}
-	if(number > FLT_MAX || number < FLT_MIN)
-	{
-		t_set_err_t(lexeme,&t);
-		return t;
-	}
-	
-
-return t;
-	
-
-//THE FUNCTION MUST CONVERT THE LEXEME TO A FLOATING POINT VALUE,
-//WHICH IS THE ATTRIBUTE FOR THE TOKEN.
-//THE VALUE MUST BE IN THE SAME RANGE AS the value of 4-byte float in C.
-//IN CASE OF ERROR (OUT OF RANGE) THE FUNCTION MUST RETURN ERROR TOKEN
-//THE ERROR TOKEN ATTRIBUTE IS  lexeme
- 
-}
 
 //ACCEPTING FUNCTION FOR THE integer literal(IL) - decimal constant (DIL)
 
@@ -536,6 +506,26 @@ Token aa_func05(char lexeme[]){
 	return t;
 }
 
+//ACCEPTING FUNCTION FOR THE floating-point literal (FPL)
+
+Token aa_func08(char lexeme[])
+{
+	Token t;
+	double number = atof(lexeme);
+
+	t.code = FPL_T;
+	t.attribute.flt_value = (float)number;
+	if(number == 0.0 )
+	{
+		return t;
+	}
+	if(number > FLT_MAX || number < FLT_MIN)
+	{
+		t_set_err_t(lexeme,&t);
+		return t;
+	}
+	return t;
+}
 //ACCEPTING FUNCTION FOR THE integer literal(IL) - octal constant (OIL)
 
 Token aa_func11(char lexeme[]){
