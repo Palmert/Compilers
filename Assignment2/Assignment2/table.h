@@ -25,15 +25,37 @@ Function list: a_func21(), aa_func22(), aa_func23()
  *    '\0' or only one of the folowing constants: 255, 0xFF , EOF
  */
 #ifndef SEOF
-#define SEOF(c) (c==0xFF || c==EOF ||( c=='\0')
+#define SEOF(c) ((c==0xFF) || (c==EOF) || (c=='\0'))
 #endif
+
+#ifndef WHTSPC
+#define WHTSPC(c) ((c==' ') || (c=='\t') || (c=='\v') || (c=='\f'))
+#endif
+
+#ifndef ISASSOP
+#define is_assop(c) 	{ (c)=(b_getc(sc_buf)); if(c== ASSOP) {(t.code) = (REL_OP_T);(t.attribute.rel_op) = (EQ); return (t);} {(b_retract(sc_buf));(t.code) = (ASS_OP_T);return (t);} }
+#endif
+
+#define ASSOP   '='
+#define LPRNTHS '('
+#define RPRNTHS ')'
+#define LBRACE  '{'
+#define RBRACE  '}'
+#define GRTRTHN '>'
+#define LESSTHN	'<'
+#define COMMA   ','
+#define QUOTE   '"'
+#define	SEMICLN	';'
+#define NEG		'-'
+#define POS		'+'
+#define	ASTRX	'*'
+#define FWDSLSH	'/'
+#define NEWLINE '\n'
+
 
 /*  Single-lexeme tokens processed separately one by one
  *  in the token-driven part of the scanner
- *  '=' , ' ' , '(' , ')' , '{' , '}' , == , != , '>' , '<' ,
- *       space
- *  !<comment , ',' , '"' , ';' , '-' , '+' , '*' , '/', <> ,
- *  .AND., .OR. , SEOF, 'wrong symbol',
+ *   ==  !=  !<comment  <> .AND. .OR. 'wrong symbol'
  */
  
 
