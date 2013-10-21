@@ -142,8 +142,9 @@ which is being processed by the scanner.
 		   return t;
 	   }
 	   t.code = ERR_T;
-
-
+	   t.attribute.err_lex[0] = '!';
+	   t.attribute.err_lex[1] = c;
+	   t.attribute.err_lex[2] = '\0';
 	   return t;
 
 	case '+':
@@ -503,46 +504,13 @@ Token aa_func03(char lexeme[])
 Token aa_func08(char lexeme[])
 {
 	Token t;
-	double digit = 0.0;
-	double total = 0.0;
 	int i;
-	int j;
-	int decimalFound = 0;
-	for( i = 0;i<strlen(lexeme);i++)
-	{
-		if(lexeme[i] == '.')
-		{			
-			decimalFound= i;
-			continue;
-		}
-	}
-	for( i = 0;i<strlen(lexeme);i++)
-	{
-		if(lexeme[i] == '.')
-			continue;
-		digit = 0.0;		
-		digit = (lexeme[i]-'0');
-		if(decimalFound - i > 0)
-		{
-			for ( j = 1; j<decimalFound-i;j++)
-			{
-				digit *=10.0;
-			}
-			total += digit;
-		}
-		if(decimalFound -(signed)i<0)
-		{
-			for ( j = 0; j<i-decimalFound;j++)
-			{
-				digit /=10.0;
-			}
-			total += digit;
-		}
+	double number = atof(lexeme);
 
-	}
+
 	t.code = FPL_T;
-	t.attribute.flt_value = (float)total;
-	if(total > FLT_MAX || total < FLT_MIN)
+	t.attribute.flt_value = (float)number;
+	if(number > FLT_MAX || number < FLT_MIN)
 	{
 		t.code = ERR_T;
 		for( i = 0; i < strlen(lexeme); i++)
