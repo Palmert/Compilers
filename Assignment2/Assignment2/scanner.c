@@ -96,234 +96,218 @@ which is being processed by the scanner.
 	c = b_getc(sc_buf); 	
 	lexstart = b_getmark(sc_buf);
 	
-	if(SEOF(c)))
+	if(SEOF(c))
 	{
 		t.code = SEOF_T;
 		return t;
 	}
+	if(WHTSPC(c))
+	{
+		continue;
+	}
 
+	switch(c)
+	{
+		
+		case ASSOP:
+			is_assop(c);
+		/*If the token starts wiht ! it can either be a comment or the != relational operator, so peak forward and act appropriatly. */
+		case '!':
+			c = b_getc(sc_buf);
+			/*If the next token is < then we have a comment and ifnot everything till the newline character is hit. */
+			if(c == LESSTHN)
+			{
+			do
+				{
+					c = b_getc(sc_buf);
+				}while ( c != NEWLINE);
+				// If output doesn't match revert to his logic as follows
+				// IF (c == '!') TRY TO PROCESS COMMENT
+				//IF THE FOLLOWING IS NOT CHAR IS NOT < REPORT AN ERROR
+				//ELSE IN A LOOP SKIP CHARACTERS UNTIL \n THEN continue;
+				++line;
 
-   switch(c)
-   {
-  
-	case '=':
-		c = b_getc(sc_buf);
-		if(c == '=')
-		{
-		t.code = REL_OP_T;
-		t.attribute.rel_op = EQ;
-		return t;
-		}
-		b_retract(sc_buf);
-		t.code = ASS_OP_T;
-		return t;
-	/*If the token starts wiht ! it can either be a comment or the != relational operator, so peak forward and act appropriatly. */
-	case '!':
-		c = b_getc(sc_buf);
-		/*If the next token is < then we have a comment and ifnot everything till the newline character is hit. */
-		if(c == '<')
-	    {
-		do
-		    {
-				c = b_getc(sc_buf);
-		    }while ( c != '\n');
-			// If output doesn't match revert to his logic as follows
-			// IF (c == '!') TRY TO PROCESS COMMENT
-			//IF THE FOLLOWING IS NOT CHAR IS NOT < REPORT AN ERROR
-			//ELSE IN A LOOP SKIP CHARACTERS UNTIL \n THEN continue;
-			++line;
-
-			continue;
-		}
-		/*If it's the != relation operator set the proper values and return.  */
-	   if(c == '=')
-	   {
-		   t.code = REL_OP_T;
-		   t.attribute.rel_op = NE ;
-		   return t;
-	   }	
-	   t.code = ERR_T;
-	   t.attribute.err_lex[0] = '!';
-	   t.attribute.err_lex[1] = c;
-	   t.attribute.err_lex[2] = '\0';
+				continue;
+			}
+			/*If it's the != relation operator set the proper values and return.  */
+		   if(c == '=')
+		   {
+			   t.code = REL_OP_T;
+			   t.attribute.rel_op = NE ;
+			   return t;
+		   }	
+		   t.code = ERR_T;
+		   t.attribute.err_lex[0] = '!';
+		   t.attribute.err_lex[1] = c;
+		   t.attribute.err_lex[2] = '\0';
 	   
-	   do
-	   {
-		   c = b_getc(sc_buf);
-	   }while ( c != '\n');
-			// If output doesn't match revert to his logic as follows
-			// IF (c == '!') TRY TO PROCESS COMMENT
-			//IF THE FOLLOWING IS NOT CHAR IS NOT < REPORT AN ERROR
-			//ELSE IN A LOOP SKIP CHARACTERS UNTIL \n THEN continue;
-	   ++line;
-	   return t;
+		   do
+		   {
+			   c = b_getc(sc_buf);
+		   }while ( c != NEWLINE);
+				// If output doesn't match revert to his logic as follows
+				// IF (c == '!') TRY TO PROCESS COMMENT
+				//IF THE FOLLOWING IS NOT CHAR IS NOT < REPORT AN ERROR
+				//ELSE IN A LOOP SKIP CHARACTERS UNTIL \n THEN continue;
+		   ++line;
+		   return t;
 
-	case '+':
-		t.code = ART_OP_T;
-		t.attribute.arr_op = PLUS;
-		return t;
+		case NEG:
+			t.code = ART_OP_T;
+			t.attribute.arr_op = PLUS;
+			return t;
 
-	case '-':
-		t.code = ART_OP_T;
-		t.attribute.arr_op = MINUS;
-		return t;
+		case POS:
+			t.code = ART_OP_T;
+			t.attribute.arr_op = MINUS;
+			return t;
 
 		case'.':
-		tempString[0] = c;
-		c = b_getc(sc_buf);
-		tempString[1] = c;
-		for (i = 2; i < 5; i++)
-		{
-			tempString[i] = b_getc(sc_buf);
-		}
-		switch (c) {
-
-		case'A' :
-
-			if( strncmp(tempString,andString, 5)==0)
+			tempString[0] = c;
+			c = b_getc(sc_buf);
+			tempString[1] = c;
+			for (i = 2; i < 5; i++)
 			{
-				t.code = LOG_OP_T;
-				t.attribute.log_op = AND;
+				tempString[i] = b_getc(sc_buf);
+			}
+			switch (c) {
+
+			case'A' :
+
+				if( strncmp(tempString,andString, 5)==0)
+				{
+					t.code = LOG_OP_T;
+					t.attribute.log_op = AND;
+					return t;
+				}
+			case'O':
+
+				if( strncmp(tempString,orString, 4)==0)
+				{
+					t.code = LOG_OP_T;
+					t.attribute.log_op = OR;
+					b_retract(sc_buf);
+					return t;
+				}
+			default:
+				b_set_getc_offset(sc_buf, lexstart);
+				t.code = ERR_T;
+				t.attribute.err_lex[0] = b_getc(sc_buf);
+				t.attribute.err_lex[1] = '\0';
 				return t;
 			}
-		case'O':
-
-			if( strncmp(tempString,orString, 4)==0)
-			{
-				t.code = LOG_OP_T;
-				t.attribute.log_op = OR;
-				b_retract(sc_buf);
-				return t;
-			}
-		default:
-			b_set_getc_offset(sc_buf, lexstart);
+			b_set_getc_offset(sc_buf, lexstart +1);
 			t.code = ERR_T;
-			t.attribute.err_lex[0] = b_getc(sc_buf);
+			t.attribute.err_lex[0] = '.';
 			t.attribute.err_lex[1] = '\0';
 			return t;
-		}
-		b_set_getc_offset(sc_buf, lexstart +1);
-		t.code = ERR_T;
-		t.attribute.err_lex[0] = '.';
-		t.attribute.err_lex[1] = '\0';
-		return t;
 
 
-	case '*':
-		t.code = ART_OP_T;
-		t.attribute.arr_op =MULT;
-		return t;
-
-	case'/':
-		t.code = ART_OP_T;
-		t.attribute.arr_op = DIV;
-		return t;
-
-	case'{':
-		t.code = LBR_T;
-		return t;
-
-	case'}':
-		t.code = RBR_T;
-		return t;
-
-	case '(':
-		t.code = LPR_T;
-		return t;
-
-	case ')':
-		t.code = RPR_T;
-		return t;
-
-	case '<':
-		c = b_getc(sc_buf);
-
-		if(c == '>'){
-			t.code = SCC_OP_T;
+		case ASTRX:
+			t.code = ART_OP_T;
+			t.attribute.arr_op =MULT;
 			return t;
-		}
-		t.code = REL_OP_T;
-		t.attribute.rel_op = LT;
-		b_retract(sc_buf);
-		return t;
 
-	case '>':
-		t.code = REL_OP_T;
-		t.attribute.rel_op = GT;
-		return t;
+		case FWDSLSH:
+			t.code = ART_OP_T;
+			t.attribute.arr_op = DIV;
+			return t;
 
-	case '\n':
-		++line;
-		continue;
+		case LBRACE:
+			t.code = LBR_T;
+			return t;
 
-	case ',':
-		t.code = COM_T;  //   SEOF, 'wrong symbol',
-		return t;
+		case RBRACE:
+			t.code = RBR_T;
+			return t;
 
-	case ';':
-		t.code = EOS_T;
-		return t;
+		case LPRNTHS:
+			t.code = LPR_T;
+			return t;
 
-	case'"':
-		//need to handle \n within 
-		lexstart = b_get_getc_offset(sc_buf);
-		do
-		{	
+		case RPRNTHS:
+			t.code = RPR_T;
+			return t;
+
+		case GRTRTHN:
 			c = b_getc(sc_buf);
-			lexend = b_get_getc_offset(sc_buf);
-			if(b_eob(sc_buf))
-			{				
-				b_set_getc_offset(sc_buf,lexstart-1);
-				for( i = 0; i<lexend- lexstart;i++)
-				{				
-					c = b_getc(sc_buf);
-					if(i<=ERR_LEN)
-					{
-						if(i<=16)
-						t.attribute.err_lex[i] = c;
-						if(i>16 && i<ERR_LEN)
-						{
-							t.attribute.err_lex[i] = '.';
-						}
-						if (i==ERR_LEN)
-						{
-							t.attribute.err_lex[i]= '\0';
-						}
 
-					}
-					
-				}
-				t.code = ERR_T;							
+			if(c == '>'){
+				t.code = SCC_OP_T;
 				return t;
 			}
+			t.code = REL_OP_T;
+			t.attribute.rel_op = LT;
+			b_retract(sc_buf);
+			return t;
+
+		case LESSTHN:
+			t.code = REL_OP_T;
+			t.attribute.rel_op = GT;
+			return t;
+
+		case NEWLINE:
+			++line;
+			continue;
+
+		case ',':
+			t.code = COM_T;  //   SEOF, 'wrong symbol',
+			return t;
+
+		case ';':
+			t.code = EOS_T;
+			return t;
+
+		case'"':
+			//need to handle \n within 
+			lexstart = b_get_getc_offset(sc_buf);
+			do
+			{	
+				c = b_getc(sc_buf);
+				lexend = b_get_getc_offset(sc_buf);
+				if(b_eob(sc_buf))
+				{				
+					b_set_getc_offset(sc_buf,lexstart-1);
+					for( i = 0; i<lexend- lexstart;i++)
+					{				
+						c = b_getc(sc_buf);
+						if(i<=ERR_LEN)
+						{
+							if(i<=16)
+							t.attribute.err_lex[i] = c;
+							if(i>16 && i<ERR_LEN)
+							{
+								t.attribute.err_lex[i] = '.';
+							}
+							if (i==ERR_LEN)
+							{
+								t.attribute.err_lex[i]= '\0';
+							}
+
+						}
+					
+					}
+					t.code = ERR_T;							
+					return t;
+				}
 			
-		}while(c!='"');
+			}while(c!='"');
 		
-		b_set_getc_offset(sc_buf,lexstart);
-		t.attribute.str_offset = str_LTBL->addc_offset;
-		for(  i = 0; i<lexend-lexstart;i++)
-		{
+			b_set_getc_offset(sc_buf,lexstart);
+			t.attribute.str_offset = str_LTBL->addc_offset;
+			for(  i = 0; i<lexend-lexstart;i++)
+			{
 			
-			c = b_getc(sc_buf);
-			if(c != '"')
-			b_addc(str_LTBL,c);
+				c = b_getc(sc_buf);
+				if(c != '"')
+				b_addc(str_LTBL,c);
+			}
+			b_addc(str_LTBL,'\0');
+			t.code = STR_T;
+			return t;
 		}
-		b_addc(str_LTBL,'\0');
-		t.code = STR_T;
-		return t;
+	
 
-	case ' ':
-	case '\t':
-	case '\v':
-	case '\f':
-		continue;
-
-	}
-	if(c == '\0')
-	{
-		t.code = SEOF_T;
-		return t;
-	}
 	if (isalnum(c))
 	{
 
@@ -525,7 +509,11 @@ Token aa_func08(char lexeme[])
 
 	t.code = FPL_T;
 	t.attribute.flt_value = (float)number;
-	if(number > FLT_MAX || number < -FLT_MIN)
+	if(number == 0.0 )
+	{
+		return t;
+	}
+	if(number > FLT_MAX || number < FLT_MIN)
 	{
 		t.code = ERR_T;
 		for( i = 0; i < strlen(lexeme); i++)
@@ -578,17 +566,11 @@ Token aa_func05(char lexeme[]){
 	if(total > 32767 || total < -32767)
 	{
 		t.code = ERR_T;
-		for( i = 0; i < strlen(lexeme); i++)
+		if(strlen(lexeme) < ERR_LEN-1)
 		{
-			t.attribute.vid_lex[i] = lexeme[i];
-
-			if(strlen(lexeme) == i || ERR_LEN == i )
-			{
-				t.attribute.err_lex[i] = '\0';
-				return t;
-			}
+			strncpy(t.attribute.err_lex, lexeme, strlen(lexeme));
 		}
-		t.attribute.err_lex[i] = '\0';
+
 		return t;
 	}
 	
