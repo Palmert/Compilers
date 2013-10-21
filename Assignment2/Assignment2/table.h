@@ -52,6 +52,8 @@ Function list: a_func21(), aa_func22(), aa_func23()
 #define FWDSLSH	'/'
 #define NEWLINE '\n'
 
+#define MAX2BYTEINT 32767
+
 
 /*  Single-lexeme tokens processed separately one by one
  *  in the token-driven part of the scanner
