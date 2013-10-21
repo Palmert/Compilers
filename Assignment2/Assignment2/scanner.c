@@ -6,6 +6,7 @@ Course: CST 8152 – Compilers, Lab Section: 401
 Assignment: Assignment 2 
 Date: Oct. 25th 2013
 Professor: Sv. Ranev
+Version: 1.0.0.0
 Purpose: Functions implementing a Lexical Analyzer (Scanner) as required for CST8152, Assignment #2
 Function list: 
 *********************************************************************************************************/
