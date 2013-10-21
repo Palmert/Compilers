@@ -72,8 +72,8 @@ Token mlwpar_next_token(Buffer * sc_buf)
    int accept = NOAS; /* type of state - initially not accepting */  
    int i;
    char tempString[5];
-   char orString [] ={'.','O','R','.'};
-   char andString[] ={'.','A','N','D','.'};
+   char orString [] =".OR.";
+   char andString[] =".AND.";
 /* 
 lexstart is the offset from the beginning of the char buffer of the
 input buffer (sc_buf) to the first character of the current lexeme,
