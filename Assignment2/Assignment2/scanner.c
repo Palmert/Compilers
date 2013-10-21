@@ -260,7 +260,6 @@ which is being processed by the scanner.
 
 		case'"':
 			//need to handle \n within 
-			lexstart = b_get_getc_offset(sc_buf);
 			do
 			{	
 				c = b_getc(sc_buf);
