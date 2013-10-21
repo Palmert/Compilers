@@ -54,6 +54,11 @@ static int get_next_state(int, char, int *); /* state machine function */
 static int iskeyword(char * kw_lexeme); /*keywords lookup functuion */
 static long atool(char * lexeme); /* converts octal string to decimal value */
 
+/* local helper functions. */
+int decimalString_toInt(char* lexeme);
+void t_set_err_t(char* lexeme, Token* t);
+int octalstring_toInt(char* lexeme);
+
 int scanner_init(Buffer * sc_buf) {
   	if(b_isempty(sc_buf)) return EXIT_FAILURE;/*1*/
 	b_set_getc_offset(sc_buf,0);/* in case the buffer has been read previously  */
@@ -196,11 +201,6 @@ which is being processed by the scanner.
 				t.attribute.err_lex[1] = '\0';
 				return t;
 			}
-			b_set_getc_offset(sc_buf, lexstart +1);
-			t.code = ERR_T;
-			t.attribute.err_lex[0] = '.';
-			t.attribute.err_lex[1] = '\0';
-			return t;
 
 
 		case ASTRX:
@@ -266,7 +266,7 @@ which is being processed by the scanner.
 				lexend = b_get_getc_offset(sc_buf);
 				if(b_eob(sc_buf))
 				{				
-					b_set_getc_offset(sc_buf,lexstart-1);
+					b_set_getc_offset(sc_buf,lexstart);
 					for( i = 0; i<lexend- lexstart;i++)
 					{				
 						c = b_getc(sc_buf);
@@ -448,7 +448,6 @@ int char_class (char c)
 
 Token aa_func02(char lexeme[]){
 	Token t;
-	unsigned int i;
 	int kwIndex = iskeyword(lexeme);
 	if( kwIndex >=0)
 	{
