@@ -122,8 +122,6 @@ which is being processed by the scanner.
 		/*If the next token is < then we have a comment and ifnot everything till the newline character is hit. */
 		if(c == '<')
 	    {
-			
-		}
 		do
 		    {
 				c = b_getc(sc_buf);
@@ -133,14 +131,16 @@ which is being processed by the scanner.
 			//IF THE FOLLOWING IS NOT CHAR IS NOT < REPORT AN ERROR
 			//ELSE IN A LOOP SKIP CHARACTERS UNTIL \n THEN continue;
 			++line;
+
 			continue;
+		}
 		/*If it's the != relation operator set the proper values and return.  */
 	   if(c == '=')
 	   {
 		   t.code = REL_OP_T;
 		   t.attribute.rel_op = NE ;
 		   return t;
-	   }
+	   }	
 	   t.code = ERR_T;
 	   t.attribute.err_lex[0] = '!';
 	   t.attribute.err_lex[1] = c;
@@ -183,7 +183,6 @@ which is being processed by the scanner.
 			{
 				t.code = LOG_OP_T;
 				t.attribute.log_op = AND;
-				b_retract(sc_buf);
 				return t;
 			}
 		case'O':
@@ -198,7 +197,7 @@ which is being processed by the scanner.
 		default:
 			b_set_getc_offset(sc_buf, lexstart);
 			t.code = ERR_T;
-			t.attribute.err_lex[0] = '.';
+			t.attribute.err_lex[0] = b_getc(sc_buf);
 			t.attribute.err_lex[1] = '\0';
 			return t;
 		}
