@@ -91,9 +91,8 @@ which is being processed by the scanner.
 	while (1){ /* endless loop broken by token returns it will generate a warning */
                 
        // GET THE NEXT SYMBOL FROM THE INPUT BUFFER 
-        
-	c = b_getc(sc_buf); 
-	b_setmark(sc_buf, b_get_getc_offset(sc_buf));
+    b_setmark(sc_buf, b_get_getc_offset(sc_buf));
+	c = b_getc(sc_buf); 	
 	lexstart = b_getmark(sc_buf);
 	
 	if(SEOF(c)))
@@ -347,7 +346,6 @@ which is being processed by the scanner.
 			}
 		}*/
 			
-		lexstart = b_getmark(sc_buf);
 		lex_buf = b_create(100,1,'a');
 		if(accept==ASWR)
 		{
@@ -570,7 +568,7 @@ Token aa_func05(char lexeme[]){
 		/*Add the current digit to the total. */
 		total+= digit;
 	}
-	if(total > SHRT_MAX || total < 0)
+	if(total > 32767 || total < -32767)
 	{
 		t.code = ERR_T;
 		for( i = 0; i < strlen(lexeme); i++)
