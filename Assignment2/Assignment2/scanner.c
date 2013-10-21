@@ -145,6 +145,16 @@ which is being processed by the scanner.
 	   t.attribute.err_lex[0] = '!';
 	   t.attribute.err_lex[1] = c;
 	   t.attribute.err_lex[2] = '\0';
+	   
+	   do
+	   {
+		   c = b_getc(sc_buf);
+	   }while ( c != '\n');
+			// If output doesn't match revert to his logic as follows
+			// IF (c == '!') TRY TO PROCESS COMMENT
+			//IF THE FOLLOWING IS NOT CHAR IS NOT < REPORT AN ERROR
+			//ELSE IN A LOOP SKIP CHARACTERS UNTIL \n THEN continue;
+	   ++line;
 	   return t;
 
 	case '+':
