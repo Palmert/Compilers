@@ -49,13 +49,13 @@ Function list: a_func21(), aa_func22(), aa_func23()
 /*transition table - type of states defined in separate table */
 int  st_table[ ][TABLE_COLUMNS] = {
 /* State 0 */  {  1, 6, 4, 4,ES,ES,ES },
-/* State 1 */  {  1, 1, 1, 1,ES, 3, 2 },
+/* State 1 */  {  1, 1, 1, 1,2, 3, 2 },
 /* State 2 */  { IS,IS,IS,IS,IS,IS,IS },
 /* State 3 */  { IS,IS,IS,IS,IS,IS,IS },
 /* State 4 */  { ES, 4, 4, 4, 7, 5, 5 },
 /* State 5 */  { IS,IS,IS,IS,IS,IS,IS },
 /* State 6 */  { ES,10, 9,ES, 7,ES, 5 },
-/* State 7 */  { ES, 7, 7, 7,ES, 8, 8 },
+/* State 7 */  { 8, 7, 7, 7, 8, 8, 8 },
 /* State 8 */  { IS,IS,IS,IS,IS,IS,IS },
 /* State 9 */  { ES, 9, 9,ES,ES,ES,11 },
 /* State 10*/  { ES,ES,ES,ES,ES,ES,11 },
