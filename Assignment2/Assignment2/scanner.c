@@ -458,16 +458,12 @@ Token aa_func02(char lexeme[]){
 		return t;
 	}
 	t.code = AVID_T;
-	for( i = 0; i < strlen(lexeme); i++)
+	strncpy(t.attribute.vid_lex, lexeme, VID_LEN);	
+	t.attribute.vid_lex[VID_LEN] = '\0';
+	if (strlen(lexeme) < VID_LEN+1)		
 	{
-		t.attribute.vid_lex[i] = lexeme[i];
-		if(strlen(lexeme) == i || VID_LEN == i )
-		{
-			t.attribute.vid_lex[i] = '\0';
-			return t;
-		}
+		t.attribute.vid_lex[strlen(lexeme)] = '\0';
 	}
-	t.attribute.vid_lex[i] = '\0';
 	return t;
 }
 
@@ -477,24 +473,16 @@ Token aa_func02(char lexeme[]){
 
 Token aa_func03(char lexeme[])
 {
-    Token t;
-	unsigned int i;
+	Token t;	
 	t.code = SVID_T;	
-
-	for( i = 0; i < strlen(lexeme); i++)
+	strncpy(t.attribute.vid_lex, lexeme, VID_LEN);
+	t.attribute.vid_lex[VID_LEN-1] = '#';
+	t.attribute.vid_lex[VID_LEN] = '\0';
+	if (strlen(lexeme) < VID_LEN+1)		
 	{
-		t.attribute.vid_lex[i] = lexeme[i];
-		if(VID_LEN-1 == i )
-		{
-			t.attribute.vid_lex[i] = '#';
-		}
-		if(strlen(lexeme) == i || VID_LEN == i )
-		{
-			t.attribute.vid_lex[i] = '\0';
-			return t;
-		}
+		t.attribute.vid_lex[strlen(lexeme)-1] = '#';
+		t.attribute.vid_lex[strlen(lexeme)] = '\0';
 	}
-	t.attribute.vid_lex[i] = '\0';
 	return t;
 }
 
@@ -503,9 +491,7 @@ Token aa_func03(char lexeme[])
 Token aa_func08(char lexeme[])
 {
 	Token t;
-	int i;
 	double number = atof(lexeme);
-
 
 	t.code = FPL_T;
 	t.attribute.flt_value = (float)number;
@@ -515,17 +501,7 @@ Token aa_func08(char lexeme[])
 	}
 	if(number > FLT_MAX || number < FLT_MIN)
 	{
-		t.code = ERR_T;
-		for( i = 0; i < strlen(lexeme); i++)
-		{
-			t.attribute.err_lex[i] = lexeme[i];
-
-			if(strlen(lexeme) == i || ERR_LEN == i )
-			{
-				t.attribute.err_lex[i] = '\0';
-				return t;
-			}
-		}
+		t_set_err_t(lexeme,&t);
 		return t;
 	}
 	
@@ -546,6 +522,63 @@ return t;
 Token aa_func05(char lexeme[]){
 	Token t;		/*Token to be returned*/
 	int total = 0;	/*Store the total value */
+	
+	total = decimalString_toInt(lexeme);
+
+	if(total > MAX2BYTEINT || total < 0)
+	{
+		t_set_err_t(lexeme,&t);
+		return t;
+	}
+	
+	t.code = INL_T;
+	t.attribute.int_value = total;
+	return t;
+}
+
+//ACCEPTING FUNCTION FOR THE integer literal(IL) - octal constant (OIL)
+
+Token aa_func11(char lexeme[]){
+
+	Token t;		/*Token to be returned*/
+	int total = 0;	/*Store the total value */
+	
+	total = octalstring_toInt(lexeme);
+
+	if(total > MAX2BYTEINT || total < 0)
+	{
+		t_set_err_t(lexeme,&t);
+		return t;
+	}
+	
+	t.code = INL_T;
+	t.attribute.int_value = total;
+	return t;
+}
+
+//ACCEPTING FUNCTION FOR THE ERROR TOKEN 
+
+Token aa_func12(char lexeme[]){
+	Token t;
+	t_set_err_t(lexeme,&t);
+	return t;
+}
+
+
+//CONVERSION FUNCTION
+
+//long atool(char * lexeme){
+
+//THE FUNCTION CONVERTS AN ASCII STRING
+//REPRESENTING AN OCTAL INTEGER CONSTANT TO INTEGER VALUE
+//}
+
+//HERE YOU WRITE YOUR ADDITIONAL FUNCTIONS (IF ANY).
+//FOR EXAMPLE
+
+int decimalString_toInt(char lexeme[])
+{
+	int total = 0;	/*Store the total value */
 	int digit = 0;	/*The current index of the array converted to an int*/
 	unsigned int i = 0;		/*Used as an iterator*/
 	unsigned int j = 0;		/*Used as an iterator*/
@@ -563,30 +596,13 @@ Token aa_func05(char lexeme[]){
 		/*Add the current digit to the total. */
 		total+= digit;
 	}
-	if(total > 32767 || total < -32767)
-	{
-		t.code = ERR_T;
-		if(strlen(lexeme) < ERR_LEN-1)
-		{
-			strncpy(t.attribute.err_lex, lexeme, strlen(lexeme));
-		}
-
-		return t;
-	}
-	
-	t.code = INL_T;
-	t.attribute.int_value = total;
-	t.attribute.vid_lex[i] = '\0';
-	return t;
+	return total;
 }
 
-//ACCEPTING FUNCTION FOR THE integer literal(IL) - octal constant (OIL)
-
-Token aa_func11(char lexeme[]){
-
-	Token t;		/*Token to be returned*/
+int octalstring_toInt(char lexeme[])
+{
 	int total = 0;	/*Store the total value */
-	int digit = 0;	/*The current index of the array converted to an int*/
+	int octalDigit = 0;	/*The current index of the array converted to an int*/
 	unsigned int i = 0;		/*Used as an iterator*/
 	unsigned int j = 0;		/*Used as an iterator*/
 
@@ -594,67 +610,17 @@ Token aa_func11(char lexeme[]){
 	for(i = 0; i <strlen(lexeme); i++)
     {
 		/*Convert the current index of the array to an int. */
-		digit = lexeme[i] - '0';
+		octalDigit = lexeme[i] - '0';
 		/*Determine the power of the current digit by finding its index in the array. */
 		for(j=1; j< strlen(lexeme) -i; j++)
 		{
-			digit *=8;
+			octalDigit *=8;
 		}
 		/*Add the current digit to the total. */
-		total+= digit;
+		total+= octalDigit;
 	}
-	if(total > SHRT_MAX || total < 0)
-	{
-		t.code = ERR_T;
-		for( i = 0; i < strlen(lexeme); i++)
-		{
-			t.attribute.vid_lex[i] = lexeme[i];
-
-			if(strlen(lexeme) == i || ERR_LEN == i )
-			{
-				t.attribute.vid_lex[i] = '\0';
-				return t;
-			}
-		}
-		t.attribute.vid_lex[i] = '\0';
-		return t;
-	}
-	
-	t.code = INL_T;
-	t.attribute.int_value = total;
-
-  return t;
+	return total;
 }
-
-//ACCEPTING FUNCTION FOR THE ERROR TOKEN 
-
-Token aa_func12(char lexeme[]){
-	Token t;
-	unsigned int i;
-	t.code = ERR_T;
-	for(i = 0; i < strlen(lexeme); i++)
-	{
-		t.attribute.err_lex[i] = lexeme[i];
-		if(i == strlen(lexeme) ||   i == ERR_LEN)
-		{
-			t.attribute.err_lex[i] = '\0';
-		}
-	}
-	t.attribute.vid_lex[i] = '\0';
-	return t;
-}
-
-
-//CONVERSION FUNCTION
-
-//long atool(char * lexeme){
-
-//THE FUNCTION CONVERTS AN ASCII STRING
-//REPRESENTING AN OCTAL INTEGER CONSTANT TO INTEGER VALUE
-//}
-
-//HERE YOU WRITE YOUR ADDITIONAL FUNCTIONS (IF ANY).
-//FOR EXAMPLE
 
 int iskeyword(char * kw_lexeme)
 {
@@ -668,4 +634,15 @@ int iskeyword(char * kw_lexeme)
 	}
 	i = -1;
 	return i;
+}
+
+void t_set_err_t(char lexeme[], Token *t)
+{
+	t->code = ERR_T;
+	strncpy(t->attribute.err_lex, lexeme, ERR_LEN);
+	t->attribute.err_lex[ERR_LEN] = '\0';
+	if(strlen(lexeme) < ERR_LEN+1)
+	{
+		t->attribute.err_lex[strlen(lexeme)];
+	}
 }
