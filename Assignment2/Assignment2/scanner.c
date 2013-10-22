@@ -55,9 +55,9 @@ static int iskeyword(char * kw_lexeme); /*keywords lookup functuion */
 static long atool(char * lexeme); /* converts octal string to decimal value */
 
 /* local helper functions. */
-int decimalString_toInt(char* lexeme);
-void t_set_err_t(char* lexeme, Token* t);
-int octalstring_toInt(char* lexeme);
+int decimalString_toInt(char lexeme[]);
+void t_set_err_t(char lexeme[], Token* t);
+int octalstring_toInt(char lexeme[]);
 
 int scanner_init(Buffer * sc_buf) {
   	if(b_isempty(sc_buf)) return EXIT_FAILURE;/*1*/
@@ -69,17 +69,19 @@ int scanner_init(Buffer * sc_buf) {
 }
 
 /**********************************************************************************************************
-Purpose: Resizes the character buffer to the size + 1 of the characters added to it
-Author: Thom Palmer and Chris Whitten
-History/Versions: 10.20.13
-Called functions: b_setmark(), b_getc(), b_getmark(), SEOF(), WHTSPACE(), is_assop(), strncmp(),
-				  b_set_getc_offset(), b_retract(), b_get_getc_offset(),b_eob(), isalnum(), b_addc()
-				  get_next_state(), 
-Parameters: Buffer * const pBD
-Return value: Buffer *pBD on success, NULL on failure
-Algorithm: Validate parameters, set the capacity to addc_offest + 1, resize char buffer using realloc,
-			return Buffer * pBD
-			*Assume that pBD->capacity and pBD->addc_offset are the same measurements*
+Purpose:			Set the proper token depending on the lexeme read from the buffer. 
+Author:				Thom Palmer and Chris Whitten
+History/Versions:	10.20.13
+Called functions:	b_setmark(), b_getc(), b_getmark(), SEOF(), WHTSPACE(), is_assop(), strncmp(),
+					b_set_getc_offset(), b_retract(), b_get_getc_offset(),b_eob(), isalnum(), b_addc()
+					get_next_state(), b_create(), b_pack(), b_destroy() 
+Parameters:			Buffer * const pBD
+Return value:		Token t
+Algorithm:			Validate parameters, read char from buffer, check the char to see if its a legal character.
+					depending on the char peak forward to see what the following char is in order to 
+					determine if it's part of the lexeme or if it's time to return. once a valid lexeme is
+					found set the token and return. if a valid lexeme is not found set the token to error 
+					state and return. 
 **********************************************************************************************************/
 Token mlwpar_next_token(Buffer * sc_buf)
 {
@@ -89,41 +91,42 @@ Token mlwpar_next_token(Buffer * sc_buf)
    short lexstart;  /*start offset of a lexeme in the input buffer */
    short lexend;    /*end   offset of a lexeme in the input buffer */
    int accept = NOAS; /* type of state - initially not accepting */  
-   int i;
-   char tempString[5];
-   char orString [] =".OR.";
-   char andString[] =".AND.";
-/* 
-lexstart is the offset from the beginning of the char buffer of the
-input buffer (sc_buf) to the first character of the current lexeme,
-which is being processed by the scanner.
-lexend is the offset from the beginning of the char buffer of the
-input buffer (sc_buf) to the last character of the current lexeme,
-which is being processed by the scanner.
-
-*/ 
-        
-        
-        //DECLARE YOUR VARIABLES HERE IF NEEDED 
-        
+   int i;			/*Used throughout the function as iterator*/
+   char tempString[5];	/*Used to store the characters read in after '.' is foud to determine if its a logical operator*/
+   char orString [] =".OR.";	/*Used to compare against the temporary string*/
+   char andString[] =".AND.";	/*Used to compare against the temporary string*/
+   
+	/*Ensure the buffer is not null before trying to access it*/
+   if(sc_buf == NULL)
+   {
+	   t.code = ERR_T;
+	   strcpy(t.attribute.err_lex, RUNTIMERR);
+	   return t;
+   }
+     
                 
 	while (1){ /* endless loop broken by token returns it will generate a warning */
                 
-       // GET THE NEXT SYMBOL FROM THE INPUT BUFFER 
+    /*Set mark before getting the next character. This prevents the need for unneccessary decrements.  */
     b_setmark(sc_buf, b_get_getc_offset(sc_buf));
-	c = b_getc(sc_buf); 	
 	lexstart = b_getmark(sc_buf);
 	
+	/*Get the next char from the buffer. */
+	c = b_getc(sc_buf); 	
+	
+	/*Ensure SEOF has not been read before processing any further.*/
 	if(SEOF(c))
 	{
 		t.code = SEOF_T;
 		return t;
 	}
+
+	/*If it's whitespace ignore and return to the start of the loop.*/
 	if(WHTSPC(c))
 	{
 		continue;
 	}
-
+	/**/
 	switch(c)
 	{
 		
@@ -139,12 +142,8 @@ which is being processed by the scanner.
 				{
 					c = b_getc(sc_buf);
 				}while ( c != NEWLINE);
-				// If output doesn't match revert to his logic as follows
-				// IF (c == '!') TRY TO PROCESS COMMENT
-				//IF THE FOLLOWING IS NOT CHAR IS NOT < REPORT AN ERROR
-				//ELSE IN A LOOP SKIP CHARACTERS UNTIL \n THEN continue;
-				++line;
 
+				++line;
 				continue;
 			}
 			/*If it's the != relation operator set the proper values and return.  */
@@ -163,10 +162,7 @@ which is being processed by the scanner.
 		   {
 			   c = b_getc(sc_buf);
 		   }while ( c != NEWLINE);
-				// If output doesn't match revert to his logic as follows
-				// IF (c == '!') TRY TO PROCESS COMMENT
-				//IF THE FOLLOWING IS NOT CHAR IS NOT < REPORT AN ERROR
-				//ELSE IN A LOOP SKIP CHARACTERS UNTIL \n THEN continue;
+
 		   ++line;
 		   return t;
 
@@ -245,7 +241,7 @@ which is being processed by the scanner.
 		case LESSTHN:
 			c = b_getc(sc_buf);
 
-			if(c == '>'){
+			if(c == GRTRTHN){
 				t.code = SCC_OP_T;
 				return t;
 			}
@@ -331,27 +327,6 @@ which is being processed by the scanner.
 		{
 			c = b_getc(sc_buf);
 		}
-		/*if (state == 3 )
-		{
-			lexend = b_get_getc_offset(sc_buf)-1;
-			if (isalpha(c))
-			{
-			b_set_getc_offset(sc_buf, b_getmark(sc_buf)-1);
-			t.code = ERR_T;
-			for(i = 0;i<(lexend-b_getmark(sc_buf)-1);i++)
-			{
-				t.attribute.err_lex[i] = b_getc(sc_buf);
-				if( ERR_LEN == i )
-				{
-				t.attribute.err_lex[i] = '\0';
-				return t;
-				}
-				
-			}
-			t.attribute.err_lex[i] = '\0';
-			return t;
-			}
-		}*/
 			
 		lex_buf = b_create(100,1,'a');
 		if(accept==ASWR)
@@ -377,11 +352,14 @@ which is being processed by the scanner.
 	return t;             
    }
 }
-
-
-//DO NOT MODIFY THE CODE OF THIS FUNCTION
-//YOU CAN REMOVE THE COMMENTS
-
+/**********************************************************************************************************
+Purpose:			Gets the next state in the transition table
+Author:				Svillen Ranev
+History/Versions:	1.0.0.0
+Called functions:	char_class()
+Parameters:			int state, char c, int *accept
+Return value:		int representing the next row(state) in the transition table
+**********************************************************************************************************/
 int get_next_state(int state, char c, int *accept)
 {
 	int col;
@@ -425,25 +403,37 @@ or #undef DEBUF is used - see the top of the file.
 	*accept = as_table[next];
 	return next;
 }
-
+/**********************************************************************************************************
+Purpose:				Find the column in the transition table that corresponds to the current character
+Author:					Thom Palmer
+History/Versions:		10.18.13
+Called functions:		isalpha(), isdigit()
+Parameters:				char c
+Return value:			int representing a column in the transition table
+Algorithm:				
+**********************************************************************************************************/
 int char_class (char c)
 {
-        int val;
+        int val;					/* Stores column index. */
 		val = 6;
+		if(isdigit(c))
+		{
+			switch(c)
+			{
+			case '0':	val = 1;
+						break;
+			case '8': 
+			case '9':	val = 3;
+						break;
+			default:	val = 2;
+						break;
+			}
+		}
 		if(isalpha(c))
 		{
 			val = 0;
 		}
-		if(isdigit(c))
-		{
-			val = 2;
-			if(c == '0')
-			{
-				val = 1;
-			}
-			if(c == '8' || c == '9')
-				val = 3;
-		}
+		
 		if(c=='.')
 		{
 			val = 4;
@@ -452,17 +442,19 @@ int char_class (char c)
 		{
 			val = 5;
 		}
-		return val;
-		
+		return val;		
 }
-
-
-
-//HERE YOU WRITE THE DEFINITIONS FOR YOUR ACCEPTING FUNCTIONS. 
-//
-//ACCEPTING FUNCTION FOR THE arithmentic variable identifier AND keywords (VID - AVID/KW)
-//REPLACE XX WITH THE CORRESPONDING ACCEPTING STATE NUMBER
-
+/**********************************************************************************************************
+Purpose:				Set the Token code and attribute for a keyword or arithmetic variable identifier
+Author:					Chris Whitten modified by Thom Palmer
+History/Versions:		10.19.13
+Called functions:		iskeyword(), strncpy(), strlen()
+Parameters:				char lexeme[]
+Return value:			Token t representing a valid keyword or valid arithmetic variable identifier
+Algorithm:				Create a temporary Token, if lexeme is a keyword set appropriate properties of 
+						the Token and return the keyword Token, otherwise lexeme is an arithmetic variable
+						identifier, set appropriate properties and return the AVID Token
+**********************************************************************************************************/
 Token aa_func02(char lexeme[]){
 	Token t;
 	int kwIndex = iskeyword(lexeme);
@@ -481,11 +473,15 @@ Token aa_func02(char lexeme[]){
 	}
 	return t;
 }
-
-
-//ACCEPTING FUNCTION FOR THE string variable identifier (VID - SVID)
-//REPLACE XX WITH THE CORRESPONDING ACCEPTING STATE NUMBER
-
+/**********************************************************************************************************
+Purpose:				Set the Token code and attribute for a string variable identifier
+Author:					Chris Whitten
+History/Versions:		10.19.13
+Called functions:		strncpy(), strlen()
+Parameters:				char lexeme[]
+Return value:			Token t representing a valid strng variable identifier
+Algorithm:				Create a temporary Token, 
+**********************************************************************************************************/
 Token aa_func03(char lexeme[])
 {
 	Token t;	
