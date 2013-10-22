@@ -142,12 +142,8 @@ Token mlwpar_next_token(Buffer * sc_buf)
 				{
 					c = b_getc(sc_buf);
 				}while ( c != NEWLINE);
-				// If output doesn't match revert to his logic as follows
-				// IF (c == '!') TRY TO PROCESS COMMENT
-				//IF THE FOLLOWING IS NOT CHAR IS NOT < REPORT AN ERROR
-				//ELSE IN A LOOP SKIP CHARACTERS UNTIL \n THEN continue;
-				++line;
 
+				++line;
 				continue;
 			}
 			/*If it's the != relation operator set the proper values and return.  */
@@ -166,10 +162,7 @@ Token mlwpar_next_token(Buffer * sc_buf)
 		   {
 			   c = b_getc(sc_buf);
 		   }while ( c != NEWLINE);
-				// If output doesn't match revert to his logic as follows
-				// IF (c == '!') TRY TO PROCESS COMMENT
-				//IF THE FOLLOWING IS NOT CHAR IS NOT < REPORT AN ERROR
-				//ELSE IN A LOOP SKIP CHARACTERS UNTIL \n THEN continue;
+
 		   ++line;
 		   return t;
 
@@ -248,7 +241,7 @@ Token mlwpar_next_token(Buffer * sc_buf)
 		case LESSTHN:
 			c = b_getc(sc_buf);
 
-			if(c == '>'){
+			if(c == GRTRTHN){
 				t.code = SCC_OP_T;
 				return t;
 			}
