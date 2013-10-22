@@ -1,8 +1,8 @@
-/*********************************************************************************************************
+ï»¿/*********************************************************************************************************
 File name: table.h
 Compiler: MS Visual Studio 2110
 Authors: Thom Palmer - 023 713 234 and Chris Whitten - 040 611 350 
-Course: CST 8152 – Compilers, Lab Section: 401
+Course: CST 8152 ï¿½ Compilers, Lab Section: 401
 Assignment: Assignment 2 
 Date: Oct. 25th 2013
 Professor: Sv. Ranev
@@ -51,6 +51,8 @@ Function list: a_func21(), aa_func22(), aa_func23()
 #define	ASTRX	'*'
 #define FWDSLSH	'/'
 #define NEWLINE '\n'
+
+#define RUNTIMERR  "RUN TIME ERROR"
 
 #define MAX2BYTEINT 32767
 
