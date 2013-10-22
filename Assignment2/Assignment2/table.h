@@ -1,4 +1,4 @@
-﻿/*********************************************************************************************************
+/*********************************************************************************************************
 File name: table.h
 Compiler: MS Visual Studio 2110
 Authors: Thom Palmer - 023 713 234 and Chris Whitten - 040 611 350 
@@ -51,6 +51,7 @@ Function list: a_func21(), aa_func22(), aa_func23()
 #define	ASTRX	'*'
 #define FWDSLSH	'/'
 #define NEWLINE '\n'
+#define PERIOD	'.'
 
 #define RUNTIMERR  "RUN TIME ERROR"
 
