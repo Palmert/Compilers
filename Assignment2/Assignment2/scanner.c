@@ -68,6 +68,19 @@ int scanner_init(Buffer * sc_buf) {
 /*   scerrnum = 0;  *//*no need - global ANSI C */
 }
 
+/**********************************************************************************************************
+Purpose: Resizes the character buffer to the size + 1 of the characters added to it
+Author: Thom Palmer and Chris Whitten
+History/Versions: 10.20.13
+Called functions: b_setmark(), b_getc(), b_getmark(), SEOF(), WHTSPACE(), is_assop(), strncmp(),
+				  b_set_getc_offset(), b_retract(), b_get_getc_offset(),b_eob(), isalnum(), b_addc()
+				  get_next_state(), 
+Parameters: Buffer * const pBD
+Return value: Buffer *pBD on success, NULL on failure
+Algorithm: Validate parameters, set the capacity to addc_offest + 1, resize char buffer using realloc,
+			return Buffer * pBD
+			*Assume that pBD->capacity and pBD->addc_offset are the same measurements*
+**********************************************************************************************************/
 Token mlwpar_next_token(Buffer * sc_buf)
 {
    Token t; /* token to return after recognition */
@@ -289,7 +302,11 @@ which is being processed by the scanner.
 					t.code = ERR_T;							
 					return t;
 				}
-			
+
+				if(c == NEWLINE)
+				{
+					++line;
+				}			
 			}while(c!='"');
 		
 			b_set_getc_offset(sc_buf,lexstart);
@@ -513,11 +530,7 @@ Token aa_func08(char lexeme[])
 
 	t.code = FPL_T;
 	t.attribute.flt_value = (float)number;
-	if(number == 0.0 )
-	{
-		return t;
-	}
-	if(number > FLT_MAX || number < FLT_MIN)
+	if(number > FLT_MAX || (number < FLT_MIN && number != 0.0))
 	{
 		t_set_err_t(lexeme,&t);
 		return t;
