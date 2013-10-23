@@ -96,8 +96,7 @@ Token mlwpar_next_token(Buffer * sc_buf)
 	/*Ensure the buffer is not null before trying to access it*/
    if(sc_buf == NULL)
    {
-	   t.code = ERR_T;
-	   strcpy(t.attribute.err_lex, RUNTIMERR);
+	   t_set_err_t(RUNTIMERR, &t);
 	   return t;
    }
      
@@ -339,7 +338,7 @@ Token mlwpar_next_token(Buffer * sc_buf)
 			/* Set the getc_offset back to the start of the string */
 			b_set_getc_offset(sc_buf,lexstart);
 			/* Set the str_offset attribute to the location of the current getc_offset in the str_LTBL */
-			t.attribute.str_offset = str_LTBL->addc_offset;
+			t.attribute.str_offset = b_getsize(str_LTBL);
 
 			/* Add the characters of the string into the str_LTBL */
 			for(  i = 0; i<lexend-lexstart;i++)
@@ -348,42 +347,74 @@ Token mlwpar_next_token(Buffer * sc_buf)
 				/* Ensure that quotes are not added to the string */
 				if(c != '"')
 				{
-					b_addc(str_LTBL,c);
+					if(!(b_addc(str_LTBL, c)))
+					{
+						t_set_err_t(RUNTIMERR, &t);
+						return t;
+					}
 				}
 			}
 			/* Add the string terminator to the string and set the Token Code */
-			b_addc(str_LTBL,'\0');
+			if (!b_addc(str_LTBL,'\0'))
+			{
+				t_set_err_t(RUNTIMERR, &t);
+				return t;
+			}
 			t.code = STR_T;
 			return t;
 		}
 	
-
+	/* Special symbol scanning completed. Now checking for lexeme type */
 	if (isalnum(c))
 	{
-
+		/* Use for loop to iterate over the transition table based on the current state and character */
+		/* Continue iterating until an accepting state has been found */
 		for(state = get_next_state(state,c,&accept);accept==NOAS; state = get_next_state(state,c,&accept))
 		{
 			c = b_getc(sc_buf);
 		}
-			
-		lex_buf = b_create(100,1,'a');
+		
+		/* Create a temporary buffer to store the lexeme */
+		lex_buf = b_create(100,15,'a');
+		/* If buffer creation was not successful. Set the error token for a runtime error. */
+		if (!lex_buf)
+		{
+			t_set_err_t(RUNTIMERR, &t);
+			return t;
+		}
+		/* Retract the buffer if is is an accepting state with a retract */
 		if(accept==ASWR)
 		{
 			b_retract(sc_buf);
 		}
+		/* Set the end of the lexeme at the current getc_offset */
 		lexend = b_get_getc_offset(sc_buf);
+		/* Reset the getc_offset to the start of the lexeme */
 		b_set_getc_offset(sc_buf,lexstart);
+		/* Add the characters of the lexeme to lex_buf */
 		for( i = 0;i<lexend-lexstart;i++)
 		{
-			b_addc(lex_buf,b_getc(sc_buf));
+			if (!b_addc(lex_buf,b_getc(sc_buf)))
+			{
+				t_set_err_t(RUNTIMERR, &t);
+				return t;
+			}
 		}
+		/* Pack lex_buf and add the string terminator to it */
 		b_pack(lex_buf);
-		b_addc(lex_buf,'\0');
-		t = aa_table[state](lex_buf->ca_head);
+		/* If b_addc fails set the token for a runtime error and return t  */
+		if (!b_addc(lex_buf,'\0'))
+		{
+			t_set_err_t(RUNTIMERR, &t);
+			return t;
+		}
+		/* Call the accepting function at the current state index and pass the lexeme */
+		t = aa_table[state](b_get_chmemloc(lex_buf,0));
 		b_destroy(lex_buf);
-		++line;
 		return t;
 	}
+	/* This code will be executed if c was an invalid symbol*/
+	/* Set error token and return t. */
 	t.code = ERR_T;
 	t.attribute.err_lex[0] = c;
 	t.attribute.err_lex[1] = '\0'; /*Probably a better way to do this.*/
@@ -504,12 +535,13 @@ Token aa_func02(char lexeme[])
 		return t;
 	}
 	t.code = AVID_T;
-	strncpy(t.attribute.vid_lex, lexeme, VID_LEN);	
-	t.attribute.vid_lex[VID_LEN] = '\0';
-	if (strlen(lexeme) < VID_LEN+1)		
+
+	
+	if (strlen(lexeme) > VID_LEN)		
 	{
-		t.attribute.vid_lex[strlen(lexeme)] = '\0';
+		lexeme[VID_LEN] = '\0';
 	}
+	strcpy(t.attribute.vid_lex, lexeme);		
 	return t;
 }
 /**********************************************************************************************************
@@ -527,14 +559,14 @@ Token aa_func03(char lexeme[])
 {
 	Token t;	
 	t.code = SVID_T;	
-	strncpy(t.attribute.vid_lex, lexeme, VID_LEN);
-	t.attribute.vid_lex[VID_LEN-1] = '#';
-	t.attribute.vid_lex[VID_LEN] = '\0';
-	if (strlen(lexeme) < VID_LEN+1)		
+	
+	
+	if (strlen(lexeme) > VID_LEN)		
 	{
-		t.attribute.vid_lex[strlen(lexeme)-1] = '#';
-		t.attribute.vid_lex[strlen(lexeme)] = '\0';
+		lexeme[VID_LEN-1] = '#';
+		lexeme[VID_LEN] = '\0';
 	}
+	strcpy(t.attribute.vid_lex, lexeme);
 	return t;
 }
 /**********************************************************************************************************
@@ -820,10 +852,9 @@ Algorithm:				Set the Token code to ERR_t then set the err_lex attribute to the 
 void t_set_err_t(char lexeme[], Token *t)
 {
 	t->code = ERR_T;
-	strncpy(t->attribute.err_lex, lexeme, ERR_LEN);
-	t->attribute.err_lex[ERR_LEN] = '\0';
-	if(strlen(lexeme) <= ERR_LEN)
+	if(strlen(lexeme) > ERR_LEN)
 	{
-		t->attribute.err_lex[strlen(lexeme)];
+		lexeme[ERR_LEN] = '\0';
 	}
+	strcpy(t->attribute.err_lex, lexeme);
 }
