@@ -290,33 +290,24 @@ Token mlwpar_next_token(Buffer * sc_buf)
 
 			/* If c is a quotation mark '"' we have the start of a string, analyze the next chars until '"' or SEOF is hit. */
 		case QUOTE:
-			/* read all the chars in from the input buffer until a '"' */
-			do
-			{
+			/* read all the chars in from the input buffer until a '"' */	do
+			{	
 				c = b_getc(sc_buf);
 				lexend = b_get_getc_offset(sc_buf);
-				/* If eob has be set or SEOF is read in from the buffer prior to closing the string */
-				/* Break into the error token setup. */
 				if(b_eob(sc_buf) || SEOF(c))
-				{	
-					/* Set the getc_offset to the start of the string */
+				{				
 					b_set_getc_offset(sc_buf,lexstart);
-					/* Iterate over the buffer and copy the contents of the error string into the err_lex */
-					for( i = 0; i < lexend-lexstart; i++)
+					for( i = 0; i<lexend- lexstart;i++)
 					{				
 						c = b_getc(sc_buf);
-						/* For the first 20 characters */
 						if(i<=ERR_LEN)
 						{
-							/* Copy c into the current index of err_lex for first 16 characters */
 							if(i<=16)
 							t.attribute.err_lex[i] = c;
-							/* Copy a decimal into the indexes between 17 and ERR_LEN */
 							if(i>16 && i<ERR_LEN)
 							{
-								t.attribute.err_lex[i] = PERIOD;
+								t.attribute.err_lex[i] = '.';
 							}
-							/* Copy a string terminator into the last index of err_lex */
 							if (i==ERR_LEN)
 							{
 								t.attribute.err_lex[i]= '\0';
@@ -328,18 +319,15 @@ Token mlwpar_next_token(Buffer * sc_buf)
 					t.code = ERR_T;							
 					return t;
 				}
-				/* Increment the line number each time a line terminator is found */
+
 				if(c == NEWLINE)
 				{
 					++line;
-				}	
-			}while ( c != QUOTE );
-			
-			/* Closing quote found. Valid String */
-			/* Set the getc_offset back to the start of the string */
+				}			
+			}while(c!='"');
 			b_set_getc_offset(sc_buf,lexstart);
 			/* Set the str_offset attribute to the location of the current getc_offset in the str_LTBL */
-			t.attribute.str_offset = str_LTBL->addc_offset;
+			t.attribute.str_offset = b_get_getc_offset(str_LTBL);
 
 			/* Add the characters of the string into the str_LTBL */
 			for(  i = 0; i<lexend-lexstart;i++)
