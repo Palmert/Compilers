@@ -142,7 +142,7 @@ int main(int argc, char ** argv){
 	b_destroy(sc_buf);
 	b_destroy(str_LTBL);
 	sc_buf = str_LTBL = NULL;
- 
+	printf("%d",line);
   return (0);
 }
 

@@ -22,7 +22,7 @@ Function list:	t_set_err_t()
 #endif
 
 #ifndef SEOF
-#define SEOF(c) ((c)==0xFF || (c)==EOF || (c)=='\0')
+#define SEOF(c) ((c)==0xFF || (signed char)(c)==EOF || (c)=='\0')
 #endif
 
 #ifndef WHTSPC
@@ -34,7 +34,7 @@ Function list:	t_set_err_t()
 Purpose:				Set the Token to error and copy the lexeme to the error lex
 Author:					Chris Whitten
 History/Versions:		10.21.13
-Called functions:		none
+Called functions:		strlen()
 Parameters:				char lexeme[], Token *t
 Return value:			Error Token
 Algorithm:				Set the Token code to ERR_t then set the err_lex attribute to the input lexeme. 
@@ -51,24 +51,27 @@ Algorithm:				Set the Token code to ERR_t then set the err_lex attribute to the 
 #endif
 
 
-#define ASSOP   '='		/* Equal sign symbol constant */
-#define LPRNTHS '('		/* Left parenthesis symbol constant */
-#define RPRNTHS ')'		/* Right parenthesis symbol constant */
-#define LBRACE  '{'		/* Left brace symbol constant */
-#define RBRACE  '}'		/* Right brace symbol constant */
-#define GRTRTHN '>'		/* Greater than symbol constant */
-#define LESSTHN	'<'		/* Less than symbol constant */
-#define COMMA   ','		/* Comma symbol constant */
-#define QUOTE   '"'		/* Quotation mark symbol constant */
-#define	SEMICLN	';'		/* Semicolon symbol constant */
-#define NEG		'-'		/* Minus symbol sign constant */
-#define POS		'+'		/* Plus sign symbol constant */
-#define	ASTRX	'*'		/* Asterix symbol constant */
-#define FWDSLSH	'/'		/* Forward slash symbol constant */
-#define NEWLINE '\n'	/* Newline symbol constant */
-#define PERIOD	'.'		/* Period symbol constant */
-#define STRTERM	'\0'	/* String terminator constant */
-#define EXCLAMTN'!'		/* Exclamation point symbol constant */
+#define EQSIGN    '='		/* Equal sign symbol constant */
+#define LPRNTHS  '('		/* Left parenthesis symbol constant */
+#define RPRNTHS  ')'		/* Right parenthesis symbol constant */
+#define LBRACE   '{'		/* Left brace symbol constant */
+#define RBRACE   '}'		/* Right brace symbol constant */
+#define GRTRTHN  '>'		/* Greater than symbol constant */
+#define LESSTHN	 '<'		/* Less than symbol constant */
+#define COMMA    ','		/* Comma symbol constant */
+#define QUOTE    '"'		/* Quotation mark symbol constant */
+#define	SEMICLN	 ';'		/* Semicolon symbol constant */
+#define NEG		 '-'		/* Minus symbol sign constant */
+#define POS		 '+'		/* Plus sign symbol constant */
+#define	ASTRX	 '*'		/* Asterix symbol constant */
+#define FWDSLSH	 '/'		/* Forward slash symbol constant */
+#define NEWLINE  '\n'		/* Newline symbol constant */
+#define PERIOD	 '.'		/* Period symbol constant */
+#define STRTERM	 '\0'		/* String terminator constant */
+#define EXCLAMTN '!'		/* Exclamation point symbol constant */
+#define CARRTRN	 '\r'		/* Carriage return symbol constant */
+#define LOG_OP_AND ".AND."	/* Used to represent the logical operator .AND. string*/
+#define LOG_OP_OR  ".OR."	/* Used to represent the logical operator .OR. string*/
 
 #define RUNTIMERR  "RUN TIME ERROR" /* Constant String for run time errors */
 
