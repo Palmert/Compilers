@@ -55,7 +55,6 @@ static long atool(char * lexeme); /* converts octal string to decimal value */
 
 /* local helper functions. */
 int decimalString_toInt(char lexeme[]);
-void t_set_err_t(char lexeme[], Token* t);
 int octalstring_toInt(char lexeme[]);
 
 int scanner_init(Buffer * sc_buf) {
@@ -96,8 +95,8 @@ Token mlwpar_next_token(Buffer * sc_buf)
 	/*Ensure the buffer is not null before trying to access it*/
    if(sc_buf == NULL)
    {
-	   t_set_err_t(RUNTIMERR, &t);
-	   return t;
+	   
+	     t_set_err_t(RUNTIMERR, t);
    }
      
                 
@@ -349,16 +348,14 @@ Token mlwpar_next_token(Buffer * sc_buf)
 				{
 					if(!(b_addc(str_LTBL, c)))
 					{
-						t_set_err_t(RUNTIMERR, &t);
-						return t;
+						t_set_err_t(RUNTIMERR, t);
 					}
 				}
 			}
 			/* Add the string terminator to the string and set the Token Code */
 			if (!b_addc(str_LTBL,'\0'))
 			{
-				t_set_err_t(RUNTIMERR, &t);
-				return t;
+				t_set_err_t(RUNTIMERR, t);
 			}
 			t.code = STR_T;
 			return t;
@@ -379,8 +376,7 @@ Token mlwpar_next_token(Buffer * sc_buf)
 		/* If buffer creation was not successful. Set the error token for a runtime error. */
 		if (!lex_buf)
 		{
-			t_set_err_t(RUNTIMERR, &t);
-			return t;
+			t_set_err_t(RUNTIMERR, t);
 		}
 		/* Retract the buffer if is is an accepting state with a retract */
 		if(accept==ASWR)
@@ -396,8 +392,7 @@ Token mlwpar_next_token(Buffer * sc_buf)
 		{
 			if (!b_addc(lex_buf,b_getc(sc_buf)))
 			{
-				t_set_err_t(RUNTIMERR, &t);
-				return t;
+				t_set_err_t(RUNTIMERR, t);
 			}
 		}
 		/* Pack lex_buf and add the string terminator to it */
@@ -405,8 +400,7 @@ Token mlwpar_next_token(Buffer * sc_buf)
 		/* If b_addc fails set the token for a runtime error and return t  */
 		if (!b_addc(lex_buf,'\0'))
 		{
-			t_set_err_t(RUNTIMERR, &t);
-			return t;
+			t_set_err_t(RUNTIMERR, t);
 		}
 		/* Call the accepting function at the current state index and pass the lexeme */
 		t = aa_table[state](b_get_chmemloc(lex_buf,0));
@@ -606,7 +600,7 @@ Token aa_func05(char lexeme[])
 
 	if(number > MAX2BYTEINT || number < 0)
 	{
-		t_set_err_t(lexeme,&t);
+		t_set_err_t(lexeme,t);
 		return t;
 	}
 	
@@ -672,7 +666,7 @@ Token aa_func08(char lexeme[])
 	
 	if(total > FLT_MAX || (total < FLT_MIN && total != 0.0))
 	{
-		t_set_err_t(lexeme,&t);
+		t_set_err_t(lexeme,t);
 		return t;
 	}
 
@@ -719,7 +713,7 @@ Token aa_func11(char lexeme[]){
 
 	if(total > MAX2BYTEINT || total < 0)
 	{
-		t_set_err_t(lexeme,&t);
+		t_set_err_t(lexeme,t);
 		return t;
 	}
 	
@@ -738,8 +732,9 @@ Algorithm:				Create a temporary Token. Call t_set_err_t() to set code and attri
 						Return the error token.
 **********************************************************************************************************/
 Token aa_func12(char lexeme[]){
+	int i;
 	Token t;
-	t_set_err_t(lexeme,&t);
+	t_set_err_t(lexeme,t);
 	return t;
 }
 /**********************************************************************************************************
@@ -849,12 +844,3 @@ Parameters:				char lexeme[], Token *t
 Return value:			None
 Algorithm:				Set the Token code to ERR_t then set the err_lex attribute to the input lexeme. 
 **********************************************************************************************************/
-void t_set_err_t(char lexeme[], Token *t)
-{
-	t->code = ERR_T;
-	if(strlen(lexeme) > ERR_LEN)
-	{
-		lexeme[ERR_LEN] = '\0';
-	}
-	strcpy(t->attribute.err_lex, lexeme);
-}

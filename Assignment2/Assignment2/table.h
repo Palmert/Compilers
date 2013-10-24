@@ -36,6 +36,11 @@ Function list: a_func21(), aa_func22(), aa_func23()
 #define is_assop(c) 	{ (c)=(b_getc(sc_buf)); if(c== ASSOP) {(t.code) = (REL_OP_T);(t.attribute.rel_op) = (EQ); return (t);} {(b_retract(sc_buf));(t.code) = (ASS_OP_T);return (t);} }
 #endif
 
+#ifndef T_SET_ERR_T
+#define t_set_err_t(lexeme, t) {(t).code = ERR_T;if(strlen((lexeme)) > ERR_LEN){(lexeme)[ERR_LEN] = '\0';} for(i=0;i<=strlen((lexeme));i++){(t).attribute.err_lex[i]=(lexeme)[i];}  return (t);}
+#endif
+
+
 #define ASSOP   '='
 #define LPRNTHS '('
 #define RPRNTHS ')'
