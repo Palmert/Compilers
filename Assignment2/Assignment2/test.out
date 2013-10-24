@@ -1,0 +1,107 @@
+Reading file test.pls ....Please wait
+
+Printing buffer parameters:
+
+The capacity of the buffer is:  616
+The current size of the buffer is:  615
+
+Printing buffer contents:
+
+PLATYPUS
+{
+	!<this file contains tests for the transition table
+	!<Illegal numbers - what we're expenting according to table
+	a = 01.0; !<error 01., decimal 0
+	b = 0002.0; !<error 000, float 2.0
+	c = 00.0; !<error 00., decimal 0
+	d = .0; !<error ., decimal 0
+	e = .01; !<error ., octal 1
+	f = .8; !<error ., decimal 8
+	g = .; !<error .
+	h = #; !<error #
+	i = â†; !<unicode character â†
+	j = 0..; !<expecting 0., then error token .
+	k = ..; !<error . error .
+	!<more unicode and ascii chars
+	Ã¯Ï„â–¼3C#Eâ•£?,7XÃœâ•šÎ¦
+	!<string literal with line breaks should work
+	"
+	
+	
+	
+	
+	
+	
+	";
+
+}!<this comment just ends ...
+
+Scanning source file...
+
+Token		Attribute
+----------------------------------
+KW_T		PLATYPUS
+LBR_T
+AVID_T		a
+ASS_OP_T
+ERR_T		01.
+IL_T		0
+EOS_T
+AVID_T		b
+ASS_OP_T
+ERR_T		000
+FPL_T		2.000000
+EOS_T
+AVID_T		c
+ASS_OP_T
+ERR_T		00.
+IL_T		0
+EOS_T
+AVID_T		d
+ASS_OP_T
+ERR_T		.
+IL_T		0
+EOS_T
+AVID_T		e
+ASS_OP_T
+ERR_T		.
+IL_T		1
+EOS_T
+AVID_T		f
+ASS_OP_T
+ERR_T		.
+IL_T		8
+EOS_T
+AVID_T		g
+ASS_OP_T
+ERR_T		.
+EOS_T
+AVID_T		h
+ASS_OP_T
+ERR_T		#
+EOS_T
+AVID_T		i
+ASS_OP_T
+ERR_T		â
+ERR_T		†
+ERR_T		
+EOS_T
+AVID_T		j
+ASS_OP_T
+FPL_T		0.000000
+ERR_T		.
+EOS_T
+AVID_T		k
+ASS_OP_T
+ERR_T		.
+ERR_T		.
+EOS_T
+ERR_T		Ã
+ERR_T		¯
+ERR_T		Ï
+ERR_T		„
+ERR_T		â
+ERR_T		–
+ERR_T		¼
+ERR_T		3C
+ERR_T		#
