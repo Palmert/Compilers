@@ -146,6 +146,11 @@ Token mlwpar_next_token(Buffer * sc_buf)
 					do
 					{
 						c = b_getc(sc_buf);
+						if(SEOF(c)||b_eob(sc_buf))
+						{ 
+							b_retract(sc_buf);
+							continue;
+						}
 					}while ( c != NEWLINE);
 
 					++line;
@@ -168,6 +173,11 @@ Token mlwpar_next_token(Buffer * sc_buf)
 				do
 				{
 					c = b_getc(sc_buf);
+					if(SEOF(c) || b_eob(sc_buf))
+					{
+						b_retract(sc_buf);
+						return t;
+					}
 				}while ( c != NEWLINE);
 
 				++line;
