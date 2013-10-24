@@ -89,13 +89,12 @@ Token mlwpar_next_token(Buffer * sc_buf)
    short lexstart;  /*start offset of a lexeme in the input buffer */
    short lexend;    /*end   offset of a lexeme in the input buffer */
    int accept = NOAS; /* type of state - initially not accepting */  
-   int i;			/*Used throughout the function as iterator*/
+   unsigned int i;			/*Used throughout the function as iterator*/
    char tempString[5];	/*Used to store the characters read in after '.' is foud to determine if its a logical operator*/
    
 	/*Ensure the buffer is not null before trying to access it*/
    if(sc_buf == NULL)
-   {
-	   
+   {	   
 	     t_set_err_t(RUNTIMERR, t);
    }
      
@@ -601,7 +600,6 @@ Token aa_func05(char lexeme[])
 	if(number > MAX2BYTEINT || number < 0)
 	{
 		t_set_err_t(lexeme,t);
-		return t;
 	}
 	
 	t.code = INL_T;
@@ -667,7 +665,7 @@ Token aa_func08(char lexeme[])
 	if(total > FLT_MAX || (total < FLT_MIN && total != 0.0))
 	{
 		t_set_err_t(lexeme,t);
-		return t;
+		
 	}
 
 	t.code = FPL_T;
@@ -714,7 +712,6 @@ Token aa_func11(char lexeme[]){
 	if(total > MAX2BYTEINT || total < 0)
 	{
 		t_set_err_t(lexeme,t);
-		return t;
 	}
 	
 	t.code = INL_T;
@@ -732,10 +729,9 @@ Algorithm:				Create a temporary Token. Call t_set_err_t() to set code and attri
 						Return the error token.
 **********************************************************************************************************/
 Token aa_func12(char lexeme[]){
-	int i;
+	unsigned int i;
 	Token t;
 	t_set_err_t(lexeme,t);
-	return t;
 }
 /**********************************************************************************************************
 Purpose:				Set the Token code and attribute for a Octal Integer Literal

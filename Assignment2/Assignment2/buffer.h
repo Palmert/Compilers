@@ -2,7 +2,7 @@
 File name: Buffer.h
 Compiler: MS Visual Studio 2012
 Author: Thom Palmer, 040 713 234 
-Course: CST 8152 – Compilers, Lab Section: 401
+Course: CST 8152 ï¿½ Compilers, Lab Section: 401
 Assignment: Assignment 1 
 Date: Sept. 25, 2013
 Professor: Sv. Ranev
