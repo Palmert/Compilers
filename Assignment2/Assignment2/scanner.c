@@ -52,6 +52,9 @@ static Buffer *lex_buf;/*pointer to temporary lexeme buffer*/
 static int char_class(char c);					/* character class function */
 static int get_next_state(int, char, int *);	/* state machine function */
 static int iskeyword(char * kw_lexeme);			/* keywords lookup functuion */
+static double atodbl(char lexeme[]);			/* Converts string to double */
+static long atool(char lexeme[]);				/* Converts octal string to decimal value */
+static int atoint(char lexeme[]);				/* Converts integer literal string to int value */
 
 int scanner_init(Buffer * sc_buf) {
   	if(b_isempty(sc_buf)) return EXIT_FAILURE;/*1*/
@@ -197,7 +200,7 @@ Token mlwpar_next_token(Buffer * sc_buf)
 
 			/*If we have a a period '.' it could be a logical operator or an error. */
 			case PERIOD:
-				/* Add the next five characters in the buffer to a temporary string */
+				/* Add the next five characters in the buffer to a temporary string */	
 				do
 				{
 					tempString[i] = c;
@@ -625,33 +628,20 @@ Algorithm:				Create a temporary Token. Convert the string to an integer.
 Token aa_func05(char lexeme[])
 {
 	Token t;				/* Token to be returned */	
-	int number = 0;			/* Store the total value */
-	int digit = 0;			/* The current index of the array converted to an int */ 
-	unsigned int i = 0;		/* Used as an iterator */ 
-	unsigned int j = 0;		/* Used as an iterator */ 
+	int integerValue = 0;	/* Stores the integer value represented by lexeme */
+	
+	/* Call decimalString_toInt to convert to lexeme to an int */
+	integerValue = atoint(lexeme);
 
-	/* Iterate over the full input array. */
-	for(i = 0; i<strlen(lexeme); i++)
-    {
-		/* Convert the current index of the array to an int. */
-		digit = lexeme[i] - '0';
-		/* Determine the power  of the current digit by finding its index in the array. */
-		for(j=1; j < strlen(lexeme) - i; j++)
-		{
-			digit *=10;
-		}
-		/* Add the current digit to the number. */
-		number += digit;
-	}
 	/* If number is outside of the valid range we have an error state */
-	if (number > MAX2BYTEINT || number < 0)
+	if (integerValue > MAX2BYTEINT || integerValue < 0)
 	{	
- 		/* Call the function corresponding to an error state in the accepting function table */
-		aa_table[ES](lexeme);
+		/* Call the function corresponding to an error state in the accepting function table */
+		return aa_table[ES](lexeme);
 	}
 	/* Number is valid set integer literal code and int_value attribute and return t */
 	t.code = INL_T;
-	t.attribute.int_value = number;
+	t.attribute.int_value = integerValue;
 	return t;
 }
 /**********************************************************************************************************
@@ -670,15 +660,157 @@ Algorithm:				Create a temporary Token. Convert the string to a double. If the d
 **********************************************************************************************************/
 Token aa_func08(char lexeme[])
 {
-	Token t;				/* Temporary Token */
+	Token t;					/* Temporary Token */
+	double fplValue = 0.0;		/* Stores the floating point value represented by lexeme */
+	
+	
+	fplValue = atodbl(lexeme);
+	if(fplValue > FLT_MAX || (fplValue < FLT_MIN && fplValue != 0.0))
+	{
+		/* Call the function corresponding to an error state in the accepting function table */
+		return aa_table[ES](lexeme); 
+	}
+	/* Number is valid set Floating Point Literal code and flt_value attribute and return t */
+	t.code = FPL_T;
+	t.attribute.flt_value = (float)fplValue;
+	return t;
+}
+/**********************************************************************************************************
+Purpose:				Set the Token code and attribute for a Octal Integer Literal
+Author:					Thom Palmer
+History/Versions:		10.19.13
+Called functions:		strlen(), t_set_err_t()
+Parameters:				char lexeme[]
+Return value:			Token t representing a valid  Integer Literal or Token t representing
+						an error token
+Algorithm:				Create a temporary Token. Convert the string to an integer. If the integer 
+						is outside the valid range for a postive 2 byte integer, set the Token code 
+						to ERR_T and store the lexeme in the err_lex. Otherwise set the Token code
+						to INL_T and store the number as an integer in the Token attribute int_value.
+						Return the token.
+						* Assume that size_t is that same size as an int *
+**********************************************************************************************************/
+Token aa_func11(char lexeme[]){
+
+	Token t;				/* Token to be returned */
+	long integerValue = 0;		/* Stores the integer value represented by lexeme */
+	
+
+	/* Convert the lexeme to int */
+	integerValue = atool(lexeme);
+
+	/* Prevent overflow errors */
+	if(integerValue > MAX2BYTEINT || integerValue < 0)
+	{
+		/* Call the function corresponding to an error state in the accepting function table */
+		return aa_table[ES](lexeme);		
+	}	
+	t.code = INL_T;
+	t.attribute.int_value = integerValue;
+	return t;
+}
+/**********************************************************************************************************
+Purpose:				Calls t_set_err_t to set the Token code and attribute for an error token
+Author:					Thom Palmer
+History/Versions:		10.19.13
+Called functions:		(macro)t_set_err_t()
+Parameters:				char lexeme[]
+Return value:			Token t representing an error token
+Algorithm:				Create a temporary Token. Call t_set_err_t() to set code and attribute.
+						Return the error token.
+**********************************************************************************************************/
+Token aa_func12(char lexeme[]){
+	unsigned int i; /* Used as an iterator in the t_set_err_t macro */
+	Token t;
+	t_set_err_t(lexeme,t);
+}
+
+/**********************************************************************************************************
+Purpose:				Determine if the input string is a keyword or not. 
+Author:					Thom Palmer
+History/Versions:		10.21.13
+Called functions:		strncmp()
+Parameters:				char * kw_lexeme
+Return value:			Index of the keyword found or -1 if a keyword is not found.
+Algorithm:				Iterate through the kw_table comparing each element to the input string, if they 
+						are equal return immediately. If a match is not found and the end of the table has
+						been reached return -1;
+**********************************************************************************************************/
+int iskeyword(char * kw_lexeme)
+{
+	int i;		/*Used as an iterator*/
+
+	/* Iterate through the entite kt_table*/
+	for( i = 0; i < KWT_SIZE; i++)
+	{
+		/* Comapre the lexeme to the current point in the key word table. */
+		if( strcmp(kw_lexeme, kw_table[i]) ==0)
+		{
+			return i;			
+		}
+	}
+	/* Keyword not found return -1*/
+	return -1;
+}
+/**********************************************************************************************************
+Purpose:				Set the Token code and attribute for a Octal Integer Literal
+Author:					Thom Palmer
+History/Versions:		10.19.13
+Called functions:		strlen()
+Parameters:				char lexeme[]
+Return value:			Integer value represented by the string.
+Algorithm:				Convert each digit to an int by subtracting char '0'. For each digit multiply it by
+						10 in a loop. The iterations of the loop is determined by the distance of the
+						current digit from the end of the lexeme. Return the integer.					
+**********************************************************************************************************/
+int atoint(char lexeme[])
+{
+	int total = 0;	/*Store the total value */
+	int digit = 0;	/*The current index of the array converted to an int*/
+	unsigned int i = 0;		/*Used as an iterator*/
+	unsigned int j = 0;		/*Used as an iterator*/
+
+	/*Iterate ove the full input array. */
+	for(i = 0; i <strlen(lexeme); i++)
+    {
+		/*Convert the current index of the array to an int. */
+		digit = lexeme[i] - '0';
+		/*Determine the power of the current digit by finding its index in the array. */
+		for(j=1; j< strlen(lexeme) -i; j++)
+		{
+			digit *=10;
+		}
+		/*Add the current digit to the total. */
+		total+= digit;
+	}
+	return total;
+}
+/**********************************************************************************************************
+Purpose:			Convert a lexeme representation of an Floating Pointer number to a valid to a double.
+					This conversion function has been specifically designed for the platypus language and
+					is not intended to used for other purposes.
+Author:				Thom Palmer
+History/Versions:	10.21.13
+Called functions:	none
+Parameters:			char lexeme[]
+Return value:		Double value represented by the string
+Algorithm:			Iterate over the loop to find the index location of the decimal point.
+					Convert each digit to an int by subtracting char '0'. Multiply the digit by 10 
+					in a loop if the index of the digit is less the decimal point index. Otherwise divide
+					the digit by 10 in loop.The iterations of the loop is determined by the distance of the
+					current digit from the decimal point. Return the double.
+**********************************************************************************************************/
+double atodbl(char lexeme[])
+{
 	double digit;		/* Stores value of current digit */
-	double total = 0.0;		/* Stores total value of converted lexeme */
+	double total = 0.0;
 	int decimalFound = 0;	/* Used to store the index location of the decimal in the lexeme */
 	int i;				/* Used to store the index of the lexeme and iterator */
 	int j;				/* Used as an iterator */
-	
+
 	/* Iterate over the lexeme and find the index location of the decimal point/period */
-	for( i = 0;i<strlen(lexeme);i++) /* Comparison of size_t and signed int will cause warning. Does not affect program operation */
+	for( i = 0;i<strlen(lexeme);i++) /* Comparison of size_t and signed int will cause warning. 
+										Does not affect program operation */
 	{
 		if(lexeme[i] == PERIOD)
 		{			
@@ -687,7 +819,8 @@ Token aa_func08(char lexeme[])
 		}
 	}
 	/* Foreach digit in the lexeme. */
-	for( i = 0;i<strlen(lexeme);i++) /* Comparison of size_t and signed int will cause warning. Does not affect program operation */
+	for( i = 0;i<strlen(lexeme);i++) /* Comparison of size_t and signed int will cause warning.
+										Does not affect program operation */
 	{
 		/* Ignore the decimal/period */
 		if(lexeme[i] == PERIOD)
@@ -719,109 +852,41 @@ Token aa_func08(char lexeme[])
 			}
 			/* Add the digit to the total */
 			total += digit;
-		}
-
-	}
-	/* If number is outside of the valid range set the error token and return t */ 
-	if(total > FLT_MAX || (total < FLT_MIN && total != 0.0))
-	{
-		/* Call the function corresponding to an error state in the accepting function table */
-		aa_table[ES](lexeme); 
-	}
-	/* Number is valid set Floating Point Literal code and flt_value attribute and return t */
-	t.code = FPL_T;
-	t.attribute.flt_value = (float)total;
-	return t;
+		}		
+	} 
+	return total;
 }
 /**********************************************************************************************************
-Purpose:				Set the Token code and attribute for a Octal Integer Literal
-Author:					Thom Palmer
-History/Versions:		10.19.13
-Called functions:		strlen(), t_set_err_t()
-Parameters:				char lexeme[]
-Return value:			Token t representing a valid  Integer Literal or Token t representing
-						an error token
-Algorithm:				Create a temporary Token. Convert the string to an integer. If the integer 
-						is outside the valid range for a postive 2 byte integer, set the Token code 
-						to ERR_T and store the lexeme in the err_lex. Otherwise set the Token code
-						to INL_T and store the number as an integer in the Token attribute int_value.
-						Return the token.
-						* Assume that size_t is that same size as an int *
-**********************************************************************************************************/
-Token aa_func11(char lexeme[]){
-
-	Token t;				/* Token to be returned */
-	int total = 0;			/* Store the total value */
-	int octalDigit = 0;		/* The current index of the array converted to an int */
-	unsigned int i = 0;		/* Used as an iterator */
-	unsigned int j = 0;		/* Used as an iterator */
-
-	/* Iterate over the full input array. */
-	for(i = 0; i <strlen(lexeme); i++)
-    {
-		/* Convert the current index of the array to an int. */
-		octalDigit = lexeme[i] - '0';
-		/* Determine the power of the current digit by finding its index in the array. */
-		for(j=1; j< strlen(lexeme) -i; j++)
-		{
-			/* Base 8 for octal digits */
-			octalDigit *=8;
-		}
-		/* Add the current digit to the total. */
-		total+= octalDigit;
-	}
-	/* If the total is outside of the valid range we have an error state. */
-	if(total > MAX2BYTEINT || total < 0)
-	{
-		/* Call the function corresponding to an error state in the accepting function table */
-		aa_table[ES](lexeme);
-	}
-	
-	t.code = INL_T;
-	t.attribute.int_value = total;
-	return t;
-}
-//ASK ABOUT MACRO NAMING CONVENTIONS AND IF IT SHOULD BE CONSIDERED A CALLED FUNCTION
-/**********************************************************************************************************
-Purpose:				Calls t_set_err_t to set the Token code and attribute for an error token
-Author:					Thom Palmer
-History/Versions:		10.19.13
-Called functions:		(macro)t_set_err_t()
-Parameters:				char lexeme[]
-Return value:			Token t representing an error token
-Algorithm:				Create a temporary Token. Call t_set_err_t() to set code and attribute.
-						Return the error token.
-**********************************************************************************************************/
-Token aa_func12(char lexeme[]){
-	unsigned int i; /* Used as an iterator in the t_set_err_t macro */
-	Token t;
-	t_set_err_t(lexeme,t);
-}
-//Discuss with Svillen
-/**********************************************************************************************************
-Purpose:				Determine if the input string is a keyword or not. 
+Purpose:				Convert a lexeme representation of an Octal Integer Literal to a int. 
 Author:					Thom Palmer
 History/Versions:		10.21.13
-Called functions:		strncmp()
-Parameters:				char * kw_lexeme
-Return value:			Index of the keyword found or -1 if a keyword is not found.
-Algorithm:				Iterate through the kw_table comparing each element to the input string, if they 
-						are equal return immediately. If a match is not found and the end of the table has
-						been reached return -1;
+Called functions:		none
+Parameters:				char lexeme[]
+Return value:			Integer value represented by the string.
+Algorithm:				Convert each digit to an int by subtracting char '0'. For each digit multiply it by
+						10 in a loop. The iterations of the loop is determined by the distance of the
+						current digit from the end of the lexeme. Return the integer.				
 **********************************************************************************************************/
-int iskeyword(char * kw_lexeme)
+long atool(char lexeme[])
 {
-	int i;		/*Used as an iterator*/
+	int total = 0;	/*Store the total value */
+	int octalDigit = 0;	/*The current index of the array converted to an int*/
+	unsigned int i = 0;		/*Used as an iterator*/
+	unsigned int j = 0;		/*Used as an iterator*/
 
-	/* Iterate through the entite kt_table*/
-	for( i = 0; i < KWT_SIZE; i++)
-	{
-		/* Comapre the lexeme to the current point in the key word table. */
-		if( strcmp(kw_lexeme, kw_table[i]) ==0)
+	/*Iterate over the full input array. */
+	for(i = 0; i <strlen(lexeme); i++)
+    {
+		octalDigit = 0;
+		/*Convert the current index of the array to an int. */
+		octalDigit = lexeme[i] - '0';
+		/*Determine the power of the current digit by finding its index in the array. */
+		for(j=1; j< strlen(lexeme) -i; j++)
 		{
-			return i;			
+			octalDigit *=8;
 		}
+		/*Add the current digit to the total. */
+		total+= octalDigit;
 	}
-	/* Keyword not found return -1*/
-	return -1;
+	return total;
 }
