@@ -22,10 +22,14 @@ Function list:	t_set_err_t()
 #endif
 
 #ifndef SEOF
-#define SEOF(c) ((c)==0xFF || (signed char)(c)==EOF || (c)=='\0')
+/* Used to check for all possible SEOF values rather than manually checking each one in every conditional statement, this macro will work for both 
+signed and unsigned chars. */
+#define SEOF(c) ((c)==255 || (c)==EOF || (c)=='\0')
 #endif
 
 #ifndef WHTSPC
+/* Used to check for all possible whitespace characters, rather than having to manually check each one in every conditional statement in scanner.c.
+1 will be returned if any whitespace character is found.*/
 #define WHTSPC(c) ((c)==' ' || c=='\t' || (c)=='\v' || (c)=='\f')
 #endif
 

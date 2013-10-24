@@ -52,9 +52,9 @@ static Buffer *lex_buf;/*pointer to temporary lexeme buffer*/
 static int char_class(char c);					/* character class function */
 static int get_next_state(int, char, int *);	/* state machine function */
 static int iskeyword(char * kw_lexeme);			/* keywords lookup functuion */
-static double atodbl(char lexeme[]);			/* Converts string to double */
-static long atool(char lexeme[]);				/* Converts octal string to decimal value */
-static int atoint(char lexeme[]);				/* Converts integer literal string to int value */
+static double atodbl(char * lexeme);			/* Converts string to double */
+static long atool(char * lexeme);				/* Converts octal string to decimal value */
+static int atoint(char * lexeme);				/* Converts integer literal string to int value */
 
 int scanner_init(Buffer * sc_buf) {
   	if(b_isempty(sc_buf)) return EXIT_FAILURE;/*1*/
@@ -64,7 +64,6 @@ int scanner_init(Buffer * sc_buf) {
 	return EXIT_SUCCESS;/*0*/
 /*   scerrnum = 0;  *//*no need - global ANSI C */
 }
-
 /**********************************************************************************************************
 Purpose:			Set the proper token depending on the lexeme read from the buffer. 
 Author:				Thom Palmer and Chris Whitten
@@ -172,17 +171,17 @@ Token mlwpar_next_token(Buffer * sc_buf)
 				t.attribute.err_lex[1] = c;
 				t.attribute.err_lex[2] = STRTERM;
 	   
-				/*We assume the error was ment to be a token so ignore everything in the line. */
+				/* We assume the error was meant to be a token so ignore everything in the line. */
 				do
 				{
 					c = b_getc(sc_buf);
+					/* If SEOF or b_eob is found retract the buffer and return t */
 					if(SEOF(c) || b_eob(sc_buf))
 					{
 						b_retract(sc_buf);
 						return t;
 					}
 				}while ( c != NEWLINE);
-
 				++line;
 				return t;
 
@@ -201,12 +200,10 @@ Token mlwpar_next_token(Buffer * sc_buf)
 			/*If we have a a period '.' it could be a logical operator or an error. */
 			case PERIOD:
 				/* Add the next five characters in the buffer to a temporary string */	
-				do
+				for (tempString[i] = c ; i<4; tempString[i] = b_getc(sc_buf))
 				{
-					tempString[i] = c;
-					c = b_getc(sc_buf);
-					i++;
-				}while(i<5);
+					++i;
+				}
 				/* Switch on the first character read after the period '.' */
 				switch (tempString[1]) {
 				/* If its an 'A' we might have .AND. */
@@ -300,6 +297,10 @@ Token mlwpar_next_token(Buffer * sc_buf)
 					continue;
 				}
 				t.code = ERR_T;
+				t.attribute.err_lex[0] = CARRTRN;
+				t.attribute.err_lex[1] = STRTERM;
+				return t;
+			/* If c is a NEWLINE character increment the line number and continue */
 			case NEWLINE:
 				++line;
 				continue;
@@ -463,30 +464,7 @@ int get_next_state(int state, char c, int *accept)
 #ifdef DEBUG
 printf("Input symbol: %c Row: %d Column: %d Next: %d \n",c,state,col,next);
 #endif
-/*
-The assert(int test) macro can be used to add run-time diagnostic to programs
-and to "defend" from producing unexpected results.
-assert() is a macro that expands to an if statement;
-if test evaluates to false (zero) , assert aborts the program
-(by calling abort()) and sends the following message on stderr:
-
-Assertion failed: test, file filename, line linenum
-
-The filename and linenum listed in the message are the source file name
-and line number where the assert macro appears.
-If you place the #define NDEBUG directive ("no debugging")
-in the source code before the #include <assert.h> directive,
-the effect is to comment out the assert statement.
-*/
        assert(next != IS);
-
-/*
-The other way to include diagnostics in a program is to use
-conditional preprocessing as shown bellow. It allows the programmer
-to send more details describing the run-time problem. 
-Once the program is tested thoroughly #define DEBUG is commented out
-or #undef DEBUF is used - see the top of the file.
-*/ 
 #ifdef DEBUG
 	if(next == IS){
 	  printf("Scanner Error: Illegal state:\n");
@@ -509,6 +487,7 @@ Algorithm:				Find the column index, Return the column index.
 int char_class (char c)
 {
         int val;					/* Stores column index. */
+
 		val = 6;
 		if(isdigit(c))
 		{
@@ -663,8 +642,8 @@ Token aa_func08(char lexeme[])
 	Token t;					/* Temporary Token */
 	double fplValue = 0.0;		/* Stores the floating point value represented by lexeme */
 	
-	
 	fplValue = atodbl(lexeme);
+
 	if(fplValue > FLT_MAX || (fplValue < FLT_MIN && fplValue != 0.0))
 	{
 		/* Call the function corresponding to an error state in the accepting function table */
@@ -770,7 +749,7 @@ int atoint(char lexeme[])
 	unsigned int i = 0;		/*Used as an iterator*/
 	unsigned int j = 0;		/*Used as an iterator*/
 
-	/*Iterate ove the full input array. */
+	/*Iterate over the full input array. */
 	for(i = 0; i <strlen(lexeme); i++)
     {
 		/*Convert the current index of the array to an int. */
@@ -788,7 +767,7 @@ int atoint(char lexeme[])
 /**********************************************************************************************************
 Purpose:			Convert a lexeme representation of an Floating Pointer number to a valid to a double.
 					This conversion function has been specifically designed for the platypus language and
-					is not intended to used for other purposes.
+					is not intended to be used for other purposes.
 Author:				Thom Palmer
 History/Versions:	10.21.13
 Called functions:	none

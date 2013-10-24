@@ -1,0 +1,18 @@
+Reading file test2.pls ....Please wait
+
+Printing buffer parameters:
+
+The capacity of the buffer is:  8
+The current size of the buffer is:  7
+
+Printing buffer contents:
+
+.OR.AND
+
+Scanning source file...
+
+Token		Attribute
+----------------------------------
+LOG_OP_T	1
+AVID_T		AND
+SEOF_T
