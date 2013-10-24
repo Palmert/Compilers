@@ -1,7 +1,7 @@
 /*********************************************************************************************************
 File name:		scanner.c
 Compiler:		MS Visual Studio 2110
-Authors:		Thom Palmer - 023 713 234 and Chris Whitten - 040 611 350 
+Authors:		Thom Palmer - 040 713 234 and Chris Whitten - 040 611 350 
 Course:			CST 8152 – Compilers, Lab Section: 401
 Assignment:		Assignment 2 
 Date:			Oct. 25th 2013
@@ -146,6 +146,11 @@ Token mlwpar_next_token(Buffer * sc_buf)
 					do
 					{
 						c = b_getc(sc_buf);
+						if(SEOF(c)||b_eob(sc_buf))
+						{ 
+							b_retract(sc_buf);
+							break;
+						}
 					}while ( c != NEWLINE);
 
 					++line;
@@ -168,6 +173,11 @@ Token mlwpar_next_token(Buffer * sc_buf)
 				do
 				{
 					c = b_getc(sc_buf);
+					if(SEOF(c) || b_eob(sc_buf))
+					{
+						b_retract(sc_buf);
+						return t;
+					}
 				}while ( c != NEWLINE);
 
 				++line;
@@ -363,7 +373,7 @@ Token mlwpar_next_token(Buffer * sc_buf)
 					/* Ensure that quotes are not added to the string */
 					if(c != '"')
 					{
-						if(!(b_addc(str_LTBL, c)))
+						if(!b_addc(str_LTBL, c))
 						{
 							t_set_err_t(RUNTIMERR, t);
 						}
@@ -633,10 +643,11 @@ Token aa_func05(char lexeme[])
 		/* Add the current digit to the number. */
 		number += digit;
 	}
-	/* If number is outside of the valid range set the error token and return t */
+	/* If number is outside of the valid range we have an error state */
 	if (number > MAX2BYTEINT || number < 0)
-	{
- 		t_set_err_t(lexeme,t);
+	{	
+ 		/* Call the function corresponding to an error state in the accepting function table */
+		aa_table[ES](lexeme);
 	}
 	/* Number is valid set integer literal code and int_value attribute and return t */
 	t.code = INL_T;
@@ -714,7 +725,8 @@ Token aa_func08(char lexeme[])
 	/* If number is outside of the valid range set the error token and return t */ 
 	if(total > FLT_MAX || (total < FLT_MIN && total != 0.0))
 	{
-		t_set_err_t(lexeme,t); /* Comparison of size_t and signed int will cause warning. Does not affect program operation */
+		/* Call the function corresponding to an error state in the accepting function table */
+		aa_table[ES](lexeme); 
 	}
 	/* Number is valid set Floating Point Literal code and flt_value attribute and return t */
 	t.code = FPL_T;
@@ -758,10 +770,11 @@ Token aa_func11(char lexeme[]){
 		/* Add the current digit to the total. */
 		total+= octalDigit;
 	}
-
+	/* If the total is outside of the valid range we have an error state. */
 	if(total > MAX2BYTEINT || total < 0)
 	{
-		t_set_err_t(lexeme,t);
+		/* Call the function corresponding to an error state in the accepting function table */
+		aa_table[ES](lexeme);
 	}
 	
 	t.code = INL_T;
