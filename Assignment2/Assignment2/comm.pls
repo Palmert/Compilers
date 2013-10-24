@@ -1,0 +1,1 @@
+!<Expect only seof token to be created
