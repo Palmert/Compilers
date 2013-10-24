@@ -1,14 +1,14 @@
 /*********************************************************************************************************
-File name: table.h
-Compiler: MS Visual Studio 2110
-Authors: Thom Palmer - 023 713 234 and Chris Whitten - 040 611 350 
-Course: CST 8152 � Compilers, Lab Section: 401
-Assignment: Assignment 2 
-Date: Oct. 25th 2013
-Professor: Sv. Ranev
-Purpose: Transition Table and function declarations necessary for the scanner implementation  
-		 as required for CST8152 - Assignment #2.
-Function list: a_func21(), aa_func22(), aa_func23()
+File name:		table.h
+Compiler:		MS Visual Studio 2110
+Authors:		Thom Palmer - 023 713 234 and Chris Whitten - 040 611 350 
+Course:			CST 8152 - Compilers, Lab Section: 401
+Assignment:		Assignment 2 
+Date:			Oct.25th 2013
+Professor:		Sv. Ranev
+Purpose:		Transition Table and function declarations necessary for the scanner implementation  
+				as required for CST8152 - Assignment #2.
+Function list:	t_set_err_t()
 *********************************************************************************************************/
 #ifndef  TABLE_H_
 #define  TABLE_H_ 
@@ -21,9 +21,6 @@ Function list: a_func21(), aa_func22(), aa_func23()
 #include <_null.h> /* NULL pointer constant is defined there */
 #endif
 
-/*   Source end-of-file (SEOF) sentinel symbol
- *    '\0' or only one of the folowing constants: 255, 0xFF , EOF
- */
 #ifndef SEOF
 #define SEOF(c) ((c)==0xFF || (c)==EOF || (c)=='\0')
 #endif
@@ -31,33 +28,51 @@ Function list: a_func21(), aa_func22(), aa_func23()
 #ifndef WHTSPC
 #define WHTSPC(c) ((c)==' ' || c=='\t' || (c)=='\v' || (c)=='\f')
 #endif
-//Should we make a header???
 
 #ifndef T_SET_ERR_T
-#define t_set_err_t(lexeme, t) {(t).code = ERR_T;if(ERR_LEN+1 < strlen((lexeme))){ (t).attribute.err_lex[ERR_LEN] = '\0';} for(i=0;i<ERR_LEN && i<=strlen(lexeme);i++){(t).attribute.err_lex[i]=(lexeme)[i];}  return (t);}
+/**********************************************************************************************************
+Purpose:				Set the Token to error and copy the lexeme to the error lex
+Author:					Chris Whitten
+History/Versions:		10.21.13
+Called functions:		none
+Parameters:				char lexeme[], Token *t
+Return value:			Error Token
+Algorithm:				Set the Token code to ERR_t then set the err_lex attribute to the input lexeme. 
+						* Assume that size_t is that same size as an int *
+**********************************************************************************************************/
+#define t_set_err_t(lexeme, t){ \
+								(t).code = ERR_T; \
+								if(ERR_LEN+1 < strlen((lexeme))) \
+									(t).attribute.err_lex[ERR_LEN] = STRTERM; \
+								for(i=0;i<ERR_LEN && i<=strlen(lexeme);i++) \
+									(t).attribute.err_lex[i]=(lexeme)[i]; \
+								return (t); \
+							  }					
 #endif
 
 
-#define ASSOP   '='
-#define LPRNTHS '('
-#define RPRNTHS ')'
-#define LBRACE  '{'
-#define RBRACE  '}'
-#define GRTRTHN '>'
-#define LESSTHN	'<'
-#define COMMA   ','
-#define QUOTE   '"'
-#define	SEMICLN	';'
-#define NEG		'-'
-#define POS		'+'
-#define	ASTRX	'*'
-#define FWDSLSH	'/'
-#define NEWLINE '\n'
-#define PERIOD	'.'
+#define ASSOP   '='		/* Equal sign symbol constant */
+#define LPRNTHS '('		/* Left parenthesis symbol constant */
+#define RPRNTHS ')'		/* Right parenthesis symbol constant */
+#define LBRACE  '{'		/* Left brace symbol constant */
+#define RBRACE  '}'		/* Right brace symbol constant */
+#define GRTRTHN '>'		/* Greater than symbol constant */
+#define LESSTHN	'<'		/* Less than symbol constant */
+#define COMMA   ','		/* Comma symbol constant */
+#define QUOTE   '"'		/* Quotation mark symbol constant */
+#define	SEMICLN	';'		/* Semicolon symbol constant */
+#define NEG		'-'		/* Minus symbol sign constant */
+#define POS		'+'		/* Plus sign symbol constant */
+#define	ASTRX	'*'		/* Asterix symbol constant */
+#define FWDSLSH	'/'		/* Forward slash symbol constant */
+#define NEWLINE '\n'	/* Newline symbol constant */
+#define PERIOD	'.'		/* Period symbol constant */
+#define STRTERM	'\0'	/* String terminator constant */
+#define EXCLAMTN'!'		/* Exclamation point symbol constant */
 
-#define RUNTIMERR  "RUN TIME ERROR"
+#define RUNTIMERR  "RUN TIME ERROR" /* Constant String for run time errors */
 
-#define MAX2BYTEINT 32767
+#define MAX2BYTEINT 32767			/* Constant for a 2 byte int */
 
 
 /*  Single-lexeme tokens processed separately one by one
@@ -65,15 +80,10 @@ Function list: a_func21(), aa_func22(), aa_func23()
  *   ==  !=  !<comment  <> .AND. .OR. 'wrong symbol'
  */
  
-
-//REPLACE *ESN* WITH YOUR ERROR STATE NUMBER 
 #define ES 12		/* Error state */
 #define IS -1		/* Inavalid state */
 
 /* State transition table definition */
-
-//REPLACE *CN* WITH YOUR COLUMN NUMBER  
-
 #define TABLE_COLUMNS 7
 /*transition table - type of states defined in separate table */
 int  st_table[ ][TABLE_COLUMNS] = {
@@ -95,10 +105,9 @@ int  st_table[ ][TABLE_COLUMNS] = {
 
  
 /* Accepting state table definition */
-//REPLACE *N1*, *N2*, and *N3* WITH YOUR NUMBERS
-#define ASWR    1  /* accepting state with retract */
-#define ASNR    2 /* accepting state with no retract */
-#define NOAS    3  /* not accepting state */
+#define ASWR    1	/* accepting state with retract */
+#define ASNR    2	/* accepting state with no retract */
+#define NOAS    3	/* not accepting state */
 
 int as_table[ ] = { 
 	NOAS, 
@@ -118,38 +127,17 @@ int as_table[ ] = {
 };
 
 /* Accepting action function declarations */
-
-//FOR EACH OF YOUR ACCEPTING STATES YOU MUST PROVIDE
-//ONE FUNCTION PROTOTYPE. THEY ALL RETURN Token AND TAKE
-//ONE ARGUMENT: A string REPRESENTING A TOKEN LEXEME. 
-
-Token aa_func02(char *lexeme); 
+Token aa_func02(char *lexeme);		
 Token aa_func03(char *lexeme);
 Token aa_func05(char *lexeme);
 Token aa_func08(char *lexeme);
 Token aa_func11(char *lexeme);
 Token aa_func12(char *lexeme);
-//Token aa_func13(char *lexeme);
 
-
-//Replace XX with the number of the accepting state: 02, 03 and so on.
-
-/* defining a new type: pointer to function (of one char * argument) 
-   returning Token
-*/  
-
+/* Defining a new type: pointer to function (of one char * argument) returning Token */
 typedef Token (*PTR_AAF)(char *lexeme);
 
-
 /* Accepting function (action) callback table (array) definition */
-/* If you do not want to use the typedef, the equvalent declaration is:
- * Token (*aa_table[])(char lexeme[]) = {
- */
-//HERE YOU MUST PROVIDE AN INITIALIZATION FOR AN ARRAY OF POINTERS
-//TO ACCEPTING FUNCTIONS. THE ARRAY HAS THE SAME SIZE AS as_table[ ].
-//YOU MUST INITIALIZE THE ARRAY ELEMENTS WITH THE CORRESPONDING
-//ACCEPTING FUNCTIONS (FOR THE STATES MARKED AS ACCEPTING IN as_table[]).
-//THE REST OF THE ELEMENTS MUST BE SET TO NULL.
 PTR_AAF aa_table[ ] = {
 	NULL,
 	NULL,
@@ -168,7 +156,6 @@ PTR_AAF aa_table[ ] = {
 };
 
 /* Keyword lookup table (.AND. and .OR. are not keywords) */
-
 #define KWT_SIZE  8
 
 char * kw_table []= {

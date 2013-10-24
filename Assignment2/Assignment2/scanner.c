@@ -6,9 +6,10 @@ Course:			CST 8152 – Compilers, Lab Section: 401
 Assignment:		Assignment 2 
 Date:			Oct. 25th 2013
 Professor:		Sv. Ranev
-Version:		1.0.0.0
+Version:		10.24.13
 Purpose:		Functions implementing a Lexical Analyzer (Scanner) as required for CST8152, Assignment #2
-Function list: 
+Function list:	scanner_init(), mwlpar_next_token(), get_next_state(), char_class(), a_func02(),
+				aa_func03(), aa_func05(), aa_func08(), aa_func11(), aafunc12(),  isKeyword()				
 *********************************************************************************************************/
 
 /* The #define _CRT_SECURE_NO_WARNINGS should be used in MS Visual Studio projects
@@ -137,7 +138,7 @@ Token mlwpar_next_token(Buffer * sc_buf)
 					return t;
 				} 
 			/* If the token starts with ! it can either be a comment or the != relational operator, so peak forward and act appropriatly. */
-			case '!':
+			case EXCLAMTN:
 				c = b_getc(sc_buf);
 				/* If the next token is < then we have a comment therfore ignore everything in the line.*/
 				if(c == LESSTHN)
@@ -159,9 +160,9 @@ Token mlwpar_next_token(Buffer * sc_buf)
 				}
 				/* if the next char is neither = or < we have an error set ERR_T*/
 				t.code = ERR_T;
-				t.attribute.err_lex[0] = '!';
+				t.attribute.err_lex[0] = EXCLAMTN;
 				t.attribute.err_lex[1] = c;
-				t.attribute.err_lex[2] = '\0';
+				t.attribute.err_lex[2] = STRTERM;
 	   
 				/*We assume the error was ment to be a token so ignore everything in the line. */
 				do
@@ -221,14 +222,14 @@ Token mlwpar_next_token(Buffer * sc_buf)
 					t.code = ERR_T;
 					/* Add char which caused the error to the err_lex */
 					t.attribute.err_lex[0] = b_getc(sc_buf);
-					t.attribute.err_lex[1] = '\0';
+					t.attribute.err_lex[1] = STRTERM;
 					return t;
 				}
 
 			/* If we have an astrix sign '*' set the token and it's attirbute then return. */
 			case ASTRX:
 				t.code = ART_OP_T;
-				t.attribute.arr_op =MULT;
+				t.attribute.arr_op = MULT;
 				return t;
 
 			/* If c is a forward slash '/' set the token and it's attirbute then return. */
@@ -326,7 +327,7 @@ Token mlwpar_next_token(Buffer * sc_buf)
 								/* Copy a string terminator into the last index of err_lex */
 								if (i==ERR_LEN)
 								{
-									t.attribute.err_lex[i]= '\0';
+									t.attribute.err_lex[i]= STRTERM;
 								}
 
 							}
@@ -363,7 +364,7 @@ Token mlwpar_next_token(Buffer * sc_buf)
 					}
 				}
 				/* Add the string terminator to the string and set the Token Code */
-				if (!b_addc(str_LTBL,'\0'))
+				if (!b_addc(str_LTBL,STRTERM))
 				{
 					t_set_err_t(RUNTIMERR, t);
 				}
@@ -409,7 +410,7 @@ Token mlwpar_next_token(Buffer * sc_buf)
 			/* Pack lex_buf and add the string terminator to it */
 			b_pack(lex_buf);
 			/* If b_addc fails set the token for a runtime error and return t  */
-			if (!b_addc(lex_buf,'\0'))
+			if (!b_addc(lex_buf,STRTERM))
 			{
 				t_set_err_t(RUNTIMERR, t);
 			}
@@ -422,7 +423,7 @@ Token mlwpar_next_token(Buffer * sc_buf)
 		/* Set error token and return t. */
 		t.code = ERR_T;
 		t.attribute.err_lex[0] = c;
-		t.attribute.err_lex[1] = '\0'; /*Probably a better way to do this.*/
+		t.attribute.err_lex[1] = STRTERM; /*Probably a better way to do this.*/
 		return t;             
    }
 }
@@ -522,12 +523,13 @@ int char_class (char c)
 Purpose:				Set the Token code and attribute for a keyword or arithmetic variable identifier
 Author:					Chris Whitten modified by Thom Palmer
 History/Versions:		10.19.13
-Called functions:		iskeyword(), strncpy(), strlen()
+Called functions:		iskeyword(), strlen()
 Parameters:				char lexeme[]
 Return value:			Token t representing a valid keyword or valid arithmetic variable identifier
 Algorithm:				Create a temporary Token, if lexeme is a keyword set appropriate properties of 
 						the Token and return the keyword Token, otherwise lexeme is an arithmetic variable
 						identifier, set appropriate properties and return the Token
+						* Assume that size_t is that same size as an int *
 **********************************************************************************************************/
 Token aa_func02(char lexeme[])
 {
@@ -549,7 +551,7 @@ Token aa_func02(char lexeme[])
 	/* If lexeme is longer than VID_LEN add string terminator in lexeme at VID_LEN index */
 	if (strlen(lexeme) > VID_LEN)		
 	{
-		lexeme[VID_LEN] = '\0';
+		lexeme[VID_LEN] = STRTERM;
 	}
 	/* Iterate until the end of the  lexeme and add lexeme characters to vid_lex */
 	for(i=0;i<=strlen(lexeme);i++)
@@ -562,12 +564,13 @@ Token aa_func02(char lexeme[])
 Purpose:				Set the Token code and attribute for a string variable identifier
 Author:					Chris Whitten
 History/Versions:		10.19.13
-Called functions:		strncpy(), strlen()
+Called functions:		strlen()
 Parameters:				char lexeme[]
 Return value:			Token t representing a valid string variable identifier
 Algorithm:				Create a temporary Token, Assign a SVID_T code to the Token, Copy the SVID to the
 						vid_lex array up to 8 characters and ensure that end of string is added to the
 						array. Return the token.
+						* Assume that size_t is that same size as an int *
 **********************************************************************************************************/
 Token aa_func03(char lexeme[])
 {
@@ -580,7 +583,7 @@ Token aa_func03(char lexeme[])
 	if (strlen(lexeme) > VID_LEN)		
 	{
 		lexeme[VID_LEN-1] = '#';
-		lexeme[VID_LEN] = '\0';
+		lexeme[VID_LEN] = STRTERM;
 	}
 	/* Iterate until the end of the  lexeme and add lexeme characters to vid_lex */
 	for(i=0;i<=strlen(lexeme);i++)
@@ -600,7 +603,8 @@ Return value:			Token t representing a valid Decimal Integer Literal or Token t 
 Algorithm:				Create a temporary Token. Convert the string to an integer.
 						If the number is out of the valid range, call t_set_err_t() and return t. 
 						Otherwise the number is valid set the Token code to INL_T and copy the number 
-						to the attribute int_value. Return the token.			
+						to the attribute int_value. Return the token.	
+						* Assume that size_t is that same size as an int *
 **********************************************************************************************************/
 Token aa_func05(char lexeme[])
 {
@@ -616,7 +620,7 @@ Token aa_func05(char lexeme[])
 		/* Convert the current index of the array to an int. */
 		digit = lexeme[i] - '0';
 		/* Determine the power  of the current digit by finding its index in the array. */
-		for(j=1; j< strlen(lexeme) -i; j++)
+		for(j=1; j < strlen(lexeme) - i; j++)
 		{
 			digit *=10;
 		}
@@ -645,6 +649,7 @@ Algorithm:				Create a temporary Token. Convert the string to a double. If the d
 						the valid range for a postive float, set the Token code to ERR_T and store the
 						lexeme in the err_lex. Otherwise set the Token code to FPL_T and store the
 						number as a float in the Token attribute flt_value. Return the token.
+						* Assume that size_t is that same size as an int *
 **********************************************************************************************************/
 Token aa_func08(char lexeme[])
 {
@@ -723,6 +728,7 @@ Algorithm:				Create a temporary Token. Convert the string to an integer. If the
 						to ERR_T and store the lexeme in the err_lex. Otherwise set the Token code
 						to INL_T and store the number as an integer in the Token attribute int_value.
 						Return the token.
+						* Assume that size_t is that same size as an int *
 **********************************************************************************************************/
 Token aa_func11(char lexeme[]){
 
@@ -756,11 +762,12 @@ Token aa_func11(char lexeme[]){
 	t.attribute.int_value = total;
 	return t;
 }
+//ASK ABOUT MACRO NAMING CONVENTIONS AND IF IT SHOULD BE CONSIDERED A CALLED FUNCTION
 /**********************************************************************************************************
 Purpose:				Calls t_set_err_t to set the Token code and attribute for an error token
 Author:					Thom Palmer
 History/Versions:		10.19.13
-Called functions:		t_set_err_t()
+Called functions:		(macro)t_set_err_t()
 Parameters:				char lexeme[]
 Return value:			Token t representing an error token
 Algorithm:				Create a temporary Token. Call t_set_err_t() to set code and attribute.
@@ -776,7 +783,7 @@ Token aa_func12(char lexeme[]){
 Purpose:				Determine if the input string is a keyword or not. 
 Author:					Thom Palmer
 History/Versions:		10.21.13
-Called functions:		strncpy(), strlen()
+Called functions:		strncmp()
 Parameters:				char * kw_lexeme
 Return value:			Index of the keyword found or -1 if a keyword is not found.
 Algorithm:				Iterate through the kw_table comparing each element to the input string, if they 
