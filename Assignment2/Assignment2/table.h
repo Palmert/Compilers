@@ -77,11 +77,6 @@ Algorithm:				Set the Token code to ERR_t then set the err_lex attribute to the 
 
 #define MAX2BYTEINT 32767			/* Constant for a 2 byte int */
 
-
-/*  Single-lexeme tokens processed separately one by one
- *  in the token-driven part of the scanner
- *   ==  !=  !<comment  <> .AND. .OR. 'wrong symbol'
- */
  
 #define ES 12		/* Error state */
 #define IS -1		/* Inavalid state */
