@@ -85,7 +85,7 @@ Token mlwpar_next_token(Buffer * sc_buf)
 	short lexstart;		/* start offset of a lexeme in the input buffer */
 	short lexend;		/* end offset of a lexeme in the input buffer */
 	int accept = NOAS;	/* type of state - initially not accepting */  
-	unsigned int i;		/* Used throughout the function as iterator */
+	unsigned int i=0;	/* Used throughout the function as iterator */
 	char tempString[5];	/* Used to store the characters read in after '.' is found to determine if its a logical operator */
    
 	/* Ensure the buffer is not null before trying to access it */
@@ -121,11 +121,11 @@ Token mlwpar_next_token(Buffer * sc_buf)
 		switch(c)
 		{
 			/* If c is '=' the token can either be a relation operatory or an assignment operator,  so peak forward */
-			case ASSOP:
+			case EQSIGN:
 				{ 
 					c = b_getc(sc_buf);
 					/* If the next character is '=' then we have found a relational operator */
-					if(c == ASSOP) 
+					if(c == EQSIGN) 
 					{
 						/* Set the code and attribute and return t */
 						t.code = REL_OP_T;
@@ -146,13 +146,18 @@ Token mlwpar_next_token(Buffer * sc_buf)
 					do
 					{
 						c = b_getc(sc_buf);
+						if(SEOF(c)||b_eob(sc_buf))
+						{ 
+							b_retract(sc_buf);
+							continue;
+						}
 					}while ( c != NEWLINE);
 
 					++line;
 					continue;
 				}
 				/* If the next token we have the NE relational operator. */
-				if(c == '=')
+				if(c == EQSIGN)
 				{
 					t.code = REL_OP_T;
 					t.attribute.rel_op = NE ;
@@ -168,6 +173,11 @@ Token mlwpar_next_token(Buffer * sc_buf)
 				do
 				{
 					c = b_getc(sc_buf);
+					if(SEOF(c) || b_eob(sc_buf))
+					{
+						b_retract(sc_buf);
+						return t;
+					}
 				}while ( c != NEWLINE);
 
 				++line;
@@ -187,20 +197,19 @@ Token mlwpar_next_token(Buffer * sc_buf)
 
 			/*If we have a a period '.' it could be a logical operator or an error. */
 			case PERIOD:
-				tempString[0] = c; 
-				c = b_getc(sc_buf);
-				tempString[1] = c;
-				/*Add characters to the temp string in order to compare them to the string constants .AND. & .OR.*/
-				for (i = 2; i < 5; i++)
+				/* Add the next five characters in the buffer to a temporary string */
+				do
 				{
-					tempString[i] = b_getc(sc_buf);
-				}
+					tempString[i] = c;
+					c = b_getc(sc_buf);
+					i++;
+				}while(i<5);
 				/* Switch on the first character read after the period '.' */
-				switch (c) {
+				switch (tempString[1]) {
 				/* If its an 'A' we might have .AND. */
 				case'A' :
 					/* Compare the string the string read from the buffer to the string literal .AND.  */
-					if( strncmp(tempString,".AND.", 5)==0)
+					if( strncmp(tempString, LOG_OP_AND, 5)==0)
 					{
 						t.code = LOG_OP_T;
 						t.attribute.log_op = AND;
@@ -208,7 +217,7 @@ Token mlwpar_next_token(Buffer * sc_buf)
 					}
 				case'O':
 					/* Comapre the string the string read from the buffer to the string literal .OR.  */
-					if( strncmp(tempString,".OR.", 4)==0)
+					if( strncmp(tempString, LOG_OP_OR, 4)==0)
 					{
 						t.code = LOG_OP_T;
 						t.attribute.log_op = OR;
@@ -281,6 +290,13 @@ Token mlwpar_next_token(Buffer * sc_buf)
 				return t;
 
 			/* If c is a new line '\n' increment the line number and return to the start of the loop. */
+			case CARRTRN:
+				if (b_getc(sc_buf) == NEWLINE)
+				{
+					++line;
+					continue;
+				}
+				t.code = ERR_T;
 			case NEWLINE:
 				++line;
 				continue;
