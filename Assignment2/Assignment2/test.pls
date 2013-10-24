@@ -13,10 +13,10 @@ PLATYPUS
 	i = ←; !<unicode character ←
 	j = 0..; !<expecting 0., then error token .
 	k = ..; !<error . error .
-	!<more unicode and ascii chars
-	ïτ▼3C#E╣?,7XÜ╚Φ
+	!<more unicode and ascii chars	
 	!<string literal with line breaks should work
 	"
+
 	
 	
 	

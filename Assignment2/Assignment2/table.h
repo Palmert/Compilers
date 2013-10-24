@@ -1,7 +1,7 @@
 /*********************************************************************************************************
 File name:		table.h
 Compiler:		MS Visual Studio 2110
-Authors:		Thom Palmer - 023 713 234 and Chris Whitten - 040 611 350 
+Authors:		Thom Palmer - 040 713 234 and Chris Whitten - 040 611 350 
 Course:			CST 8152 - Compilers, Lab Section: 401
 Assignment:		Assignment 2 
 Date:			Oct.25th 2013
