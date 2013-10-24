@@ -1,0 +1,19 @@
+Reading file and.pls ....Please wait
+
+Printing buffer parameters:
+
+The capacity of the buffer is:  52
+The current size of the buffer is:  51
+
+Printing buffer contents:
+
+!< Should be ERR_T '.' AVID_T 'AND' and SEOF_T
+.AND
+
+Scanning source file...
+
+Token		Attribute
+----------------------------------
+ERR_T		.
+AVID_T		AND
+SEOF_T
