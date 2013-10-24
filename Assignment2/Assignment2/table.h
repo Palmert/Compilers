@@ -25,16 +25,13 @@ Function list: a_func21(), aa_func22(), aa_func23()
  *    '\0' or only one of the folowing constants: 255, 0xFF , EOF
  */
 #ifndef SEOF
-#define SEOF(c) ((c==0xFF) || (c==EOF) || (c=='\0'))
+#define SEOF(c) ((c)==0xFF || (c)==EOF || (c)=='\0')
 #endif
 
 #ifndef WHTSPC
-#define WHTSPC(c) ((c==' ') || (c=='\t') || (c=='\v') || (c=='\f'))
+#define WHTSPC(c) ((c)==' ' || c=='\t' || (c)=='\v' || (c)=='\f')
 #endif
-
-#ifndef ISASSOP
-#define is_assop(c) 	{ (c)=(b_getc(sc_buf)); if(c== ASSOP) {(t.code) = (REL_OP_T);(t.attribute.rel_op) = (EQ); return (t);} {(b_retract(sc_buf));(t.code) = (ASS_OP_T);return (t);} }
-#endif
+//Should we make a header???
 
 #ifndef T_SET_ERR_T
 #define t_set_err_t(lexeme, t) {(t).code = ERR_T;if(ERR_LEN+1 < strlen((lexeme))){ (t).attribute.err_lex[ERR_LEN] = '\0';} for(i=0;i<ERR_LEN && i<=strlen(lexeme);i++){(t).attribute.err_lex[i]=(lexeme)[i];}  return (t);}
