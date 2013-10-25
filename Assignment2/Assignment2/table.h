@@ -22,13 +22,15 @@ Function list:	t_set_err_t()
 #endif
 
 #ifndef SEOF
-/* Used to check for all possible SEOF values rather than manually checking each one in every conditional statement, this macro will work for both 
+/* Used to check for all possible SEOF values rather than manually
+checking each one in every conditional statement, this macro will work for both 
 signed and unsigned chars. */
 #define SEOF(c) ((c)==255 || (c)==EOF || (c)=='\0')
 #endif
 
 #ifndef WHTSPC
-/* Used to check for all possible whitespace characters, rather than having to manually check each one in every conditional statement in scanner.c.
+/* Used to check for all possible whitespace characters, rather
+than having to manually check each one in every conditional statement in scanner.c.
 1 will be returned if any whitespace character is found.*/
 #define WHTSPC(c) ((c)==' ' || c=='\t' || (c)=='\v' || (c)=='\f')
 #endif
@@ -103,6 +105,7 @@ int  st_table[ ][TABLE_COLUMNS] = {
 /* State 10*/  { ES,ES,ES,ES,ES,ES,11 },
 /* State 11*/  { IS,IS,IS,IS,IS,IS,IS },
 /* State 12*/  { IS,IS,IS,IS,IS,IS,IS }
+/* State 13	   { IS,IS,IS,IS,IS,IS,IS }  State 13 will never occur. According to Svillen */
 };
 
  
@@ -124,7 +127,8 @@ int as_table[ ] = {
 	NOAS, 
 	NOAS, 
 	ASWR, 
-	ASNR 
+	ASNR
+	/* ASWR Code - State 13 */
 };
 
 /* Accepting action function declarations */
@@ -134,6 +138,7 @@ Token aa_func05(char *lexeme);
 Token aa_func08(char *lexeme);
 Token aa_func11(char *lexeme);
 Token aa_func12(char *lexeme);
+/* Token aa_func13(char *lexeme); - State 13 */
 
 /* Defining a new type: pointer to function (of one char * argument) returning Token */
 typedef Token (*PTR_AAF)(char *lexeme);
@@ -152,8 +157,8 @@ PTR_AAF aa_table[ ] = {
 	NULL,
 	NULL,
 	aa_func11,
-	aa_func12,
-	NULL
+	aa_func12
+	/*aa_func13 - State 13*/
 };
 
 /* Keyword lookup table (.AND. and .OR. are not keywords) */
