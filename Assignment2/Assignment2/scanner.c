@@ -91,8 +91,10 @@ Token mlwpar_next_token(Buffer * sc_buf)
 	char tempString[5];	/* Used to store the characters read in after '.' is found to determine if its a logical operator */
    
 	/* Ensure the buffer is not null before trying to access it */
+
 	if(sc_buf == NULL)
 	{	   
+		scerrnum = BUFFNULL;  
 	     t_set_err_t(RUNTIMERR, t);
 	}     
                 
@@ -379,6 +381,7 @@ Token mlwpar_next_token(Buffer * sc_buf)
 					{
 						if(!b_addc(str_LTBL, c))
 						{
+							scerrnum = FAILADDC;
 							t_set_err_t(RUNTIMERR, t);
 						}
 					}
@@ -386,6 +389,7 @@ Token mlwpar_next_token(Buffer * sc_buf)
 				/* Add the string terminator to the string and set the Token Code */
 				if (!b_addc(str_LTBL,STRTERM))
 				{
+					scerrnum = FAILADDC;
 					t_set_err_t(RUNTIMERR, t);
 				}
 				t.code = STR_T;
@@ -407,6 +411,7 @@ Token mlwpar_next_token(Buffer * sc_buf)
 			/* If buffer creation was not successful. Set the error token for a runtime error. */
 			if (!lex_buf)
 			{
+				scerrnum = BUFFNULL;
 				t_set_err_t(RUNTIMERR, t);
 			}
 			/* Retract the buffer if is is an accepting state with a retract */
@@ -424,6 +429,7 @@ Token mlwpar_next_token(Buffer * sc_buf)
 			{
 				if (!b_addc(lex_buf,b_getc(sc_buf)))
 				{
+					scerrnum = FAILADDC;
 					t_set_err_t(RUNTIMERR, t);
 				}
 			}
@@ -432,6 +438,7 @@ Token mlwpar_next_token(Buffer * sc_buf)
 			/* If b_addc fails set the token for a runtime error and return t  */
 			if (!b_addc(lex_buf,STRTERM))
 			{
+				scerrnum = FAILADDC;
 				t_set_err_t(RUNTIMERR, t);
 			}
 			/* Call the accepting function at the current state index and pass the lexeme */
