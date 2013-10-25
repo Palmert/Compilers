@@ -594,7 +594,7 @@ Token aa_func03(char lexeme[])
 Purpose:				Set the Token code and attribute for a Decimal Integer Literal
 Author:					Chris Whitten
 History/Versions:		10.19.13
-Called functions:		strlen()
+Called functions:		atoint(),aa_table[ES]()
 Parameters:				char lexeme[]
 Return value:			Token t representing a valid Decimal Integer Literal or Token t representing
 						an error token
@@ -627,7 +627,7 @@ Token aa_func05(char lexeme[])
 Purpose:				Set the Token code and attribute for a Floating Point Literal
 Author:					Thom Palmer
 History/Versions:		10.19.13
-Called functions:		strlen(), t_set_err_t()
+Called functions:		atodbl(),aa_table[ES]()
 Parameters:				char lexeme[]
 Return value:			Token t representing a valid Floating Point Literal or Token t representing
 						an error token
@@ -658,7 +658,7 @@ Token aa_func08(char lexeme[])
 Purpose:				Set the Token code and attribute for a Octal Integer Literal
 Author:					Thom Palmer
 History/Versions:		10.19.13
-Called functions:		strlen(), t_set_err_t()
+Called functions:		atool(),aa_table[ES]()
 Parameters:				char lexeme[]
 Return value:			Token t representing a valid  Integer Literal or Token t representing
 						an error token
@@ -700,13 +700,13 @@ Algorithm:				Create a temporary Token. Call t_set_err_t() to set code and attri
 **********************************************************************************************************/
 Token aa_func12(char lexeme[]){
 	unsigned int i; /* Used as an iterator in the t_set_err_t macro */
-	Token t;
+	Token t;		/* Temporary token */
 	t_set_err_t(lexeme,t);
 }
 
 /**********************************************************************************************************
 Purpose:				Determine if the input string is a keyword or not. 
-Author:					Thom Palmer
+Author:					Chris Whitten
 History/Versions:		10.21.13
 Called functions:		strncmp()
 Parameters:				char * kw_lexeme
@@ -723,17 +723,17 @@ int iskeyword(char * kw_lexeme)
 	for( i = 0; i < KWT_SIZE; i++)
 	{
 		/* Comapre the lexeme to the current point in the key word table. */
-		if( strcmp(kw_lexeme, kw_table[i]) ==0)
+		if( strcmp(kw_lexeme, kw_table[i]) == 0)
 		{
 			return i;			
 		}
 	}
 	/* Keyword not found return -1*/
-	return -1;
+	return KWNTFND;
 }
 /**********************************************************************************************************
 Purpose:				Set the Token code and attribute for a Octal Integer Literal
-Author:					Thom Palmer
+Author:					Chris Whitten
 History/Versions:		10.19.13
 Called functions:		strlen()
 Parameters:				char lexeme[]
@@ -770,7 +770,7 @@ Purpose:			Convert a lexeme representation of an Floating Pointer number to a va
 					is not intended to be used for other purposes.
 Author:				Thom Palmer
 History/Versions:	10.21.13
-Called functions:	none
+Called functions:	strlen()
 Parameters:			char lexeme[]
 Return value:		Double value represented by the string
 Algorithm:			Iterate over the loop to find the index location of the decimal point.
@@ -839,7 +839,7 @@ double atodbl(char lexeme[])
 Purpose:				Convert a lexeme representation of an Octal Integer Literal to a int. 
 Author:					Thom Palmer
 History/Versions:		10.21.13
-Called functions:		none
+Called functions:		strlen()
 Parameters:				char lexeme[]
 Return value:			Integer value represented by the string.
 Algorithm:				Convert each digit to an int by subtracting char '0'. For each digit multiply it by

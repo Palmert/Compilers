@@ -78,6 +78,7 @@ Algorithm:				Set the Token code to ERR_t then set the err_lex attribute to the 
 #define LOG_OP_OR  ".OR."	/* Used to represent the logical operator .OR. string*/
 
 #define RUNTIMERR  "RUN TIME ERROR" /* Constant String for run time errors */
+#define KWNTFND -1			/* Return value for iskeyword if keyword is not found */
 
 #define MAX2BYTEINT 32767			/* Constant for a 2 byte int */
 
