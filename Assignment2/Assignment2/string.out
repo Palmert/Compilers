@@ -7,7 +7,7 @@ The current size of the buffer is:  64
 
 Printing buffer contents:
 
-!< Should containt ERR_T and SEOF_T as well as "5 Lines"
+!< Should contain ERR_T and SEOF_T as well as "5 Lines"
 "
 1
 2
