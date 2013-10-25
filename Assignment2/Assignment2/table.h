@@ -78,13 +78,13 @@ Algorithm:				Set the Token code to ERR_t then set the err_lex attribute to the 
 #define LOG_OP_OR  ".OR."	/* Used to represent the logical operator .OR. string*/
 
 #define RUNTIMERR  "RUN TIME ERROR" /* Constant String for run time errors */
-#define KWNTFND -1			/* Return value for iskeyword if keyword is not found */
+#define KWNTFND -1					/* Return value for iskeyword if keyword is not found */
 
 #define MAX2BYTEINT 32767			/* Constant for a 2 byte int */
 
  
 #define ES 12		/* Error state */
-#define IS -1		/* Inavalid state */
+#define IS -1		/* Invalid state */
 
 /* State transition table definition */
 #define TABLE_COLUMNS 7
@@ -102,8 +102,7 @@ int  st_table[ ][TABLE_COLUMNS] = {
 /* State 9 */  { ES, 9, 9,ES,ES,ES,11 },
 /* State 10*/  { ES,ES,ES,ES,ES,ES,11 },
 /* State 11*/  { IS,IS,IS,IS,IS,IS,IS },
-/* State 12*/  { IS,IS,IS,IS,IS,IS,IS },
-/* State 13*/  { IS,IS,IS,IS,IS,IS,IS }
+/* State 12*/  { IS,IS,IS,IS,IS,IS,IS }
 };
 
  
@@ -125,8 +124,7 @@ int as_table[ ] = {
 	NOAS, 
 	NOAS, 
 	ASWR, 
-	ASNR, 
-	ASWR 
+	ASNR 
 };
 
 /* Accepting action function declarations */
