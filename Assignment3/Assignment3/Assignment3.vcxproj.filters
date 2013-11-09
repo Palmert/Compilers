@@ -18,15 +18,27 @@
     <ClCompile Include="play_tt.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="stable.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="buffer.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="scanner.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="table.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="buffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="stable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="token.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="table.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
