@@ -1,3 +1,5 @@
+#include "buffer.h"
+
 typedef union InitialValue {
 int int_val; /* integer variable initial value */
 float fpl_val; /* floating-point variable initial value */
