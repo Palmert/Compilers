@@ -32,3 +32,4 @@ static void st_setsize(void);
 static void st_incoffset(void);
 int st_store(STD sym_table);
 int st_sort(STD sym_table, char s_order);
+
