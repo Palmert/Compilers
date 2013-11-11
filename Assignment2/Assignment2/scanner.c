@@ -84,12 +84,11 @@ Token mlwpar_next_token(Buffer * sc_buf)
 	Token t;			/* token to return after recognition */
 	unsigned char c;	/* input symbol */
 	int state = 0;		/* initial state of the FSM */
-	int retrCtr;
+	unsigned int retrCtr;
 	short lexstart;		/* start offset of a lexeme in the input buffer */
 	short lexend;		/* end offset of a lexeme in the input buffer */
 	int accept = NOAS;	/* type of state - initially not accepting */  
 	unsigned int i=0;	/* Used throughout the function as iterator */
-	char tempString[5];	/* Used to store the characters read in after '.' is found to determine if its a logical operator */
    
 	/* Ensure the buffer is not null before trying to access it */
 
@@ -151,10 +150,15 @@ Token mlwpar_next_token(Buffer * sc_buf)
 					do
 					{
 						c = b_getc(sc_buf);
-						if(SEOF(c)||b_eob(sc_buf))
+						if(SEOF(c))
 						{ 
+							t.code = ERR_T;
+							t.attribute.err_lex[0] = EXCLAMTN;
+							t.attribute.err_lex[1] = LESSTHN;
+							t.attribute.err_lex[2] = c;
+							t.attribute.err_lex[3] = STRTERM;
 							b_retract(sc_buf);
-							break;
+							return t;
 						}
 					}while ( c != NEWLINE && c != CARRTRN);
 
@@ -179,7 +183,7 @@ Token mlwpar_next_token(Buffer * sc_buf)
 				{
 					c = b_getc(sc_buf);
 					/* If SEOF or b_eob is found retract the buffer and return t */
-					if(SEOF(c) || b_eob(sc_buf))
+					if(SEOF(c))
 					{
 						b_retract(sc_buf);
 						return t;
@@ -373,9 +377,12 @@ Token mlwpar_next_token(Buffer * sc_buf)
 					/* Increment the line number each time a line terminator is found */
 					if(c == NEWLINE)
 					{
-						NEWLINE_TEST
 						++line;
-					}	
+					}
+					if(c == CARRTRN)
+					{
+						NEWLINE_TEST
+					}
 				}while ( c != QUOTE );
 			
 				/* Closing quote found. Valid String */
@@ -427,7 +434,7 @@ Token mlwpar_next_token(Buffer * sc_buf)
 			/* Set the end of the lexeme at the current getc_offset */
 			lexend = b_get_getc_offset(sc_buf);
 			/* Create a temporary buffer to store the lexeme */
-			lex_buf = b_create(100,(lexend - lexstart +1),'f');
+			lex_buf = b_create((lexend - lexstart +1),0,'f');
 			/* If buffer creation was not successful. Set the error token for a runtime error. */
 			if (!lex_buf)
 			{
@@ -632,7 +639,13 @@ Token aa_func05(char lexeme[])
 	Token t;				/* Token to be returned */	
 	long integerValue = 0;	/* Stores the integer value represented by lexeme */
 	
+	if(strlen(lexeme) > INL_LEN)
+	{
+		return aa_table[ES](lexeme);
+	}
 	/* Call decimalString_toInt to convert to lexeme to an int */
+	
+
 	integerValue = atoint(lexeme);
 
 	/* If number is outside of the valid range we have an error state */
