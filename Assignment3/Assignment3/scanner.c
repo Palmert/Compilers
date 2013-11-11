@@ -33,6 +33,7 @@ Function list:	scanner_init(), mwlpar_next_token(), get_next_state(), char_class
 #include "buffer.h"
 #include "token.h"
 #include "table.h"
+#include "stable.h"
 
 #define DEBUG  /* for conditional processing */
 #undef  DEBUG
@@ -42,6 +43,7 @@ Function list:	scanner_init(), mwlpar_next_token(), get_next_state(), char_class
 extern Buffer * str_LTBL; /*String literal table */
 int line; /* current line number of the source code */
 extern int scerrnum;     /* defined in platy_st.c - run-time error number */
+extern STD sym_table;
 
 /* Local(file) global objects - variables */
 static Buffer *lex_buf;/*pointer to temporary lexeme buffer*/
@@ -583,10 +585,7 @@ Token aa_func02(char lexeme[])
 		lexeme[VID_LEN] = STRTERM;
 	}
 	/* Iterate until the end of the  lexeme and add lexeme characters to vid_lex */
-	for(i=0;i<=strlen(lexeme);i++)
-	{
-		t.attribute.vid_lex[i] = lexeme[i];
-	}
+		st_install(sym_table,lexeme, line);
 	return t;
 }
 /**********************************************************************************************************
@@ -615,10 +614,7 @@ Token aa_func03(char lexeme[])
 		lexeme[VID_LEN] = STRTERM;
 	}
 	/* Iterate until the end of the  lexeme and add lexeme characters to vid_lex */
-	for(i=0;i<=strlen(lexeme);i++)
-	{
-		t.attribute.vid_lex[i] = lexeme[i];
-	}
+	st_install(sym_table,lexeme,line);
 	return t;
 }
 /**********************************************************************************************************
