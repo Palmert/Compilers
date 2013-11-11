@@ -13,4 +13,5 @@ Scanning source file...
 
 Token		Attribute
 ----------------------------------
+ERR_T		!<
 SEOF_T
