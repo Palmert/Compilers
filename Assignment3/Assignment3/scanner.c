@@ -84,11 +84,11 @@ Token mlwpar_next_token(Buffer * sc_buf)
 	Token t;			/* token to return after recognition */
 	unsigned char c;	/* input symbol */
 	int state = 0;		/* initial state of the FSM */
+	unsigned int retrCtr;
 	short lexstart;		/* start offset of a lexeme in the input buffer */
 	short lexend;		/* end offset of a lexeme in the input buffer */
 	int accept = NOAS;	/* type of state - initially not accepting */  
 	unsigned int i=0;	/* Used throughout the function as iterator */
-	char tempString[5];	/* Used to store the characters read in after '.' is found to determine if its a logical operator */
    
 	/* Ensure the buffer is not null before trying to access it */
 
@@ -150,12 +150,17 @@ Token mlwpar_next_token(Buffer * sc_buf)
 					do
 					{
 						c = b_getc(sc_buf);
-						if(SEOF(c)||b_eob(sc_buf))
+						if(SEOF(c))
 						{ 
+							t.code = ERR_T;
+							t.attribute.err_lex[0] = EXCLAMTN;
+							t.attribute.err_lex[1] = LESSTHN;
+							t.attribute.err_lex[2] = c;
+							t.attribute.err_lex[3] = STRTERM;
 							b_retract(sc_buf);
-							break;
+							return t;
 						}
-					}while ( c != NEWLINE);
+					}while ( c != NEWLINE && c != CARRTRN);
 
 					++line;
 					continue;
@@ -178,7 +183,7 @@ Token mlwpar_next_token(Buffer * sc_buf)
 				{
 					c = b_getc(sc_buf);
 					/* If SEOF or b_eob is found retract the buffer and return t */
-					if(SEOF(c) || b_eob(sc_buf))
+					if(SEOF(c))
 					{
 						b_retract(sc_buf);
 						return t;
@@ -201,41 +206,59 @@ Token mlwpar_next_token(Buffer * sc_buf)
 
 			/*If we have a a period '.' it could be a logical operator or an error. */
 			case PERIOD:
-				/* Add the next five characters in the buffer to a temporary string */	
-				for (tempString[i] = c ; i<4; tempString[i] = b_getc(sc_buf))
-				{
-					++i;
-				}
+				retrCtr = 1;
+				i = 0;
+				c = b_getc(sc_buf);
+				
 				/* Switch on the first character read after the period '.' */
-				switch (tempString[1]) {
+				switch (c) 
+				{
 				/* If its an 'A' we might have .AND. */
 				case'A' :
 					/* Compare the string the string read from the buffer to the string literal .AND.  */
-					if( strncmp(tempString, LOG_OP_AND, 5)==0)
+					++retrCtr;
+					if(b_getc(sc_buf) == 'N')
 					{
-						t.code = LOG_OP_T;
-						t.attribute.log_op = AND;
-						return t;
+						++retrCtr;
+						if(b_getc(sc_buf) == 'D')
+						{
+							++retrCtr;
+							if(b_getc(sc_buf) == PERIOD)
+							{
+								t.code = LOG_OP_T;
+								t.attribute.log_op = AND;
+								return t;
+							}
+						}
 					}
+					break;
 				case'O':
 					/* Comapre the string the string read from the buffer to the string literal .OR.  */
-					if( strncmp(tempString, LOG_OP_OR, 4)==0)
+					++retrCtr;
+					if(b_getc(sc_buf) == 'R')
 					{
-						t.code = LOG_OP_T;
-						t.attribute.log_op = OR;
-						/* Retract the buffer because one extra char was taken for the .AND. comparison. */
-						b_retract(sc_buf);
-						return t;
+						++retrCtr;
+						if(b_getc(sc_buf) == PERIOD)
+						{
+							t.code = LOG_OP_T;
+							t.attribute.log_op = OR;
+							return t;
+						}
 					}
-				/* Default for PERIOD switch. retract the buffer to the it's state prior to reading in the temp string. */
-				default:
-					b_set_getc_offset(sc_buf, lexstart);
-					t.code = ERR_T;
-					/* Add char which caused the error to the err_lex */
-					t.attribute.err_lex[0] = b_getc(sc_buf);
-					t.attribute.err_lex[1] = STRTERM;
-					return t;
+
+					break;
 				}
+
+				while(i<retrCtr)
+				{
+					b_retract(sc_buf);
+					i++;
+				}
+				t.code = ERR_T;
+				/* Add char which caused the error to the err_lex */
+				t.attribute.err_lex[0] = PERIOD;
+				t.attribute.err_lex[1] = STRTERM;
+				return t;
 
 			/* If we have an astrix sign '*' set the token and it's attirbute then return. */
 			case ASTRX:
@@ -293,15 +316,9 @@ Token mlwpar_next_token(Buffer * sc_buf)
 
 			/* If c is a new line '\n' increment the line number and return to the start of the loop. */
 			case CARRTRN:
-				if (b_getc(sc_buf) == NEWLINE)
-				{
-					++line;
-					continue;
-				}
-				t.code = ERR_T;
-				t.attribute.err_lex[0] = CARRTRN;
-				t.attribute.err_lex[1] = STRTERM;
-				return t;
+				NEWLINE_TEST
+				continue;
+				
 			/* If c is a NEWLINE character increment the line number and continue */
 			case NEWLINE:
 				++line;
@@ -326,7 +343,7 @@ Token mlwpar_next_token(Buffer * sc_buf)
 					lexend = b_get_getc_offset(sc_buf);
 					/* If eob has be set or SEOF is read in from the buffer prior to closing the string */
 					/* Break into the error token setup. */
-					if(b_eob(sc_buf) || SEOF(c))
+					if( SEOF(c))
 					{	
 						/* Set the getc_offset to the start of the string */
 						b_set_getc_offset(sc_buf,lexstart);
@@ -362,7 +379,11 @@ Token mlwpar_next_token(Buffer * sc_buf)
 					if(c == NEWLINE)
 					{
 						++line;
-					}	
+					}
+					if(c == CARRTRN)
+					{
+						NEWLINE_TEST
+					}
 				}while ( c != QUOTE );
 			
 				/* Closing quote found. Valid String */
@@ -406,14 +427,6 @@ Token mlwpar_next_token(Buffer * sc_buf)
 				c = b_getc(sc_buf);
 			}
 		
-			/* Create a temporary buffer to store the lexeme */
-			lex_buf = b_create(100,15,'a');
-			/* If buffer creation was not successful. Set the error token for a runtime error. */
-			if (!lex_buf)
-			{
-				scerrnum = BUFFNULL;
-				t_set_err_t(RUNTIMERR, t);
-			}
 			/* Retract the buffer if is is an accepting state with a retract */
 			if(accept==ASWR)
 			{
@@ -421,6 +434,17 @@ Token mlwpar_next_token(Buffer * sc_buf)
 			}
 			/* Set the end of the lexeme at the current getc_offset */
 			lexend = b_get_getc_offset(sc_buf);
+			/* Create a temporary buffer to store the lexeme */
+			lex_buf = b_create((lexend - lexstart +1),0,'f');
+			/* If buffer creation was not successful. Set the error token for a runtime error. */
+			if (!lex_buf)
+			{
+				scerrnum = BUFFNULL;
+				t_set_err_t(RUNTIMERR, t);
+			}
+
+			
+			
 			/* Reset the getc_offset to the start of the lexeme */
 			b_set_getc_offset(sc_buf,lexstart);
 			/* Add the characters of the lexeme to lex_buf */
@@ -614,9 +638,15 @@ Algorithm:				Create a temporary Token. Convert the string to an integer.
 Token aa_func05(char lexeme[])
 {
 	Token t;				/* Token to be returned */	
-	int integerValue = 0;	/* Stores the integer value represented by lexeme */
+	long integerValue = 0;	/* Stores the integer value represented by lexeme */
 	
+	if(strlen(lexeme) > INL_LEN)
+	{
+		return aa_table[ES](lexeme);
+	}
 	/* Call decimalString_toInt to convert to lexeme to an int */
+	
+
 	integerValue = atoint(lexeme);
 
 	/* If number is outside of the valid range we have an error state */
@@ -855,7 +885,7 @@ Algorithm:				Convert each digit to an int by subtracting char '0'. For each dig
 **********************************************************************************************************/
 long atool(char lexeme[])
 {
-	int total = 0;	/*Store the total value */
+	long total = 0;	/*Store the total value */
 	int octalDigit = 0;	/*The current index of the array converted to an int*/
 	unsigned int i = 0;		/*Used as an iterator*/
 	unsigned int j = 0;		/*Used as an iterator*/
