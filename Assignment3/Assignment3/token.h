@@ -52,6 +52,7 @@ typedef enum LogicalOperators     {AND,OR} Log_Op;
 /* Structure declaring the token and its attributes */
 
 typedef union TokenAttribute{
+	int vid_offset;	  /* offset from the start of the buffer*/
 	int get_int;      /* integer attributes accessor */
 	Arr_Op arr_op;    /* arithmetic operator attribute code */
 	Rel_Op rel_op;    /* relational operator attribute code */
@@ -61,7 +62,6 @@ typedef union TokenAttribute{
 	short str_offset;   /* sring literal offset from the beginning of */
 	                  /* the string literal buffer (str_LTBL->ca_head) */
 	float flt_value;    /* floating-point literal attribute (value) */
-    char vid_lex[VID_LEN+1]; /* variable identifier token attribute */
     char err_lex[ERR_LEN+1]; /* error token attribite */
   } TA;
 
