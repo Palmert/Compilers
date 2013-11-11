@@ -3,21 +3,31 @@
 #ifndef _STBL_H
 #define _STBL_H
 
-#define INVLD_SYM_TBL 0
-#define ERR_SYM_TBL -5
-#define PRV_UPDTD -1
+#define INVLD_SYM_TBL 0		/* Invalid size of symbol table */
+#define ERR_SYM_TBL -5		/* Return value if symbol table is invalid */
+#define PRV_UPDTD -1		/* */
+#define LEX_NOT_FND -1		/* Return value if lexeme was not found in the symbol table */
+#define FLT_TYPE 0			/* Represents a float data type*/
+#define INT_TYPE 1			/* Represents an int data type */
+#define STR_TYPE 2			/* Represents a string data type*/
+#define FLT 'F'
+#define INT 'I'
+#define STR 'S'
 
 
 #ifndef CHK_SYM_TBL
-#define CHK_SYM_TBL { if (sym_table.st_size == INVLD_SYM_TBL) return ERR_SYM_TBL; }
+#define CHK_SYM_TBL(sym_table) { if (sym_table.st_size == INVLD_SYM_TBL) return ERR_SYM_TBL; }
 #endif
 
 /*Bit masks*/
 #define CHK_LSB     0x0001   /* 0000 0000 0000 0001 */
+#define CHK_TYP		0x0003	 /* 0000 0000 0000 0110 */
 #define SET_LSB     0x0001   /* 0000 0000 0000 0001 */
 #define RESET12		0xFFF9   /* 1111 1111 1111 1001 */
 #define SET12_01    0x0002   /* 0000 0000 0000 0010 */
 #define SET12_10    0x0004   /* 0000 0000 0000 0100 */
+#define SET012_111  0x0007   /* 0000 0000 0000 0111 */
+#define SETDFLT     0xFFF8   /* 1111 1111 1111 1000 */
 
 typedef union InitialValue {
 int int_val; /* integer variable initial value */
@@ -49,11 +59,10 @@ InitialValue i_value);
 char st_get_type (STD sym_table, int vid_offset);
 void st_destroy(STD sym_table);
 int st_print(STD sym_table);
-static void st_setsize(void);
-static void st_incoffset(void);
 int st_store(STD sym_table);
 int st_sort(STD sym_table, char s_order);
 
 #endif
+
 
 
