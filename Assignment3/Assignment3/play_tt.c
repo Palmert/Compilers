@@ -70,7 +70,7 @@ int main(int argc, char ** argv){
 	Token t;        /* token produced by the scanner */
         int loadsize = 0; /*the size of the file loaded in the buffer */
         int st_def_size = ST_DEF_SIZE; /* Sumbol Table default size */
-        char sort_st = 0;      /*Symbol Table sort switch */
+        char sort_st = 0;      /*Symbol Table sort switch */ //For bonus sort
         int ansi_c = !ANSI_C; /* ANSI C flag */
 /* Check if the compiler option is set to compile ANSI C */
 /* __DATE__, __TIME__, __LINE__, __FILE__, __STDC__ are predefined preprocessor macros*/

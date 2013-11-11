@@ -56,6 +56,17 @@ Algorithm:				Set the Token code to ERR_t then set the err_lex attribute to the 
 							  }					
 #endif
 
+#ifndef NEWLINE_TEST
+#define NEWLINE_TEST {if (b_getc(sc_buf) == NEWLINE) \
+				{ \
+					++line; \
+				}\
+				else \
+				{ \
+				b_retract(sc_buf); \
+				++line;}}
+#endif
+
 
 #define EQSIGN    '='		/* Equal sign symbol constant */
 #define LPRNTHS  '('		/* Left parenthesis symbol constant */
@@ -94,7 +105,7 @@ Algorithm:				Set the Token code to ERR_t then set the err_lex attribute to the 
 #define TABLE_COLUMNS 7
 /*transition table - type of states defined in separate table */
 int  st_table[ ][TABLE_COLUMNS] = {
-/* State 0 */  {  1, 6, 4, 4,ES,ES,ES },
+/* State 0 */  {  1, 6, 4, 4,IS,IS,IS },
 /* State 1 */  {  1, 1, 1, 1,2, 3, 2 },
 /* State 2 */  { IS,IS,IS,IS,IS,IS,IS },
 /* State 3 */  { IS,IS,IS,IS,IS,IS,IS },
