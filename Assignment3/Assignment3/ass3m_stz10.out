@@ -37,20 +37,8 @@ OUTPUT(i,avg);
 Scanning source file...
 
 
-Symbol Table
-____________
+Error: The Symbol Table is full - install failed.
 
-Line Number Variable Identifier
- 4          day1 
- 5          day2 
- 6          day3 
- 7          day4 
- 8          day5 
- 9          sum 
-10          avg 
-11          temp 
-14          res# 
-15          i 
-15          n 
+Symbol Table stored.
 
 Collecting garbage...
