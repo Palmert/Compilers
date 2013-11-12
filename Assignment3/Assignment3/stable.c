@@ -1,5 +1,6 @@
 #include "stable.h"
 #include <string.h>
+#include<stdio.h>
 
 static void st_incoffset(void);
 STD st_create(int st_size)
@@ -29,6 +30,7 @@ int st_install(STD sym_table, char *lexeme, int line)
 	int dataType = FLT_TYPE;				/* Stores the datatype of the lexeme. Initialize as a Floating point data type. */
 	int vid_offset;					/* Stores the offset where lexeme is found */
 	int i;							/* Used and an iterator*/
+	int lexlen;
 
 	/*Check for valid symbol table*/
 	CHK_SYM_TBL(sym_table);
@@ -49,6 +51,7 @@ int st_install(STD sym_table, char *lexeme, int line)
 	/* Set o_line to the current line number */
 	sym_table.pstvr[sym_table.st_offset].o_line = line;
 	/* Set the status field to default values using the default bitmask */
+	sym_table.pstvr[sym_table.st_offset].status_field &= DEFAULTZ;
 	sym_table.pstvr[sym_table.st_offset].status_field |= SETDFLT; //Possibly wrong
 	
 	/* Iterate through the lexeme and store it as a c-type string within the symbol table buffer */ 
@@ -60,7 +63,8 @@ int st_install(STD sym_table, char *lexeme, int line)
 			dataType = INT_TYPE; // Need to make preprocessors
 		}
 		/*  According to language specs the VID is a string if its last character is a # */
-		if( i == strlen(lexeme) && (lexeme[i] == '#'));
+
+		if( i == strlen(lexeme) -1  && lexeme[i] == '#')
 		{
 			dataType = STR_TYPE; // Need to make preprocessors
 		}
@@ -72,17 +76,17 @@ int st_install(STD sym_table, char *lexeme, int line)
 	{
 		case FLT_TYPE:
 			/* Set the data type field to a float using a bitmask and set i_value to 0 */
-			sym_table.pstvr[sym_table.st_offset].status_field &= SET12_10; //Possibly wrong
+			sym_table.pstvr[sym_table.st_offset].status_field |= SET12_10; //Possibly wrong
 			sym_table.pstvr[sym_table.st_offset].i_value.fpl_val = 0.0f;
 			break;
 		case INT_TYPE:
 			/* Set the data type field to an int using a bitmask and set i_value to 0 */
-			sym_table.pstvr[sym_table.st_offset].status_field &= SET12_01; //Possibly wrong
+			sym_table.pstvr[sym_table.st_offset].status_field |= SET12_01; //Possibly wrong
 			sym_table.pstvr[sym_table.st_offset].i_value.int_val = 0;
 			break;
 		case STR_TYPE:
 			/* Set the data type field to a string using a bitmask and set i_value to -1 */
-			sym_table.pstvr[sym_table.st_offset].status_field &= SET012_111; //Possibly wrong
+			sym_table.pstvr[sym_table.st_offset].status_field |= SET012_111; //Possibly wrong
 			sym_table.pstvr[sym_table.st_offset].i_value.str_offset = -1;
 			break;
 	}
@@ -151,6 +155,7 @@ int st_update_value(STD sym_table, int vid_offset,InitialValue i_value)
 }
 char st_get_type (STD sym_table, int vid_offset)
 {
+	int v;
 	//TODO return value on failure must be -1 
 	CHK_SYM_TBL(sym_table);
 
@@ -158,18 +163,19 @@ char st_get_type (STD sym_table, int vid_offset)
 	{
 		return -1; //Define preprocessor
 	}
+	v = sym_table.pstvr[vid_offset].status_field & CHK_TYP;
 
-	if((sym_table.pstvr[vid_offset].status_field & CHK_TYP )== 10)
+	if((sym_table.pstvr[vid_offset].status_field & CHK_TYP )== 4)
 	{
 		return FLT;
 	}
 
-	if((sym_table.pstvr[vid_offset].status_field & CHK_TYP )== 01)
+	if((sym_table.pstvr[vid_offset].status_field & CHK_TYP )== 2)
 	{
 		return INT;
 	}
 
-	if((sym_table.pstvr[vid_offset].status_field & CHK_TYP )== 11)
+	if((sym_table.pstvr[vid_offset].status_field & CHK_TYP )==6)
 	{
 		return STR;
 	}
@@ -195,7 +201,7 @@ int st_print(STD sym_table)
 	{
 		if(sym_table.pstvr[i].plex != NULL)
 		{
-			printf("%2d%10s%s \n", sym_table.pstvr[i].o_line, "", sym_table.pstvr[i].plex);
+			printf("%2d%10c%s \n", sym_table.pstvr[i].o_line, ' ', sym_table.pstvr[i].plex);
 		}
 	}
 	return i;
@@ -212,7 +218,37 @@ static void st_incoffset(void)
 }
 int st_store(STD sym_table)
 {
+	int i;
+
+	char c;
+	FILE *fi;
 	CHK_SYM_TBL(sym_table);
+	fi = fopen("$stable.ste", "wt");
+	if(fi)
+	{
+		fprintf(fi,"%d", sym_table.st_size);
+		for(i=0; i<sym_table.st_offset; i++)
+		{
+			fprintf(fi, "%4X %d %s %d", sym_table.pstvr[i].status_field, strlen(sym_table.pstvr[i].plex), sym_table.pstvr[i].plex, sym_table.pstvr[i].o_line);
+			c = st_get_type(sym_table,i);
+			switch(c)
+			{
+			case FLT:
+				fprintf(fi," %.2f", sym_table.pstvr[i].i_value.fpl_val);
+				break;
+			case INT:
+				fprintf(fi," %d", sym_table.pstvr[i].i_value.int_val);
+				break;
+			case STR:
+				fprintf(fi," %d", sym_table.pstvr[i].i_value.str_offset);
+				break;
+			}
+		}
+
+		printf("\n Symbol Table Stored \n");
+		fclose(fi);
+	}
+	
 }
 int st_sort(STD sym_table, char s_order)
 {
