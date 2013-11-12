@@ -37,14 +37,14 @@ Symbol Table
 ____________
 
 Line Number Variable Identifier
- 4          day5 
- 5          day4 
- 6          day3 
- 7          day2 
- 8          day1 
- 9          sum 
-10          avg 
-11          temp 
-16          res# 
+ 4          day5
+ 5          day4
+ 6          day3
+ 7          day2
+ 8          day1
+ 9          sum
+10          avg
+11          temp
+16          res#
 
 Collecting garbage...

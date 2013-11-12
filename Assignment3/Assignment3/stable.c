@@ -201,7 +201,7 @@ int st_print(STD sym_table)
 	{
 		if(sym_table.pstvr[i].plex != NULL)
 		{
-			printf("%2d%10c%s \n", sym_table.pstvr[i].o_line, ' ', sym_table.pstvr[i].plex);
+			printf("%2d%10c%s\n", sym_table.pstvr[i].o_line, ' ', sym_table.pstvr[i].plex);
 		}
 	}
 	return i;
@@ -223,13 +223,13 @@ int st_store(STD sym_table)
 	char c;
 	FILE *fi;
 	CHK_SYM_TBL(sym_table);
-	fi = fopen("$stable.ste", "wt");
+	fi = fopen("$stable.ste", "w+");
 	if(fi)
 	{
 		fprintf(fi,"%d", sym_table.st_size);
 		for(i=0; i<sym_table.st_offset; i++)
 		{
-			fprintf(fi, "%4X %d %s %d", sym_table.pstvr[i].status_field, strlen(sym_table.pstvr[i].plex), sym_table.pstvr[i].plex, sym_table.pstvr[i].o_line);
+			fprintf(fi, " %4X %d %s %d", sym_table.pstvr[i].status_field, strlen(sym_table.pstvr[i].plex), sym_table.pstvr[i].plex, sym_table.pstvr[i].o_line);
 			c = st_get_type(sym_table,i);
 			switch(c)
 			{
@@ -244,8 +244,9 @@ int st_store(STD sym_table)
 				break;
 			}
 		}
-
-		printf("\n Symbol Table Stored \n");
+	
+		fputc(EOF,fi);
+		printf("\nSymbol Table stored.\n");
 		fclose(fi);
 	}
 	
