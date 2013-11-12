@@ -5,6 +5,7 @@
 
 #define INVLD_SYM_TBL 0		/* Invalid size of symbol table */
 #define ERR_SYM_TBL -5		/* Return value if symbol table is invalid */
+#define SYM_TBL_FULL -2	/* Return value form the accepting funtioncs when the symbol table is full */
 #define PRV_UPDTD -1		/* */
 #define LEX_NOT_FND -1		/* Return value if lexeme was not found in the symbol table */
 #define FLT_TYPE 0			/* Represents a float data type*/
@@ -21,12 +22,13 @@
 
 /*Bit masks*/
 #define CHK_LSB     0x0001   /* 0000 0000 0000 0001 */
-#define CHK_TYP		0x0003	 /* 0000 0000 0000 0110 */
+#define CHK_TYP		0x0006	 /* 0000 0000 0000 0110 */
 #define SET_LSB     0x0001   /* 0000 0000 0000 0001 */
 #define RESET12		0xFFF9   /* 1111 1111 1111 1001 */
 #define SET12_01    0x0002   /* 0000 0000 0000 0010 */
 #define SET12_10    0x0004   /* 0000 0000 0000 0100 */
 #define SET012_111  0x0007   /* 0000 0000 0000 0111 */
+#define DEFAULTZ    0x0000   /* 0000 0000 0000 0000 */
 #define SETDFLT     0xFFF8   /* 1111 1111 1111 1000 */
 
 typedef union InitialValue {

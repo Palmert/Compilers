@@ -585,7 +585,12 @@ Token aa_func02(char lexeme[])
 		lexeme[VID_LEN] = STRTERM;
 	}
 	/* Iterate until the end of the  lexeme and add lexeme characters to vid_lex */
-		st_install(sym_table,lexeme, line);
+		if(st_install(sym_table,lexeme, line)== -1)
+		{
+			printf("Error: The Symbol Table is full - install failed.");
+			st_store(sym_table);
+			exit(SYM_TBL_FULL);
+		}
 	return t;
 }
 /**********************************************************************************************************
@@ -614,7 +619,12 @@ Token aa_func03(char lexeme[])
 		lexeme[VID_LEN] = STRTERM;
 	}
 	/* Iterate until the end of the  lexeme and add lexeme characters to vid_lex */
-	st_install(sym_table,lexeme,line);
+		if(st_install(sym_table,lexeme, line)== -1)
+		{
+			printf("\n Error: The Symbol Table is full - install failed. \n");
+			st_store(sym_table);
+			exit(SYM_TBL_FULL);
+		}
 	return t;
 }
 /**********************************************************************************************************
