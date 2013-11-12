@@ -244,8 +244,6 @@ int st_store(STD sym_table)
 				break;
 			}
 		}
-	
-		fputc(EOF,fi);
 		printf("\nSymbol Table stored.\n");
 		fclose(fi);
 	}
