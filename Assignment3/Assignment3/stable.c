@@ -1,8 +1,10 @@
 #include "stable.h"
 #include <string.h>
-#include<stdio.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 static void st_incoffset(void);
+	
 STD st_create(int st_size)
 {
     STD localSTD;				/* Local variable for Symbol Table Descriptor*/
@@ -12,7 +14,7 @@ STD st_create(int st_size)
 	/* Allocate dynamic memory for an array of STVRs */
 	localSTD.pstvr = (STVR*)malloc(sizeof(STVR)*st_size); // Possible incorrect usage of malloc
 	/* Create a new buffer in additive mode */
-	localSTD.plsBD = b_create(1000,15,'a'); // Examine initial size of buffer and increment
+	localSTD.plsBD = b_create(10,10,'a'); // Examine initial size of buffer and increment
 	/* Check for a failure in either of the malloc's*/
 	if(!localSTD.pstvr || !localSTD.plsBD)
 	{
@@ -30,7 +32,8 @@ int st_install(STD sym_table, char *lexeme, int line)
 	int dataType = FLT_TYPE;				/* Stores the datatype of the lexeme. Initialize as a Floating point data type. */
 	int vid_offset;					/* Stores the offset where lexeme is found */
 	int i;							/* Used and an iterator*/
-	int lexlen;
+	short offset = 0;
+	int lexlen = 0;
 
 	/*Check for valid symbol table*/
 	CHK_SYM_TBL(sym_table);
@@ -57,6 +60,7 @@ int st_install(STD sym_table, char *lexeme, int line)
 	/* Iterate through the lexeme and store it as a c-type string within the symbol table buffer */ 
 	for( i=0;i<=strlen(lexeme) + 1;i++)
 	{
+		++lexlen;
 		/*  According to language specs the default type of an VID is Integer if it's first character is i, o, d, or n */
 		if( i == 0 && (lexeme[i] == 'i' || lexeme[i] == 'd' || lexeme[i] == 'n' ||lexeme[i] == 'o'))
 		{
@@ -70,6 +74,18 @@ int st_install(STD sym_table, char *lexeme, int line)
 		}
 		/* Store each character including the string terminator */ 
 		b_addc(sym_table.plsBD, lexeme[i]);
+		if(b_get_r_flag(sym_table.plsBD))
+		{
+			offset = 0;
+			for(i=0; i<sym_table.st_offset; i++)
+				{		
+					
+					sym_table.pstvr[i].plex  = b_get_chmemloc(sym_table.plsBD, offset);
+					offset += strlen(sym_table.pstvr[i].plex)+1;
+					
+				}	
+			sym_table.pstvr[sym_table.st_offset].plex = b_get_chmemloc(sym_table.plsBD, b_getsize(sym_table.plsBD) -lexlen);
+		}
 	}
 
 	switch(dataType)
@@ -252,4 +268,44 @@ int st_store(STD sym_table)
 int st_sort(STD sym_table, char s_order)
 {
 	CHK_SYM_TBL(sym_table);
+	if(s_order == 'A')
+	{
+		qsort(sym_table.pstvr, sym_table.st_offset,sizeof(STVR), st_compare_A);
+		return 1;
+	}
+	qsort(sym_table.pstvr, sym_table.st_offset,sizeof(STVR), st_compare_D);
+	return 1;
+}
+
+int st_compare_A(const void * pstvrA, const void * pstvrB)
+{
+	
+	int i = 0;
+
+	i = strcmp(((STVR*)pstvrA)->plex,((STVR*)pstvrB)->plex);
+	if(i<0)
+	{
+		return -1;
+	}
+	if(i==0)
+	{
+		return 0;
+	}
+	return 1;	
+}
+
+int st_compare_D(const void * pstvrA, const void * pstvrB)
+{
+	int i = 0;
+
+	i = strcmp(((STVR*)pstvrA)->plex,((STVR*)pstvrB)->plex);
+	if(i<0)
+	{
+		return 1;
+	}
+	if(i==0)
+	{
+		return 0;
+	}
+	return -1;	
 }

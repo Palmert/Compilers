@@ -63,6 +63,9 @@ void st_destroy(STD sym_table);
 int st_print(STD sym_table);
 int st_store(STD sym_table);
 int st_sort(STD sym_table, char s_order);
+int st_compare_A(const char* pstvrA, const char* pstvrB);
+int st_compare_D(const char* pstvrA, const char* pstvrB);
+
 
 #endif
 
