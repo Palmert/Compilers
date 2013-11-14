@@ -5,15 +5,19 @@
 
 #define INVLD_SYM_TBL 0		/* Invalid size of symbol table */
 #define ERR_SYM_TBL -5		/* Return value if symbol table is invalid */
-#define SYM_TBL_FULL -2	/* Return value form the accepting funtioncs when the symbol table is full */
-#define PRV_UPDTD -1		/* */
+#define SYM_TBL_FULL -2		/* Return value form the accepting funtioncs when the symbol table is full */
+#define ERR_PRV_UPDTD -1	/* Return value if the STVR has previously been updated */
+#define PRV_UPDTD 1			/* Value for the status field if the STVR has previously been updated */
 #define LEX_NOT_FND -1		/* Return value if lexeme was not found in the symbol table */
-#define FLT_TYPE 0			/* Represents a float data type*/
-#define INT_TYPE 1			/* Represents an int data type */
-#define STR_TYPE 2			/* Represents a string data type*/
-#define FLT 'F'
-#define INT 'I'
-#define STR 'S'
+#define INVLD_OFFSET -1		/* Return value if a given offset is out of the symbol tables range */
+#define	INVLD_TYPE -1		/* Return value if an invlaid type is found*/
+#define INT_TYPE 2			/* Represents an int data type */
+#define FLT_TYPE 4			/* Represents a float data type*/
+#define STR_TYPE 6			/* Represents a string data type*/
+#define FILE_NT_FND -1		/* Return value if a file cannot be opened*/
+#define FLT 'F'				/* Represents the type for a STVR that contains a float */
+#define INT 'I'				/* Represents the type for a STVR that contains an int */
+#define STR 'S'				/* Represents the type for a STVR that contains a string */
 
 
 #ifndef CHK_SYM_TBL
@@ -56,8 +60,7 @@ STD st_create(int st_size);
 int st_install(STD sym_table, char *lexeme, int line);
 int st_lookup(STD sym_table,char *lexeme);
 int st_update_type(STD sym_table,int vid_offset,char v_type);
-int st_update_value(STD sym_table, int vid_offset,
-InitialValue i_value);
+int st_update_value(STD sym_table, int vid_offset, InitialValue i_value);
 char st_get_type (STD sym_table, int vid_offset);
 void st_destroy(STD sym_table);
 int st_print(STD sym_table);
@@ -66,8 +69,4 @@ int st_sort(STD sym_table, char s_order);
 int st_compare_A(const char* pstvrA, const char* pstvrB);
 int st_compare_D(const char* pstvrA, const char* pstvrB);
 
-
 #endif
-
-
-
