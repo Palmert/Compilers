@@ -1,7 +1,6 @@
+#define  _CRT_SECURE_NO_WARNINGS
 #include "stable.h"
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
+
 
 static void st_incoffset(void);
 	
@@ -24,7 +23,7 @@ STD st_create(int st_size)
 	/* Allocate dynamic memory for an array of STVRs */
 	localSTD.pstvr = (STVR*)malloc(sizeof(STVR)*st_size); // Possible incorrect usage of malloc
 	/* Create a new buffer in additive mode */
-	localSTD.plsBD = b_create(10,10,'a'); // Examine initial size of buffer and increment
+	localSTD.plsBD = b_create(1,1,'a'); // Examine initial size of buffer and increment
 	/* Check for a failure in either of the malloc's*/
 	if(!localSTD.pstvr || !localSTD.plsBD)
 	{
@@ -55,10 +54,12 @@ int st_install(STD sym_table, char *lexeme, int line)
 	int i;							/* Used and an iterator*/
 	short offset = 0;
 	int lexlen = 0;
+	int rFlag = 0;
 
 	/*Check for valid symbol table*/
 	CHK_SYM_TBL(sym_table);
 	/* Check if symbol table is full */
+	printf("Top: |%s|\n ",lexeme);
 	if(sym_table.st_size == sym_table.st_offset)
 	{
 		return -1;
@@ -70,8 +71,12 @@ int st_install(STD sym_table, char *lexeme, int line)
 	{
 		return vid_offset;
 	}	
+	printf("Get Size: |%d|\n",b_getsize(sym_table.plsBD));
+	printf("Buffer head: |%p|\n",b_get_chmemloc(sym_table.plsBD,0));
+	printf("Buffer ptr: |%p|\n",sym_table.pstvr[sym_table.st_offset].plex);
 	/* Set the plex point using a call to b_get_chmemloc. This is the only buffer function that returns a pointer */
 	sym_table.pstvr[sym_table.st_offset].plex  = b_get_chmemloc(sym_table.plsBD, b_getsize(sym_table.plsBD));
+	printf("Buffer ptr2: |%p|\n",sym_table.pstvr[sym_table.st_offset].plex);
 	/* Set o_line to the current line number */
 	sym_table.pstvr[sym_table.st_offset].o_line = line;
 	/* Set the status field to default values using the default bitmask */
@@ -79,7 +84,7 @@ int st_install(STD sym_table, char *lexeme, int line)
 	sym_table.pstvr[sym_table.st_offset].status_field |= SETDFLT; //Possibly wrong
 	
 	/* Iterate through the lexeme and store it as a c-type string within the symbol table buffer */ 
-	for( i=0;i<=strlen(lexeme) + 1;i++)
+	for( i=0;i<=strlen(lexeme);i++)
 	{
 		++lexlen;
 		/*  According to language specs the default type of an VID is Integer if it's first character is i, o, d, or n */
@@ -89,26 +94,38 @@ int st_install(STD sym_table, char *lexeme, int line)
 		}
 		/*  According to language specs the VID is a string if its last character is a # */
 
-		if( i == strlen(lexeme) -1  && lexeme[i] == '#')
+		if( i == strlen(lexeme) -1 && lexeme[i] == '#')
 		{
 			dataType = STR_TYPE; // Need to make preprocessors
 		}
 		/* Store each character including the string terminator */ 
 		b_addc(sym_table.plsBD, lexeme[i]);
 		if(b_get_r_flag(sym_table.plsBD))
-		{
-			offset = 0;
-			for(i=0; i<sym_table.st_offset; i++)
-				{		
-					
-					sym_table.pstvr[i].plex  = b_get_chmemloc(sym_table.plsBD, offset);
-					offset += strlen(sym_table.pstvr[i].plex)+1;
-					
-				}	
-			sym_table.pstvr[sym_table.st_offset].plex = b_get_chmemloc(sym_table.plsBD, b_getsize(sym_table.plsBD) -lexlen);
+		{			
+			++rFlag;			
 		}
-	}
+			
 
+
+	//Test update type
+	}
+	
+	if(rFlag)
+	{
+		printf("st_offset: |%d|\n",sym_table.st_offset);
+		printf("Offset before: |%d|\n ",offset);
+		for(i=0; i<=sym_table.st_offset; i++)
+		{							
+			sym_table.pstvr[i].plex  = b_get_chmemloc(sym_table.plsBD, offset);
+			
+			printf("Install: |%s|\n ", sym_table.pstvr[i].plex);
+			offset += strlen(sym_table.pstvr[i].plex)+1;
+			printf("Offset after: |%d|\n ",offset);
+
+			
+		}	
+	}
+	printf("Current plex: |%s|\n", sym_table.pstvr[sym_table.st_offset].plex);
 	switch(dataType)
 	{
 		case FLT_TYPE:
@@ -147,12 +164,14 @@ int st_lookup(STD sym_table,char *lexeme)
 	int i;							/* Used as an iterator*/
 
 	CHK_SYM_TBL(sym_table);
-
+	printf("Printing Buffer\n");
+	b_print(sym_table.plsBD);
 	/* Iterate over every element in the symbol table */
-	for(i=sym_table.st_offset -1; i >= 0; i--)
+	for(i= sym_table.st_offset-1; i >= 0; i--)
 	{
 		/* If the lexeme is found in the symbol table buffer return the index where it was found */
 
+		printf("Lookup: |%s|\n ",sym_table.pstvr[i].plex);
 		if( strcmp(lexeme, sym_table.pstvr[i].plex) == 0)
 		{
 			return i;
@@ -402,14 +421,51 @@ int st_store(STD sym_table)
 }
 int st_sort(STD sym_table, char s_order)
 {
+	unsigned int i;
+	unsigned int j;
+	short initOffset = 0;
+	int rFlag = 0;
+	char * tempBuffer = NULL;
+
 	CHK_SYM_TBL(sym_table);
 	if(s_order == 'A')
 	{
-		qsort(sym_table.pstvr, sym_table.st_offset,sizeof(STVR), st_compare_A);
-		return 1;
+		qsort((void*)sym_table.pstvr, sym_table.st_offset,sizeof(STVR), st_compare_A);
 	}
-	qsort(sym_table.pstvr, sym_table.st_offset,sizeof(STVR), st_compare_D);
-	return 1;
+	else{
+	qsort((void*)sym_table.pstvr, sym_table.st_offset,sizeof(STVR), st_compare_D);
+	}
+	
+	tempBuffer = (char*)malloc(sizeof(char)*sym_table.plsBD->capacity);
+	strcpy(tempBuffer, sym_table.pstvr[0].plex);
+
+	for(i = 1; i<sym_table.st_offset;i++)
+	{
+		for (j = 0;j<strlen(sym_table.pstvr[i].plex) +1; j++);
+		{
+			strchr(tempBuffer, sym_table.pstvr[i].plex[i]);
+		}
+	}
+	printf(" TempString: |%s%|\n", tempBuffer);
+	b_reset(sym_table.plsBD);
+	for( i = 0; i<strlen(tempBuffer) + 1;++i)
+	{
+		b_addc(sym_table.plsBD, tempBuffer[i]);	
+	}
+	free(tempBuffer);
+	b_print(sym_table.plsBD);	
+	for(i=0; i<=sym_table.st_offset; i++)
+	{							
+		sym_table.pstvr[i].plex  = b_get_chmemloc(sym_table.plsBD, initOffset);
+			
+		printf("Install: |%s|\n ", sym_table.pstvr[i].plex);
+		initOffset += strlen(sym_table.pstvr[i].plex)+1;	
+		printf("Init Offset: |%d|\n", initOffset);
+	}	
+	
+
+	
+	
 }
 
 int st_compare_A(const void * pstvrA, const void * pstvrB)

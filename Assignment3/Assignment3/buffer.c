@@ -638,7 +638,7 @@ char * b_get_chmemloc(Buffer * const pBD, short offset)
 		return NULL;
 	}
 	/*Check that offset will not throw an out of bounds exception*/
-	if(offset < ZERO || offset >= pBD->capacity)
+	if(offset < ZERO || offset > pBD->capacity)
 	{ 
 		return NULL;
 	}
