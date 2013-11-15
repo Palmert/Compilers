@@ -1,4 +1,7 @@
 #include "buffer.h"
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #ifndef _STBL_H
 #define _STBL_H
@@ -63,8 +66,8 @@ void st_destroy(STD sym_table);
 int st_print(STD sym_table);
 int st_store(STD sym_table);
 int st_sort(STD sym_table, char s_order);
-int st_compare_A(const char* pstvrA, const char* pstvrB);
-int st_compare_D(const char* pstvrA, const char* pstvrB);
+int st_compare_A(const void* pstvrA, const void* pstvrB);
+int st_compare_D(const void* pstvrA, const void* pstvrB);
 
 
 #endif
