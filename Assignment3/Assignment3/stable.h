@@ -14,6 +14,7 @@ Function list:  chk_sym_tbl()
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#define _CRT_SECURE_NO_WARNINGS
 
 #ifndef _STBL_H
 #define _STBL_H
@@ -22,7 +23,7 @@ Function list:  chk_sym_tbl()
 #define ERR_SYM_TBL -1		/* Return value if symbol table is invalid */
 #define SYM_TBL_FULL -1		/* Return value form the accepting funtioncs when the symbol table is full */
 #define ERR_PRV_UPDTD -1	/* Return value if the STVR has previously been updated */
-#define B_ADDC_FAIL -1		/* Return value if b_addc fails */
+#define B_ADDC_FAIL -2		/* Return value if b_addc fails */
 #define INVLD_OFFSET -1		/* Return value if a given offset is out of the symbol tables range */
 #define	INVLD_TYPE -1		/* Return value if an invlaid type is found*/
 #define SRT_SUCCESS 1		/* Return value for a successful sort */
@@ -93,3 +94,4 @@ int st_compare_D(const void* pstvrA, const void* pstvrB);
 void test_update_type(STD sym_table);
 
 #endif
+

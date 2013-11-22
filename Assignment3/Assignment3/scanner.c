@@ -566,7 +566,8 @@ Token aa_func02(char lexeme[])
 {
 	Token t;			/* Temporary Token */
 	int kwIndex;		/* Stores index in kw_table */
-	unsigned int i;		/* Used as interator
+	int vid_offset;     /* Temporarily stores offset where vid was installed */
+	
 
 	/* Call iskeyword to find if lexeme is a keyword */
 	kwIndex = iskeyword(lexeme);
@@ -585,12 +586,15 @@ Token aa_func02(char lexeme[])
 		lexeme[VID_LEN] = STRTERM;
 	}
 	/* Iterate until the end of the  lexeme and add lexeme characters to vid_lex */
-		if(st_install(sym_table,lexeme, line)== -1)
-		{
-			printf("\nError: The Symbol Table is full - install failed.\n");
-			st_store(sym_table);
-			exit(SYM_TBL_FULL);
-		}
+	vid_offset = st_install(sym_table,lexeme, line);
+	if(vid_offset < 0 )
+	{
+		printf("\nError: The Symbol Table is full - install failed.\n");
+		st_store(sym_table);
+		free((char*)lexeme);
+		exit(SYM_TBL_FULL);
+	}
+	t.attribute.vid_offset = vid_offset;
 	return t;
 }
 /**********************************************************************************************************
@@ -608,7 +612,7 @@ Algorithm:				Create a temporary Token, Assign a SVID_T code to the Token, Copy 
 Token aa_func03(char lexeme[])
 {
 	Token t;			/* Temporary Token */
-	unsigned int i;		/* Used as interator */
+	int vid_offset;     /* Temporarily stores offset where vid was installed */
 
 	/* lexeme is an string variable identifier. Set appropriate code. */
 	t.code = SVID_T;
@@ -618,13 +622,15 @@ Token aa_func03(char lexeme[])
 		lexeme[VID_LEN-1] = '#';
 		lexeme[VID_LEN] = STRTERM;
 	}
-	/* Iterate until the end of the  lexeme and add lexeme characters to vid_lex */
-		if(st_install(sym_table,lexeme, line)== -1)
-		{
-			printf("\nError: The Symbol Table is full - install failed.\n");
-			st_store(sym_table);
-			exit(SYM_TBL_FULL);
-		}
+	vid_offset = st_install(sym_table,lexeme, line);
+	if(vid_offset < 0)
+	{
+		printf("\nError: The Symbol Table is full - install failed.\n");
+		st_store(sym_table);
+		free((char*)lexeme);
+		exit(SYM_TBL_FULL);
+	}
+	t.attribute.vid_offset = vid_offset;
 	return t;
 }
 /**********************************************************************************************************
