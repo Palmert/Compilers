@@ -13,6 +13,7 @@ Function list:  st_create(),st_install(),st_lookup(),st_update_type(),st_update_
 				st_compare_B(),test_update_type()
 *********************************************************************************************************/
 #include "stable.h"
+extern STD sym_table;
 static void st_setsize(void);
 static void st_incoffset(void);
 /**********************************************************************************************************
@@ -29,8 +30,12 @@ Algorithm:				Create a local STD, initialize the STD.st_offset to 0, allocate me
 **********************************************************************************************************/
 STD st_create(int st_size)
 {
-    STD localSTD;				/* Local variable for Symbol Table Descriptor*/
-
+	STD localSTD;				/* Local variable for Symbol Table Descriptor*/
+	if(st_size <= 0)
+	{
+		localSTD.st_size = 0;
+		return localSTD;
+	}
 	/* Set offset to 0*/
 	localSTD.st_offset = 0;	
 	/* Allocate dynamic memory for an array of STVRs */
@@ -49,6 +54,7 @@ STD st_create(int st_size)
 	if(!localSTD.plsBD)
 	{
 		/* Set the size of the STD to 0 and return STD*/
+		free((STVR*) localSTD.pstvr);
 		localSTD.st_size = 0;
 		return localSTD;
 	}
@@ -83,19 +89,19 @@ int st_install(STD sym_table, char *lexeme, int line)
 	int rFlag = 0;							/* Flag indicating if a reallocation occured in the buffer */
 
 	/*Check for valid symbol table*/
-	chk_sym_tbl(sym_table);
-	/* Check if symbol table is full */
-	if(sym_table.st_size == sym_table.st_offset)
-	{
-		return SYM_TBL_FULL; 
-	}
+	chk_sym_tbl(sym_table);	
 	/* Call st_lookup to search for the lexeme in the table */
 	vid_offset = st_lookup(sym_table, lexeme);
 	/* If the lexeme was found. Return the offset where it was found */
 	if(vid_offset != LEX_NOT_FND )
 	{
 		return vid_offset;
-	}	
+	}
+	/* Check if symbol table is full */
+	if(sym_table.st_size == sym_table.st_offset)
+	{
+		return SYM_TBL_FULL; 
+	}
 	/* Set the plex point using a call to b_get_chmemloc. This is the only buffer function that returns a pointer */
 	sym_table.pstvr[sym_table.st_offset].plex  = b_get_chmemloc(sym_table.plsBD, b_getsize(sym_table.plsBD));
 	/* Set o_line to the current line number */
@@ -176,21 +182,11 @@ Algorithm:				Ensure a valid symbol table was given then iterate of each element
 **********************************************************************************************************/
 int st_lookup(STD sym_table,char *lexeme)
 {
-	int i;							/* Used as an iterator*/
-
 	chk_sym_tbl(sym_table);
-
-	/* Iterate over every element in the symbol table */
-	for(i=sym_table.st_offset-1; i>= 0; i--)
-	{
-		/* If the lexeme is found in the symbol table buffer return the index where it was found */
-		if( strcmp(lexeme, sym_table.pstvr[i].plex) == 0)
-		{
-			return i;
-		}
-	}
-	/* If the lexeme was not found return -1 to inform the calling function. */
-	return LEX_NOT_FND;
+	/* Iterate over STVR array plexs to see if any of them match the lexeme */
+	while((--sym_table.st_offset<0)&&strcmp(lexeme, sym_table.pstvr[sym_table.st_offset].plex));	
+	/* Can use sym_table.st_offset as an iterator because it is passed by value */
+	return sym_table.st_offset;
 }
 /**********************************************************************************************************
 Purpose:				Update the type of the SVTR at the given offset. 
@@ -236,7 +232,7 @@ int st_update_type(STD sym_table,int vid_offset,char v_type)
 	}
 
 	/* Set the updated flag so the STVR cannot be updated in the future */ 
-	sym_table.pstvr[vid_offset].status_field &= SET_LSB;
+	sym_table.pstvr[vid_offset].status_field |= SET_LSB;
 
 	return vid_offset;	
 }
@@ -366,7 +362,6 @@ Algorithm:				Set the size of the symbol table to 0
 **********************************************************************************************************/
 static void st_setsize(void)
 {
-	extern STD sym_table;
 	sym_table.st_size = 0;
 }
 /**********************************************************************************************************
@@ -380,7 +375,6 @@ Algorithm:				Increment the global symbol table.
 **********************************************************************************************************/
 static void st_incoffset(void)
 {
-	extern STD sym_table;
 	++sym_table.st_offset;
 }
 /**********************************************************************************************************
@@ -400,7 +394,7 @@ int st_store(STD sym_table)
 	int i;		/* to iterate over the symbol tables elemens. */
 	FILE *fi;	/* file pointer to work with. */
 	chk_sym_tbl(sym_table);
-	fi = fopen("$stable.ste", "w+");
+	fi = fopen("$stable.ste", "w+"); /* Will throw warning. */
 	if(fi)
 	{
 		fprintf(fi,"%d", sym_table.st_size);

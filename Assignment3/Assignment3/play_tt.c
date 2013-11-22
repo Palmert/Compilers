@@ -13,7 +13,7 @@
  */
 #define _CRT_SECURE_NO_WARNINGS
 
-#define _CRTDBG_MAP_ALL
+
 #include <crtdbg.h>
 
 
@@ -78,7 +78,7 @@ int main(int argc, char ** argv){
 /* Check if the compiler option is set to compile ANSI C */
 /* __DATE__, __TIME__, __LINE__, __FILE__, __STDC__ are predefined preprocessor macros*/
 
- _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF| _CRTDBG_LEAK_CHECK_DF);
+
 
  if(ansi_c){
     err_printf("Date: %s  Time: %s",__DATE__, __TIME__);
@@ -219,7 +219,7 @@ if (argc == 5){
          }
        }
 /*Test bed for update functions */
-	  test_update_type(sym_table);
+	  /*test_update_type(sym_table);*/
 /*Test bed for bonus*/
 	return (0); /* same effect as exit(EXIT_SUCCESS) */
 } 
