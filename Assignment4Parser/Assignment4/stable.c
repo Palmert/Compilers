@@ -185,7 +185,7 @@ int st_lookup(STD sym_table,char *lexeme)
 {
 	chk_sym_tbl(sym_table);
 	/* Iterate over STVR array plexs to see if any of them match the lexeme */
-	while ((--sym_table.st_offset > 0) && (strcmp(lexeme, sym_table.pstvr[sym_table.st_offset].plex)));
+	while((--sym_table.st_offset>0)&&strcmp(lexeme, sym_table.pstvr[sym_table.st_offset].plex));	
 	/* Can use sym_table.st_offset as an iterator because it is passed by value */
 	return sym_table.st_offset;
 }
