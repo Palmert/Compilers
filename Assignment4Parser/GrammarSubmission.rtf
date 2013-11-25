@@ -1,7 +1,5 @@
-{\rtf1\ansi\ansicpg1252\deff0\deflang4105{\fonttbl{\f0\fnil\fcharset0 Calibri;}}
-{\*\generator Msftedit 5.41.21.2510;}\viewkind4\uc1\pard\sl240\slmult1\lang9\f0\fs22\par
-\par
-\b THE PLATYPUS SYNTACTIC GRAMMAR\b0\par
+{\rtf1\ansi\ansicpg1252\deff0\deflang4105{\fonttbl{\f0\fswiss\fprq2\fcharset0 Calibri;}{\f1\fnil\fcharset0 Calibri;}}
+{\*\generator Msftedit 5.41.21.2510;}\viewkind4\uc1\pard\nowidctlpar\lang9\b\f0\fs22 THE PLATYPUS SYNTACTIC GRAMMAR\b0\par
 \par
 \b (\b0 HEADER WITH * SIGNIFIES A MODIFICATION OCCURED WITHIN THE SECTION\b )\par
 \b0\par
@@ -10,10 +8,14 @@
 \b <program>\b0  ->\par
 \tab PLAYTPUS \{<opt_statements>\}\par
 \par
+\b FIRST\b0 ( program ) = \{ PLATYPUS \}\par
+\par
 Needed to define <opt_statements> as follows:\par
 \par
 \b <opt_statements> \b0 ->\par
 \tab <statements>|e\par
+\par
+\b FIRST\b0 (opt_statements) = \{ FIRST( statements ), e \}\par
 \par
 \b <statements>\b0  ->\par
 \tab <statement>|<statements><statement>\par
@@ -29,10 +31,14 @@ Left recursive. \par
 \b <statements> \b0 ->\par
 \tab <statement><statements'>\par
 \par
+\b FIRST\b0 ( statements ) = \{ FIRST( statement ) \}\par
+\par
 3. Define <statements'> as follows:\par
 \par
 \b <statements'> \b0 ->\par
 \tab <statement><statements'>|e\par
+\par
+\b FIRST\b0 ( statements' ) = \{ FIRST( statement ) \}\par
 \par
 \b STATEMENTS\par
 \par
@@ -43,20 +49,32 @@ Left recursive. \par
 \tab |<input statement>\par
 \tab |<output statement>\par
 \par
+\b FIRST\b0 ( statement ) = \{ \b FIRST\b0 ( assignment statement ), \par
+\pard\nowidctlpar\li1440      \b FIRST\b0 ( selection statement ), \par
+     \b FIRST\b0 ( iteration statement ), \par
+     \b FIRST\b0 ( input statement ), \par
+     \b FIRST\b0 ( output statement ) \}\par
+\pard\nowidctlpar\par
 \b ASSIGMENT STATEMENT\par
 \par
 <assignment statement>\b0  ->\par
 \tab <assignment expression>;\par
 \par
+\b FIRST\b0 ( assignment statement ) = \{ FIRST( assignment expression ) \}\par
+\par
 \b <assignment expression> \b0 ->\par
 \tab   AVID = <arithmetic expression>\par
 \tab |SVID = <string expression>\par
+\par
+\b FIRST\b0 (assignment expression) = \{ SVID =, AVID = \}\par
 \par
 \b SELECTION STATEMENT\par
 \par
 <selection statement> \b0 ->\par
 \tab IF(<conditional expression>)  THEN <opt_statements>\par
 \tab ELSE \{ opt_statements \};\par
+\par
+\b FIRST\b0 ( selection statement) = \{ IF \}\par
 \par
 \b ITERATION STATEMENT\par
 \par
@@ -66,10 +84,15 @@ Left recursive. \par
 \tab      <opt_statements>\par
 \tab\};\par
 \par
+\b FIRST\b0 ( iteration statement ) = \{ USING \}\par
+\par
 \b INPUT STATEMENT*\par
 \par
 <input statement> \b0 ->\par
 \tab INPUT(<variable list>);\par
+\par
+\par
+\b FIRST\b0 ( input statement ) = \{ INPUT \}\par
 \par
 ORIGINAL\par
 \b <variable list> \b0 ->\par
@@ -88,11 +111,15 @@ Left recursive.\tab\b\par
 \b <variable list> \b0 ->\par
 \tab <variable identifier><variable list'>\par
 \par
+\b FIRST\b0 ( variable list ) = \{ FIRST( variable identifier ) \}\par
+\par
 3. Define <variable'> as follows:\par
 \par
  FINAL MODIFIED\par
 \b <variable list'> \b0 ->\par
 \tab ,<variable identifier><variable list'>|e\par
+\par
+\b FIRST\b0 ( variable list' ) = \{ ',',e \} //confirm with Svillen on syntax\par
 \par
 \b <variable identifier> \b0 ->\par
 \tab <arithmetic variable identifier> | <string variable identifier>\par
@@ -110,13 +137,18 @@ FINAL MODIFIED\par
 \b <output statement> \b0 ->\par
 \tab OUTPUT(<output list>);\par
 \par
+\b FIRST\b0 ( output statement ) = \{ OUTPUT \}\par
+\par
 \b <output list> \b0 ->\par
 \tab <opt_variable list>|STR_T\par
+\b FIRST\b0 ( output list ) = \{ FIRST( opt_variable list), STR_T )\par
 \par
 Define <opt_variable list> as follows:\par
 \par
 \b <opt_variable> \b0 ->\par
 \tab <variable list>|e\par
+\par
+\b FIRST\b0 ( opt_variable list ) = \{ FIRST( variable list ), e \}\par
 \par
 \b ARITHMETIC EXPRESSIONS*\par
 \par
@@ -124,9 +156,13 @@ Define <opt_variable list> as follows:\par
 \tab   <unary arithmetic expression>\par
 \tab |<additive arithmetic expression>\par
 \par
+\b FIRST\b0 ( arithmetic expression ) = \{ FIRST( unary arithmetic expression ), FIRST( additive arithmetic expression ) \}\par
+\par
 \b <unaray arithmetic expression> \b0 ->\par
 \tab   - <primary arithmetic expression>\par
 \tab |+<primary arithmetic expression>\par
+\par
+\b FIRST\b0 ( unary arithmetic expression ) = \{ -,+ \}\par
 \par
 ORIGINAL\par
 \b <additive arithmetic expression> \b0 ->\par
@@ -149,12 +185,16 @@ FINAL MODIFIED\par
 \b <additive arithmetic expression> \b0 ->\par
 \tab <multiplicative arithmetic expression><additive arithmetic expression'>\par
 \par
+\b FIRST\b0 ( additive arithmetic expression ) = \{ FIRST( multiplicative arithmetic expression ) \}\par
+\par
 3. Define <additive arithmetic expression'> as follows:\par
 \par
-\b <additive arithmetic expression> \b0 ->\par
+\b <additive arithmetic expression\rquote > \b0 ->\par
 \tab   +<multiplicative arithmetic expression><additive arithmetic expression'>\par
 \tab |-<multiplicative arithmetic expression><additive arithmetic expression'>\par
 \tab |e\par
+\par
+\b FIRST\b0 ( additive arithmetic expression' ) = \{ +, -, e \}\par
 \par
 ORIGINAL\par
 \b <multiplicative arithmetic expression> \b0 ->\par
@@ -168,12 +208,16 @@ Left Recursive\par
 \b <multiplicative arithmetic expression>\b0  ->\par
 \tab <primary arithmetic expression><multiplicative arithmetic expression'>\par
 \par
+\b FIRST\b0 ( multiplicative arithmetic expression ) = \{ FIRST( primary arithmetic expression ) \}\par
+\par
 2. Still need to eliminate left-recursion.  Reverse the order of the production and create a new production <multiplicative arithmetic expression'>:\par
 \par
 \b <multiplicative arithmetic expression'> \b0 ->\b\par
 \b0\tab   * <primary arithmetic expression><multiplicative arithmetic expression'>\par
 \tab |/ <primary arithmetic expression><multiplicative arithmetic expression'>\par
 \tab |e\tab\par
+\par
+\b FIRST\b0 ( multiplicative arithmetic expression' ) = \{ *, /, e \}\par
 \par
 3. Define <multiplicative arithmetic expression'> as follows:\par
 \par
@@ -182,6 +226,8 @@ Left Recursive\par
 \tab | FPL_T\par
 \tab | INL_T\par
 \tab | (<arithmetic expression>)\par
+\par
+\b FIRST\b0 ( primary arithmetic expression ) = \{ AVID_T, FPL_T, INL_T, FIRST( arithmetic expression ) \}\par
 \tab\tab\par
 \b STRING EXPRESSION*\par
 \par
@@ -202,21 +248,29 @@ Left Recursive\par
 \b <string expression> \b0 -> \par
 \tab <primary string expression><string expression'>\par
 \par
+\b FIRST\b0 ( string expression ) = \{ FIRST( primary string expression ) \}\par
+\par
 3. Define <string expression'> as follows:\par
 \tab\tab\tab\par
 \b <string expression'> \b0 -> \par
 \tab   <> <primary string expression><string expression'>\par
 \tab |e\par
+\par
+\b FIRST\b0 ( string expression' ) = \{ <>, e \}\par
 \tab\tab\tab\par
 \b <primary string expression>\b0  ->\par
 \tab   SVID_T\par
 \tab |STR_T\par
+\par
+\b FIRST\b0 ( primary string expression ) = \{ SVID_T, STR_T \}\par
 \par
 \b CONDITIONAL EXPRESSION*\par
 \par
 <conditional expression>\b0  ->\par
 \tab <logical OR expression>\par
 \par
+\b FIRST\b0 ( conditional expression ) = \{ FIRST( logical OR expression ) \}\par
+\pard\sl240\slmult1\f1\par
 ORIGINAL\par
 \b <logical OR expression> \b0 ->\par
 \tab    <logical AND expression>\par
@@ -296,18 +350,7 @@ FINAL MODIFIED\tab\tab\par
 \b <relational operator> \b0 -> one of\par
 \tab > < == !=\par
 \par
-\tab\tab\tab\par
-\par
-\par
-\par
-\b\par
-\b0\par
-\par
-\par
-\par
-\par
-\tab\par
-\par
-\par
+\pard\nowidctlpar\tab\tab\tab\f0\par
+\pard\sa200\sl276\slmult1\f1\par
 }
  
