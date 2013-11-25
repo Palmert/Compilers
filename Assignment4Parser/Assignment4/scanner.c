@@ -591,7 +591,7 @@ Token aa_func02(char lexeme[])
 	{
 		printf("\nError: The Symbol Table is full - install failed.\n");
 		st_store(sym_table);
-		free((char*)lexeme);
+		free((Buffer*)lex_buf);
 		exit(SYM_TBL_FULL);
 	}
 	t.attribute.vid_offset = vid_offset;
@@ -627,7 +627,7 @@ Token aa_func03(char lexeme[])
 	{
 		printf("\nError: The Symbol Table is full - install failed.\n");
 		st_store(sym_table);
-		free((char*)lexeme);
+		free((Buffer*)lex_buf);
 		exit(SYM_TBL_FULL);
 	}
 	t.attribute.vid_offset = vid_offset;
