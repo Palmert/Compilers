@@ -55,12 +55,14 @@
 			=
 			
 	<program> ->
-			PLATYPUS {<opt_statements>}
-			<statements> ->
-			<statements> <statement> | <statement>
+		PLATYPUS {<opt_statements>}
 			
-	<opt_statements> ->
-			<statements> | E
+			
+	<opt_statements> -> <statements>|e
+
+	<statements> -> <statement><statements'>
+	<statements'> -> <statement><statements'>|e
+
 			
 	<statement> ->
 			<assignment statement>
@@ -72,7 +74,7 @@
 	<assignment statement> ->
 			<assignment expression>;
 			
-	< assignment expression> ->
+	<assignment expression> ->
 			AVID = <arithmetic expression>
 			| SVID = <string expression>
 			
@@ -89,23 +91,20 @@
 	<input statement> ->
 			INPUT (<variable list>);
 			
-	<variable list> ->
-			<variable list>,<variable identifier> | <variable identifier>
+	<variable list> -> <variable identifier><variable list'>
+
+	<variable list'> -> ,<variable identifier><variable list'>|e
 			
 	<output statement> ->
-			OUTPUT (<opt_variable list>);
-			| OUTPUT (STR_T);
+			OUTPUT (<output list>);
 			
-	<opt_variable list> ->
-			<opt_variable list> | E
+	<output list>-> <opt_variable list>|STR_T
 			
-	<arithmetic expression> - >
-			<unary arithmetic expression>
-			| <additive arithmetic expression>
+	<opt_variable list> -> <variable list> | e
 			
-	<unary arithmetic expression> ->
-			- <primary arithmetic expression>
-			| + <primary arithmetic expression>
+	<arithmetic expression> -> <unary arithmetic expression>|<additive arithmetic expression>
+			
+	<unary arithmetic expression> -> -<primary arithmetic expression>|+<primary arithmetic expression>
 			
 	<additive arithmetic expression> ->
 			<multiplicative arithmetic expression> |
@@ -113,10 +112,25 @@
 			| <additive arithmetic expression> - <multiplicative arithmetic expression>
 			
 
+	<additive arithmetic expression> ->
+			<multiplicative arithmetic expression><additive arithmetic expression'>
+
+	<additive arithmetic expression'>
+			+<multiplicative arithmetic expression><additive arithmetic expression'>
+			|-<multiplicative arithmetic expression><additive arithmetic expression'>
+			|e
+
 	<multiplicative arithmetic expression> ->
 			<primary arithmetic expression>
 			| <multiplicative arithmetic expression> * <primary arithmetic expression>
 			| <multiplicative arithmetic expression> / <primary arithmetic expression>
+
+	<multiplicative arithmetic expression> ->
+			<primary arithmetic expression><multiplicative arithmetic expression'>
+
+	<multiplicative arithmetic expression'>
+			* <primary arithmetic expression><multiplicative arithmetic expression'>
+			| / <primary arithmetic expression><multiplicative arithmetic expression'>|e
 			
 
 	<primary arithmetic expression> ->
@@ -128,6 +142,10 @@
 	<string expression> ->
 			<string expression> <> <primary string expression>
 			| <primary string expression>
+
+	<string expression> -> <primary string expression><string expression'>
+			
+	<string expression'> -> <><primary string expression><string expression'>|e
 			
 	<primary string expression> ->
 			SVID_T
@@ -140,10 +158,18 @@
 			<logical OR expression> .OR. <logical AND expression>
 			| <logical AND expression>
 			
+	<logical OR expression> ->
+			<logical AND expression><logical OR expression'>
+
+	<logical OR expression'> -> .OR. <logical AND expression><logical OR expression'>|e
 			
 	<logical AND expression> ->
 			<logical AND expression> .AND. <relational expression>
 			| <relational expression>
+
+	<logical AND expression> -> <relational expression><logical AND expression'>
+
+	<logical AND expression'> -> .AND. <relational expression><logical AND expression'>|e
 			
 	<relational expression> ->
 			<primary a_relational expression> <relational operator> <primary a_relational expression>
