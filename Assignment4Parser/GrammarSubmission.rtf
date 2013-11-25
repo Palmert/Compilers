@@ -1,0 +1,378 @@
+{\rtf1\ansi\ansicpg1252\deff0\deflang4105{\fonttbl{\f0\fnil\fcharset0 Calibri;}}
+{\*\generator Msftedit 5.41.21.2510;}\viewkind4\uc1\pard\sl240\slmult1\lang9\f0\fs22\par
+\par
+\b THE PLATYPUS SYNTACTIC GRAMMAR\b0\par
+\par
+\b (\b0 HEADER WITH * SIGNIFIES A MODIFICATION OCCURED WITHIN THE SECTION\b )\par
+\b0\par
+\b PLAYTPUS PROGRAM*\par
+\b0\par
+\b <program>\b0  ->\par
+\tab PLAYTPUS \{<opt_statements>\}\par
+\par
+Needed to define <opt_statements> as follows:\par
+\par
+\b <opt_statements> \b0 ->\par
+\tab <statements>|e\par
+\par
+\b <statements>\b0  ->\par
+\tab <statement>|<statements><statement>\par
+\par
+Left recursive. \par
+1. Reverse sides of production in preparation for transformation:\par
+\par
+\b <statements>\b0  ->\par
+\tab <statements><statement>|<statement>\par
+\par
+2. Still need to eliminate left-recursion.  Reverse the order of the production and create a new production <statements'>:\par
+\par
+\b <statements> \b0 ->\par
+\tab <statement><statements'>\par
+\par
+3. Define <statements'> as follows:\par
+\par
+\b <statements'> \b0 ->\par
+\tab <statement><statements'>|e\par
+\par
+\b STATEMENTS\par
+\par
+<statement>\b0  ->\par
+\tab   <assignment statement>\par
+\tab |<selection statement>\par
+\tab |<iteration statement>\par
+\tab |<input statement>\par
+\tab |<output statement>\par
+\par
+\b ASSIGMENT STATEMENT\par
+\par
+<assignment statement>\b0  ->\par
+\tab <assignment expression>;\par
+\par
+\b <assignment expression> \b0 ->\par
+\tab   AVID = <arithmetic expression>\par
+\tab |SVID = <string expression>\par
+\par
+\b SELECTION STATEMENT\par
+\par
+<selection statement> \b0 ->\par
+\tab IF(<conditional expression>)  THEN <opt_statements>\par
+\tab ELSE \{ opt_statements \};\par
+\par
+\b ITERATION STATEMENT\par
+\par
+<iteration statement>\b0  ->\par
+\tab USING(<assignment expression>,<conditional expression>,<assignment expression>)\par
+\tab REPEAT\{\par
+\tab      <opt_statements>\par
+\tab\};\par
+\par
+\b INPUT STATEMENT*\par
+\par
+<input statement> \b0 ->\par
+\tab INPUT(<variable list>);\par
+\par
+ORIGINAL\par
+\b <variable list> \b0 ->\par
+\tab <variable identifier>|<variable list>,<variable identifier>\par
+\par
+Left recursive.\tab\b\par
+\b0 1. Reverse sides of production in preparation for transformation:\par
+\b\par
+\b0 MODIFIED\b\par
+<variable list> \b0 ->\par
+\tab <variable list>,<variable identifier>|<variable identifier>\par
+\b\par
+\b0 2. Still need to eliminate left-recursion.  Reverse the order of the production and create a new production <variable list'>:\par
+\par
+ FINAL MODIFIED\par
+\b <variable list> \b0 ->\par
+\tab <variable identifier><variable list'>\par
+\par
+3. Define <variable'> as follows:\par
+\par
+ FINAL MODIFIED\par
+\b <variable list'> \b0 ->\par
+\tab ,<variable identifier><variable list'>|e\par
+\par
+\b <variable identifier> \b0 ->\par
+\tab <arithmetic variable identifier> | <string variable identifier>\par
+\par
+\b OUTPUT STATEMENT*\par
+\par
+\b0 ORIGINAL\b\par
+<output statement> \b0 ->\par
+\tab   OUTPUT (<opt_variable list>);\par
+ \tab |OUTPUT(STR_T);\par
+\par
+Remove left factor by defining a new production <output list>:\par
+\par
+FINAL MODIFIED\par
+\b <output statement> \b0 ->\par
+\tab OUTPUT(<output list>);\par
+\par
+\b <output list> \b0 ->\par
+\tab <opt_variable list>|STR_T\par
+\par
+Define <opt_variable list> as follows:\par
+\par
+\b <opt_variable> \b0 ->\par
+\tab <variable list>|e\par
+\par
+\b ARITHMETIC EXPRESSIONS*\par
+\par
+<arithmetic expression> \b0 ->\par
+\tab   <unary arithmetic expression>\par
+\tab |<additive arithmetic expression>\par
+\par
+\b <unaray arithmetic expression> \b0 ->\par
+\tab   - <primary arithmetic expression>\par
+\tab |+<primary arithmetic expression>\par
+\par
+ORIGINAL\par
+\b <additive arithmetic expression> \b0 ->\par
+\tab   <additive arithmetic expression>+<multiplicative arithmetic expression>\par
+\b\tab\b0 |<additive arithmetic expression>-<multiplicative arithmetic expression>\par
+\tab |<multiplicative arithmetic expression>\par
+\par
+Left Recursive\par
+1. Reverse the sides of the production in preparation for transformation:\par
+\b\par
+<additive arithmetic expression> \b0 ->\par
+\tab  <multiplicative arithmetic expression>\par
+\tab |<additive arithmetic expression>+<multiplicative arithmetic expression>\par
+\b\tab\b0 |<additive arithmetic expression>-<multiplicative arithmetic expression>\par
+\b\par
+\par
+\b0 2. Still need to eliminate left-recursion.  Reverse the order of the production and create a new production <additive arithmetic expression'>:\par
+\par
+FINAL MODIFIED\par
+\b <additive arithmetic expression> \b0 ->\par
+\tab <multiplicative arithmetic expression><additive arithmetic expression'>\par
+\par
+3. Define <additive arithmetic expression'> as follows:\par
+\par
+\b <additive arithmetic expression> \b0 ->\par
+\tab   +<multiplicative arithmetic expression><additive arithmetic expression'>\par
+\tab |-<multiplicative arithmetic expression><additive arithmetic expression'>\par
+\tab |e\par
+\par
+ORIGINAL\par
+\b <multiplicative arithmetic expression> \b0 ->\par
+\tab   <primary arithmetic expression>\par
+\tab |<multiplicative arithmetic expression> * <primary arithmetic expression>\par
+\tab |<multiplicative arithmetic expression> / <primary arithmetic expression>\par
+\par
+Left Recursive\par
+1. Reverse the sides of the production in preparation for transformation:\par
+\par
+\b <multiplicative arithmetic expression>\b0  ->\par
+\tab <primary arithmetic expression><multiplicative arithmetic expression'>\par
+\par
+2. Still need to eliminate left-recursion.  Reverse the order of the production and create a new production <multiplicative arithmetic expression'>:\par
+\par
+\b <multiplicative arithmetic expression'> \b0 ->\b\par
+\b0\tab   * <primary arithmetic expression><multiplicative arithmetic expression'>\par
+\tab |/ <primary arithmetic expression><multiplicative arithmetic expression'>\par
+\tab |e\tab\par
+\par
+3. Define <multiplicative arithmetic expression'> as follows:\par
+\par
+\b <primary arithmetic expression> \b0 ->\par
+\tab    AVID_T\par
+\tab | FPL_T\par
+\tab | INL_T\par
+\tab | (<arithmetic expression>)\par
+\tab\tab\par
+\b STRING EXPRESSION*\par
+\par
+\b0 ORIGINAL\b\par
+<string expression> \b0 ->\par
+\tab   <primary string expression>\par
+\tab |<string expression> <> <primary string expression>\par
+\par
+Left Recursive\par
+1. Reverse the sides of the production in preparation for transformation:\par
+\tab\par
+\b <string expression>\b0  ->\par
+\tab   <string expression> <> <primary string expression>\par
+\tab |<primary string expression>\par
+\par
+2. Still need to eliminate left-recursion.  Reverse the order of the production and create a new production <string expression'>:\par
+\par
+\b <string expression> \b0 -> \par
+\tab <primary string expression><string expression'>\par
+\par
+3. Define <string expression'> as follows:\par
+\tab\tab\tab\par
+\b <string expression'> \b0 -> \par
+\tab   <> <primary string expression><string expression'>\par
+\tab |e\par
+\tab\tab\tab\par
+\b <primary string expression>\b0  ->\par
+\tab   SVID_T\par
+\tab |STR_T\par
+\par
+\b CONDITIONAL EXPRESSION*\par
+\par
+<conditional expression>\b0  ->\par
+\tab <logical OR expression>\par
+\par
+<logical OR expression> ->\par
+\tab   <logical OR expression> .OR. <logical AND expression>\par
+\tab |<logical AND expression>\par
+\tab\tab\tab\par
+\tab <logical OR expression> ->\par
+\tab\tab\tab <logical AND expression><logical OR expression'>\par
+\par
+\tab <logical OR expression'> -> .OR. <logical AND expression><logical OR expression'>|e\par
+\tab\tab\tab\par
+\tab <logical AND expression> ->\par
+\tab\tab\tab <logical AND expression> .AND. <relational expression>\par
+\tab\tab\tab | <relational expression>\par
+\par
+\tab <logical AND expression> -> <relational expression><logical AND expression'>\par
+\par
+\tab <logical AND expression'> -> .AND. <relational expression><logical AND expression'>|e\par
+\tab\tab\tab\par
+\tab <relational expression> ->\par
+\tab\tab\tab <primary a_relational expression> <relational operator> <primary a_relational expression>\par
+\tab\tab\tab | <primary s_relational expression> <relational operator> <primary s_relational expression>\par
+\tab\tab\tab\par
+\tab <primary a_relational expression> ->\par
+\tab\tab\tab AVID_T\par
+\tab\tab\tab | FPL_T\par
+\tab\tab\tab | INL_T\par
+\tab\tab\tab\par
+\tab <primary s_relational expression> ->\par
+\tab\tab\tab <primary string expression>\par
+\tab\tab\tab\par
+\par
+\par
+\par
+\b\par
+\b0\par
+\par
+\par
+\par
+\par
+\tab\par
+\par
+2.1 Input Elements and Tokens\par
+\par
+\tab <input character> -> one of\par
+\tab\tab\tab ASCII characters but not SEOF\par
+\par
+\tab <input element > ->\par
+\tab\tab\tab <white space > | <comment> | <token>\par
+\par
+\tab <token> ->\par
+\tab\tab\tab <variable identifier> | <keyword> | <floating-point literal >\par
+\tab\tab\tab | <integer literal > | <string literal> | <separator> | <operator>`\par
+\par
+\tab <variable identifier> ->\par
+\tab\tab\tab <arithmetic variable identifier> | <string variable identifier>\par
+\par
+\tab <string variable identifier> ->\par
+\tab\tab\tab <arithmetic variable identifier>#\par
+\par
+\tab <variable identifier> -> AVID_T | SVID_T\par
+\par
+\tab <keyword> ->\par
+\tab\tab\tab PLATYPUS | IF | THEN | ELSE | USING | REPEAT | INPUT | OUTPUT\par
+\par
+\tab <integer literal> ->\par
+\tab\tab\tab <decimal integer literal> | <octal integer literal>\par
+\tab\tab\tab\par
+\tab <floating-point literal> ->\par
+\tab\tab\tab <decimal integer literal> . <opt_digits>\par
+\tab\tab\tab\par
+\tab <separator> -> one of\par
+\tab\tab\tab ( )\{ \} , ; \ldblquote\par
+\tab\tab\tab\par
+\tab <operator> ->\par
+\tab\tab\tab < arithmetic operator > | <string concatenation operator>\par
+\tab\tab\tab | < relational operator> | < logical operator >\par
+\tab\tab\tab | < assignment operator >\par
+\par
+\tab <arithmetic operator> -> one of\par
+\tab\tab\tab + - * /\par
+\par
+\tab <string concatenation operator> ->\par
+\tab\tab\tab <>\par
+\tab\tab\tab\par
+\tab <relational operator> -> one of\par
+\tab\tab\tab > < == !=\par
+\tab\tab\tab\par
+\tab <logical operator> ->\par
+\tab\tab\tab .AND. | .OR.\par
+\tab\tab\tab\par
+\tab <assignment operator> ->\par
+\tab\tab\tab =\par
+\tab\tab\tab\par
+\tab <program> ->\par
+\tab\tab PLATYPUS \{<opt_statements>\}\par
+\tab\tab\tab\par
+\tab\tab\tab\par
+\tab <opt_statements> -> <statements>|e\par
+\par
+\tab <statements> -> <statement><statements'>\par
+\tab <statements'> -> <statement><statements'>|e\par
+\par
+\tab\tab\tab\par
+\tab <statement> ->\par
+\tab\tab\tab <assignment statement>\par
+\tab\tab\tab | <selection statement>\par
+\tab\tab\tab | <iteration statement>\par
+\tab\tab\tab | <input statement>\par
+\tab\tab\tab | <output statement>\par
+\tab\tab\tab\par
+\tab <assignment statement> ->\par
+\tab\tab\tab <assignment expression>;\par
+\tab\tab\tab\par
+\tab <assignment expression> ->\par
+\tab\tab\tab AVID = <arithmetic expression>\par
+\tab\tab\tab | SVID = <string expression>\par
+\tab\tab\tab\par
+\tab <selection statement> ->\par
+\tab\tab\tab IF (<conditional expression>) THEN <opt_statements>\par
+\tab\tab\tab ELSE \{ <opt_statements> \} ;\par
+\tab\tab\tab\par
+\tab <iteration statement> ->\par
+\tab\tab\tab USING (<assignment expression> , <conditional expression> , <assignment expression> )\par
+\tab\tab\tab REPEAT \{\par
+\tab\tab\tab < opt_statements>\par
+\tab\tab\tab\};\par
+\tab\tab\tab\par
+\tab <input statement> ->\par
+\tab\tab\tab INPUT (<variable list>);\par
+\tab\tab\tab\par
+\tab <variable list> -> <variable identifier><variable list'>\par
+\par
+\tab <variable list'> -> ,<variable identifier><variable list'>|e\par
+\tab\tab\tab\par
+\tab <output statement> ->\par
+\tab\tab\tab OUTPUT (<output list>);\par
+\tab\tab\tab\par
+\tab <output list>-> <opt_variable list>|STR_T\par
+\tab\tab\tab\par
+\tab <opt_variable list> -> <variable list> | e\par
+\tab\tab\tab\par
+\tab <arithmetic expression> -> <unary arithmetic expression>|<additive arithmetic expression>\par
+\tab\tab\tab\par
+\tab <unary arithmetic expression> -> -<primary arithmetic expression>|+<primary arithmetic expression>\par
+\tab\tab\tab\par
+\tab <additive arithmetic expression> ->\par
+\tab\tab\tab <multiplicative arithmetic expression> |\par
+\tab\tab\tab <additive arithmetic expression> + <multiplicative arithmetic expression>\par
+\tab\tab\tab | <additive arithmetic expression> - <multiplicative arithmetic expression>\par
+\tab\tab\tab\par
+\par
+\tab <additive arithmetic expression> ->\par
+\tab\tab\tab <multiplicative arithmetic expression><additive arithmetic expression'>\par
+\par
+\tab\par
+\par
+\par
+\tab <\par
+}
+ 
