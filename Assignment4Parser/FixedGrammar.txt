@@ -182,3 +182,71 @@
 			
 	<primary s_relational expression> ->
 			<primary string expression>
+			
+			
+FIRST( program ) = { PLATYPUS { }
+
+FIRST(opt_statements) = { FIRST( statements ), e } 
+
+FIRST( statements ) = { FIRST( statement ) }
+
+FIRST( statements' ) = { FIRST( statement ) }
+
+FIRST( statement ) = { FIRST( assignment statement ), FIRST( selection statement ), 
+		FIRST( iteration statement ), FIRST( input statement ), FIRST( output statement ) }
+		
+FIRST( assignment statement ) = { FIRST( assignment expression ) }
+
+FIRST(assignment expression) = { SVID =, AVID = }
+
+FIRST( selection statement) = { IF }
+
+FIRST( iteration statement ) = { USING }
+
+FIRST( input statement ) = { INPUT }
+
+FIRST( variable list ) = { FIRST( variable identifier ) }
+
+FIRST( variable list' ) = { ',',e } //confirm with Svillen on syntax
+
+FIRST( output statement ) = { OUTPUT }
+
+FIRST( output list ) = { FIRST( opt_variable list), STR_T )
+
+FIRST( opt_variable list ) = { FIRST( variable list ), e }
+
+FIRST( arithmetic expression ) = { FIRST( unary arithmetic expression ), FIRST( additive arithmetic expression ) }
+
+FIRST( unary arithmetic expression ) = { -,+ }
+
+FIRST( additive arithmetic expression ) = { FIRST( multiplicative arithmetic expression ) }
+
+FIRST( additive arithmetic expression' ) = { +, -, e }
+
+FIRST( multiplicative arithmetic expression ) = { FIRST( primary arithmetic expression ) }
+
+FIRST( multiplicative arithmetic expression' ) = { *, /, e }
+
+FIRST( primary arithmetic expression ) = { AVID_T, FPL_T, INL_T, FIRST( arithmetic expression ) }
+
+FIRST( string expression ) = { FIRST( primary string expression ) }
+
+FIRST( string expression' ) = { <>, e }
+
+FIRST( primary string expression ) = { SVID_T, STR_T }
+
+FIRST( conditional expression ) = { FIRST( logical OR expression ) }
+
+FIRST( logical OR expression ) = { FIRST( logical AND expression ), FIRST( logical OR expression' ) }
+
+FIRST( logical OR expression' ) = { .OR., e }
+
+FIRST( logical AND expression ) = { FIRST( relational expression ) }
+
+FIRST( logical AND expression' ) = { .AND., e }
+
+FIRST( relational expression ) = { FIRST ( primary a_relational expression ) , FIRST( primary s_relational expression ) }
+
+FIRST( primary s_relational expression ) =  { SVID_T, STR_T }
+
+FIRST ( primary a_relational expression ) = { AVID_T, FPL_T, INL_T }
