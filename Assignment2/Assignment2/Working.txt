@@ -1,0 +1,874 @@
+/*********************************************************************************************************
+File name: scanner.c
+Compiler: MS Visual Studio 2110
+Authors: Thom Palmer - 023 713 234 and Chris Whitten - 040 611 350 
+Course: CST 8152 � Compilers, Lab Section: 401
+Assignment: Assignment 2 
+Date: Oct. 25th 2013
+Professor: Sv. Ranev
+Version: 1.0.0.0
+Purpose: Functions implementing a Lexical Analyzer (Scanner) as required for CST8152, Assignment #2
+Function list: 
+*********************************************************************************************************/
+
+/* The #define _CRT_SECURE_NO_WARNINGS should be used in MS Visual Studio projects
+ * to suppress the warnings about using "unsafe" functions like fopen()
+ * and standard sting library functions defined in string.h.
+ * The define does not have any effect in Borland 5.02 projects.
+ */
+#define _CRT_SECURE_NO_WARNINGS
+
+#include <stdio.h>   /* standard input / output */
+#include <ctype.h>   /* conversion functions */
+#include <stdlib.h>  /* standard library functions and constants */
+#include <string.h>  /* string functions */
+#include <limits.h>  /* integer types constants */
+#include <float.h>   /* floating-point types constants */
+
+/*#define NDEBUG        to suppress assert() call */
+#include <assert.h>  /* assert() prototype */
+
+/* project header files */
+#include "buffer.h"
+#include "token.h"
+#include "table.h"
+
+#define DEBUG  /* for conditional processing */
+#undef  DEBUG
+
+/* Global objects - variables */
+
+/* This buffer is used as a repository for string literals.
+   It is defined in platy_st.c */
+extern Buffer * str_LTBL; /*String literal table */
+int line; /* current line number of the source code */
+extern int scerrnum;     /* defined in platy_st.c - run-time error number */
+
+/* Local(file) global objects - variables */
+static Buffer *lex_buf;/*pointer to temporary lexeme buffer*/
+
+/* No other global variable declarations/definitiond are allowed */
+
+/* scanner.c static(local) function  prototypes */ 
+static int char_class(char c); /* character class function */
+static int get_next_state(int, char, int *); /* state machine function */
+static int iskeyword(char * kw_lexeme); /*keywords lookup functuion */
+static long atool(char * lexeme); /* converts octal string to decimal value */
+
+/* local helper functions. */
+int decimalString_toInt(char lexeme[]);
+void t_set_err_t(char lexeme[], Token* t);
+int octalstring_toInt(char lexeme[]);
+
+int scanner_init(Buffer * sc_buf) {
+  	if(b_isempty(sc_buf)) return EXIT_FAILURE;/*1*/
+	b_set_getc_offset(sc_buf,0);/* in case the buffer has been read previously  */
+	b_reset(str_LTBL);
+	line = 1;
+	return EXIT_SUCCESS;/*0*/
+/*   scerrnum = 0;  *//*no need - global ANSI C */
+}
+
+/**********************************************************************************************************
+Purpose:			Set the proper token depending on the lexeme read from the buffer. 
+Author:				Thom Palmer and Chris Whitten
+History/Versions:	10.20.13
+Called functions:	b_setmark(), b_getc(), b_getmark(), SEOF(), WHTSPACE(), is_assop(), strncmp(),
+					b_set_getc_offset(), b_retract(), b_get_getc_offset(),b_eob(), isalnum(), b_addc()
+					get_next_state(), b_create(), b_pack(), b_destroy() 
+Parameters:			Buffer * const pBD
+Return value:		Token t
+Algorithm:			Validate parameters, read char from buffer, check the char to see if its a legal character.
+					depending on the char peak forward to see what the following char is in order to 
+					determine if it's part of the lexeme or if it's time to return. once a valid lexeme is
+					found set the token and return. if a valid lexeme is not found set the token to error 
+					state and return. 
+**********************************************************************************************************/
+Token mlwpar_next_token(Buffer * sc_buf)
+{
+   Token t; /* token to return after recognition */
+   unsigned char c; /* input symbol */
+   int state = 0; /* initial state of the FSM */
+   short lexstart;  /*start offset of a lexeme in the input buffer */
+   short lexend;    /*end   offset of a lexeme in the input buffer */
+   int accept = NOAS; /* type of state - initially not accepting */  
+   int i;			/*Used throughout the function as iterator*/
+   char tempString[5];	/*Used to store the characters read in after '.' is foud to determine if its a logical operator*/
+   char orString [] =".OR.";	/*Used to compare against the temporary string*/
+   char andString[] =".AND.";	/*Used to compare against the temporary string*/
+   
+	/*Ensure the buffer is not null before trying to access it*/
+   if(sc_buf == NULL)
+   {
+	   t.code = ERR_T;
+	   strcpy(t.attribute.err_lex, RUNTIMERR);
+	   return t;
+   }
+     
+                
+	while (1){ /* endless loop broken by token returns it will generate a warning */
+                
+    /*Set mark before getting the next character. This prevents the need for unneccessary decrements.  */
+    b_setmark(sc_buf, b_get_getc_offset(sc_buf));
+	lexstart = b_getmark(sc_buf);
+	
+	/*Get the next char from the buffer. */
+	c = b_getc(sc_buf); 	
+	
+	/*Ensure SEOF has not been read before processing any further.*/
+	if(SEOF(c))
+	{
+		t.code = SEOF_T;
+		return t;
+	}
+
+	/*If it's whitespace ignore and return to the start of the loop.*/
+	if(WHTSPC(c))
+	{
+		continue;
+	}
+
+
+	/**/
+	switch(c)
+	{
+
+		
+		case ASSOP:
+			is_assop(c);
+		/*If the token starts wiht ! it can either be a comment or the != relational operator, so peak forward and act appropriatly. */
+		case '!':
+			c = b_getc(sc_buf);
+			/*If the next token is < then we have a comment and ifnot everything till the newline character is hit. */
+			if(c == LESSTHN)
+			{
+			do
+				{
+					c = b_getc(sc_buf);
+				}while ( c != NEWLINE);
+
+				++line;
+				continue;
+			}
+
+			/*If it's the != relation operator set the proper values and return.  */
+		   if(c == '=')
+		   {
+			   t.code = REL_OP_T;
+			   t.attribute.rel_op = NE ;
+			   return t;
+
+
+		   }	
+		   t.code = ERR_T;
+		   t.attribute.err_lex[0] = '!';
+		   t.attribute.err_lex[1] = c;
+		   t.attribute.err_lex[2] = '\0';
+	   
+
+		   do
+		   {
+			   c = b_getc(sc_buf);
+		   }while ( c != NEWLINE);
+
+		   ++line;
+		   return t;
+
+
+		case POS:
+			t.code = ART_OP_T;
+			t.attribute.arr_op = PLUS;
+			return t;
+
+
+		case NEG:
+			t.code = ART_OP_T;
+			t.attribute.arr_op = MINUS;
+			return t;
+
+
+
+		case'.':
+			tempString[0] = c;
+			c = b_getc(sc_buf);
+			tempString[1] = c;
+
+			for (i = 2; i < 5; i++)
+			{
+				tempString[i] = b_getc(sc_buf);
+			}
+
+			switch (c) {
+
+
+			case'A' :
+
+
+				if( strncmp(tempString,andString, 5)==0)
+				{
+					t.code = LOG_OP_T;
+					t.attribute.log_op = AND;
+					return t;
+				}
+			case'O':
+
+
+				if( strncmp(tempString,orString, 4)==0)
+				{
+					t.code = LOG_OP_T;
+					t.attribute.log_op = OR;
+
+					b_retract(sc_buf);
+					return t;
+				}
+
+			default:
+				b_set_getc_offset(sc_buf, lexstart);
+				t.code = ERR_T;
+
+				t.attribute.err_lex[0] = b_getc(sc_buf);
+				t.attribute.err_lex[1] = '\0';
+				return t;
+			}
+
+
+
+		case ASTRX:
+			t.code = ART_OP_T;
+			t.attribute.arr_op =MULT;
+			return t;
+
+
+		case FWDSLSH:
+			t.code = ART_OP_T;
+			t.attribute.arr_op = DIV;
+			return t;
+
+
+		case LBRACE:
+			t.code = LBR_T;
+			return t;
+
+
+		case RBRACE:
+			t.code = RBR_T;
+			return t;
+
+
+		case LPRNTHS:
+			t.code = LPR_T;
+			return t;
+
+
+		case RPRNTHS:
+			t.code = RPR_T;
+			return t;
+
+
+		case LESSTHN:
+			c = b_getc(sc_buf);
+
+
+			if(c == GRTRTHN){
+				t.code = SCC_OP_T;
+				return t;
+			}
+
+
+			t.code = REL_OP_T;
+			t.attribute.rel_op = LT;
+			b_retract(sc_buf);
+			return t;
+
+
+		case GRTRTHN:
+			t.code = REL_OP_T;
+			t.attribute.rel_op = GT;
+			return t;
+
+
+		case NEWLINE:
+			++line;
+			continue;
+
+
+
+		case ',':
+			t.code = COM_T;  //   SEOF, 'wrong symbol',
+			return t;
+
+
+
+		case ';':
+			t.code = EOS_T;
+			return t;
+
+
+
+
+		case'"':
+			//need to handle \n within 
+			do
+			{	
+				c = b_getc(sc_buf);
+				lexend = b_get_getc_offset(sc_buf);
+				if(b_eob(sc_buf))
+				{				
+					b_set_getc_offset(sc_buf,lexstart);
+					for( i = 0; i<lexend- lexstart;i++)
+					{				
+						c = b_getc(sc_buf);
+						if(i<=ERR_LEN)
+						{
+							if(i<=16)
+							t.attribute.err_lex[i] = c;
+							if(i>16 && i<ERR_LEN)
+							{
+								t.attribute.err_lex[i] = '.';
+							}
+							if (i==ERR_LEN)
+							{
+								t.attribute.err_lex[i]= '\0';
+							}
+
+						}
+					
+					}
+					t.code = ERR_T;							
+					return t;
+				}
+
+				if(c == NEWLINE)
+				{
+					++line;
+				}			
+			}while(c!='"');
+		
+			b_set_getc_offset(sc_buf,lexstart);
+
+			t.attribute.str_offset = str_LTBL->addc_offset;
+
+
+			for(  i = 0; i<lexend-lexstart;i++)
+
+			{
+			
+				c = b_getc(sc_buf);
+
+				if(c != '"')
+
+				b_addc(str_LTBL,c);
+
+			}
+
+			b_addc(str_LTBL,'\0');
+			t.code = STR_T;
+			return t;
+		}
+	
+
+	if (isalnum(c))
+	{
+
+		for(state = get_next_state(state,c,&accept);accept==NOAS; state = get_next_state(state,c,&accept))
+		{
+			c = b_getc(sc_buf);
+		}
+			
+		lex_buf = b_create(100,1,'a');
+		if(accept==ASWR)
+		{
+			b_retract(sc_buf);
+		}
+		lexend = b_get_getc_offset(sc_buf);
+		b_set_getc_offset(sc_buf,lexstart);
+		for( i = 0;i<lexend-lexstart;i++)
+		{
+			b_addc(lex_buf,b_getc(sc_buf));
+		}
+		b_pack(lex_buf);
+		b_addc(lex_buf,'\0');
+		t = aa_table[state](lex_buf->ca_head);
+		b_destroy(lex_buf);
+		++line;
+		return t;
+	}
+	t.code = ERR_T;
+	t.attribute.err_lex[0] = c;
+	t.attribute.err_lex[1] = '\0'; /*Probably a better way to do this.*/
+	return t;             
+   }
+}
+/**********************************************************************************************************
+Purpose:			Gets the next state in the transition table
+Author:				Svillen Ranev
+History/Versions:	1.0.0.0
+Called functions:	char_class()
+Parameters:			int state, char c, int *accept
+Return value:		int representing the next row(state) in the transition table
+**********************************************************************************************************/
+int get_next_state(int state, char c, int *accept)
+{
+	int col;
+	int next;
+	col = char_class(c);
+	next = st_table[state][col];
+#ifdef DEBUG
+printf("Input symbol: %c Row: %d Column: %d Next: %d \n",c,state,col,next);
+#endif
+/*
+The assert(int test) macro can be used to add run-time diagnostic to programs
+and to "defend" from producing unexpected results.
+assert() is a macro that expands to an if statement;
+if test evaluates to false (zero) , assert aborts the program
+(by calling abort()) and sends the following message on stderr:
+
+Assertion failed: test, file filename, line linenum
+
+The filename and linenum listed in the message are the source file name
+and line number where the assert macro appears.
+If you place the #define NDEBUG directive ("no debugging")
+in the source code before the #include <assert.h> directive,
+the effect is to comment out the assert statement.
+*/
+       assert(next != IS);
+
+/*
+The other way to include diagnostics in a program is to use
+conditional preprocessing as shown bellow. It allows the programmer
+to send more details describing the run-time problem. 
+Once the program is tested thoroughly #define DEBUG is commented out
+or #undef DEBUF is used - see the top of the file.
+*/ 
+#ifdef DEBUG
+	if(next == IS){
+	  printf("Scanner Error: Illegal state:\n");
+	  printf("Input symbol: %c Row: %d Column: %d\n",c,state,col);
+	  exit(1);
+	}
+#endif
+	*accept = as_table[next];
+	return next;
+}
+/**********************************************************************************************************
+Purpose:				Find the column in the transition table that corresponds to the current character
+Author:					Thom Palmer
+History/Versions:		10.18.13
+Called functions:		isalpha(), isdigit()
+Parameters:				char c
+Return value:			int representing a column in the transition table
+
+Algorithm:				
+**********************************************************************************************************/
+int char_class (char c)
+{
+        int val;					/* Stores column index. */
+		val = 6;
+		if(isdigit(c))
+		{
+			switch(c)
+			{
+			case '0':	val = 1;
+						break;
+			case '8': 
+			case '9':	val = 3;
+						break;
+			default:	val = 2;
+						break;
+			}
+		}
+		if(isalpha(c))
+		{
+			val = 0;
+		}
+		
+		if(c=='.')
+		{
+			val = 4;
+		}
+		if(c=='#')
+		{
+			val = 5;
+		}
+		return val;		
+}
+/**********************************************************************************************************
+Purpose:				Set the Token code and attribute for a keyword or arithmetic variable identifier
+Author:					Chris Whitten modified by Thom Palmer
+History/Versions:		10.19.13
+Called functions:		iskeyword(), strncpy(), strlen()
+Parameters:				char lexeme[]
+Return value:			Token t representing a valid keyword or valid arithmetic variable identifier
+Algorithm:				Create a temporary Token, if lexeme is a keyword set appropriate properties of 
+						the Token and return the keyword Token, otherwise lexeme is an arithmetic variable
+						identifier, set appropriate properties and return the AVID Token
+**********************************************************************************************************/
+Token aa_func02(char lexeme[]){
+
+	Token t;
+	int kwIndex = iskeyword(lexeme);
+	if( kwIndex >=0)
+	{
+		t.code = KW_T;
+		t.attribute.kwt_idx = kwIndex;
+		return t;
+	}
+	t.code = AVID_T;
+	strncpy(t.attribute.vid_lex, lexeme, VID_LEN);	
+	t.attribute.vid_lex[VID_LEN] = '\0';
+	if (strlen(lexeme) < VID_LEN+1)		
+	{
+		t.attribute.vid_lex[strlen(lexeme)] = '\0';
+	}
+	return t;
+}
+/**********************************************************************************************************
+Purpose:				Set the Token code and attribute for a string variable identifier
+Author:					Chris Whitten
+History/Versions:		10.19.13
+Called functions:		strncpy(), strlen()
+Parameters:				char lexeme[]
+Return value:			Token t representing a valid strng variable identifier
+Algorithm:				Create a temporary Token, 
+
+
+**********************************************************************************************************/
+Token aa_func03(char lexeme[])
+{
+	Token t;	
+	t.code = SVID_T;	
+	strncpy(t.attribute.vid_lex, lexeme, VID_LEN);
+	t.attribute.vid_lex[VID_LEN-1] = '#';
+	t.attribute.vid_lex[VID_LEN] = '\0';
+	if (strlen(lexeme) < VID_LEN+1)		
+	{
+		t.attribute.vid_lex[strlen(lexeme)-1] = '#';
+		t.attribute.vid_lex[strlen(lexeme)] = '\0';
+	}
+	return t;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//ACCEPTING FUNCTION FOR THE integer literal(IL) - decimal constant (DIL)
+
+Token aa_func05(char lexeme[]){
+	Token t;		/*Token to be returned*/
+	int total = 0;	/*Store the total value */
+	
+	total = decimalString_toInt(lexeme);
+
+	if(total > MAX2BYTEINT || total < 0)
+	{
+		t_set_err_t(lexeme,&t);
+		return t;
+	}
+	
+	t.code = INL_T;
+	t.attribute.int_value = total;
+	return t;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//ACCEPTING FUNCTION FOR THE floating-point literal (FPL)
+
+Token aa_func08(char lexeme[])
+{
+	Token t;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	double number = atof(lexeme);
+
+
+	t.code = FPL_T;
+	t.attribute.flt_value = (float)number;
+	if(number > FLT_MAX || (number < FLT_MIN && number != 0.0))
+	{
+		t_set_err_t(lexeme,&t);
+		return t;
+	}
+
+
+
+	return t;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//ACCEPTING FUNCTION FOR THE integer literal(IL) - octal constant (OIL)
+
+Token aa_func11(char lexeme[]){
+
+	Token t;		/*Token to be returned*/
+	int total = 0;	/*Store the total value */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
+	total = octalstring_toInt(lexeme);
+
+	if(total > MAX2BYTEINT || total < 0)
+	{
+		t_set_err_t(lexeme,&t);
+		return t;
+	}
+	
+	t.code = INL_T;
+	t.attribute.int_value = total;
+	return t;
+}
+
+
+
+
+
+
+
+
+
+
+
+//ACCEPTING FUNCTION FOR THE ERROR TOKEN 
+
+Token aa_func12(char lexeme[]){
+	Token t;
+	t_set_err_t(lexeme,&t);
+	return t;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//CONVERSION FUNCTION
+
+//long atool(char * lexeme){
+
+//THE FUNCTION CONVERTS AN ASCII STRING
+//REPRESENTING AN OCTAL INTEGER CONSTANT TO INTEGER VALUE
+//}
+
+//HERE YOU WRITE YOUR ADDITIONAL FUNCTIONS (IF ANY).
+//FOR EXAMPLE
+
+int decimalString_toInt(char lexeme[])
+{
+	int total = 0;	/*Store the total value */
+	int digit = 0;	/*The current index of the array converted to an int*/
+	unsigned int i = 0;		/*Used as an iterator*/
+	unsigned int j = 0;		/*Used as an iterator*/
+
+	/*Iterate ove the full input array. */
+	for(i = 0; i <strlen(lexeme); i++)
+    {
+		/*Convert the current index of the array to an int. */
+		digit = lexeme[i] - '0';
+		/*Determine the power of the current digit by finding its index in the array. */
+		for(j=1; j< strlen(lexeme) -i; j++)
+		{
+			digit *=10;
+		}
+		/*Add the current digit to the total. */
+		total+= digit;
+	}
+	return total;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+int octalstring_toInt(char lexeme[])
+{
+	int total = 0;	/*Store the total value */
+	int octalDigit = 0;	/*The current index of the array converted to an int*/
+	unsigned int i = 0;		/*Used as an iterator*/
+	unsigned int j = 0;		/*Used as an iterator*/
+
+	/*Iterate ove the full input array. */
+	for(i = 0; i <strlen(lexeme); i++)
+    {
+		/*Convert the current index of the array to an int. */
+		octalDigit = lexeme[i] - '0';
+		/*Determine the power of the current digit by finding its index in the array. */
+		for(j=1; j< strlen(lexeme) -i; j++)
+		{
+			octalDigit *=8;
+		}
+		/*Add the current digit to the total. */
+		total+= octalDigit;
+	}
+	return total;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+int iskeyword(char * kw_lexeme)
+{
+	int i;
+	for( i = 0; i < KWT_SIZE; i++)
+	{
+		if( strcmp(kw_lexeme, kw_table[i]) ==0)
+		{
+			return i;			
+		}
+	}
+	i = -1;
+	return i;
+}
+
+
+
+
+
+
+
+
+
+
+void t_set_err_t(char lexeme[], Token *t)
+{
+	t->code = ERR_T;
+	strncpy(t->attribute.err_lex, lexeme, ERR_LEN);
+	t->attribute.err_lex[ERR_LEN] = '\0';
+	if(strlen(lexeme) < ERR_LEN+1)
+	{
+		t->attribute.err_lex[strlen(lexeme)];
+	}
+}

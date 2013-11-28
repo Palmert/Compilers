@@ -1,0 +1,252 @@
+<program> ->
+		PLATYPUS { <statements> }
+		| PLATYPUS { }
+
+2.1 Input Elements and Tokens
+
+	<input character> -> one of
+			ASCII characters but not SEOF
+
+	<input element > ->
+			<white space > | <comment> | <token>
+
+	<token> ->
+			<variable identifier> | <keyword> | <floating-point literal >
+			| <integer literal > | <string literal> | <separator> | <operator>`
+
+	<variable identifier> ->
+			<arithmetic variable identifier> | <string variable identifier>
+
+	<string variable identifier> ->
+			<arithmetic variable identifier>#
+
+	<variable identifier> -> AVID_T | SVID_T
+
+	<keyword> ->
+			PLATYPUS | IF | THEN | ELSE | USING | REPEAT | INPUT | OUTPUT
+
+	<integer literal> ->
+			<decimal integer literal> | <octal integer literal>
+			
+	<floating-point literal> ->
+			<decimal integer literal> . <opt_digits>
+			
+	<separator> -> one of
+			( ){ } , ; “
+			
+	<operator> ->
+			< arithmetic operator > | <string concatenation operator>
+			| < relational operator> | < logical operator >
+			| < assignment operator >
+
+	<arithmetic operator> -> one of
+			+ - * /
+
+	<string concatenation operator> ->
+			<>
+			
+	<relational operator> -> one of
+			> < == !=
+			
+	<logical operator> ->
+			.AND. | .OR.
+			
+	<assignment operator> ->
+			=
+			
+	<program> ->
+		PLATYPUS {<opt_statements>}
+			
+			
+	<opt_statements> -> <statements>|e
+
+	<statements> -> <statement><statements'>
+	<statements'> -> <statement><statements'>|e
+
+			
+	<statement> ->
+			<assignment statement>
+			| <selection statement>
+			| <iteration statement>
+			| <input statement>
+			| <output statement>
+			
+	<assignment statement> ->
+			<assignment expression>;
+			
+	<assignment expression> ->
+			AVID = <arithmetic expression>
+			| SVID = <string expression>
+			
+	<selection statement> ->
+			IF (<conditional expression>) THEN <opt_statements>
+			ELSE { <opt_statements> } ;
+			
+	<iteration statement> ->
+			USING (<assignment expression> , <conditional expression> , <assignment expression> )
+			REPEAT {
+			< opt_statements>
+			};
+			
+	<input statement> ->
+			INPUT (<variable list>);
+			
+	<variable list> -> <variable identifier><variable list'>
+
+	<variable list'> -> ,<variable identifier><variable list'>|e
+			
+	<output statement> ->
+			OUTPUT (<output list>);
+			
+	<output list>-> <opt_variable list>|STR_T
+			
+	<opt_variable list> -> <variable list> | e
+			
+	<arithmetic expression> -> <unary arithmetic expression>|<additive arithmetic expression>
+			
+	<unary arithmetic expression> -> -<primary arithmetic expression>|+<primary arithmetic expression>
+			
+	<additive arithmetic expression> ->
+			<multiplicative arithmetic expression> |
+			<additive arithmetic expression> + <multiplicative arithmetic expression>
+			| <additive arithmetic expression> - <multiplicative arithmetic expression>
+			
+
+	<additive arithmetic expression> ->
+			<multiplicative arithmetic expression><additive arithmetic expression'>
+
+	<additive arithmetic expression'>
+			+<multiplicative arithmetic expression><additive arithmetic expression'>
+			|-<multiplicative arithmetic expression><additive arithmetic expression'>
+			|e
+
+	<multiplicative arithmetic expression> ->
+			<primary arithmetic expression>
+			| <multiplicative arithmetic expression> * <primary arithmetic expression>
+			| <multiplicative arithmetic expression> / <primary arithmetic expression>
+
+	<multiplicative arithmetic expression> ->
+			<primary arithmetic expression><multiplicative arithmetic expression'>
+
+	<multiplicative arithmetic expression'>
+			* <primary arithmetic expression><multiplicative arithmetic expression'>
+			| / <primary arithmetic expression><multiplicative arithmetic expression'>|e
+			
+
+	<primary arithmetic expression> ->
+			AVID_T
+			| FPL_T
+			| INL_T
+			| (<arithmetic expression>)
+			
+	<string expression> ->
+			<string expression> <> <primary string expression>
+			| <primary string expression>
+
+	<string expression> -> <primary string expression><string expression'>
+			
+	<string expression'> -> <><primary string expression><string expression'>|e
+			
+	<primary string expression> ->
+			SVID_T
+			| STR_T
+			
+	<conditional expression> ->
+			<logical OR expression>
+			
+	<logical OR expression> ->
+			<logical OR expression> .OR. <logical AND expression>
+			| <logical AND expression>
+			
+	<logical OR expression> ->
+			<logical AND expression><logical OR expression'>
+
+	<logical OR expression'> -> .OR. <logical AND expression><logical OR expression'>|e
+			
+	<logical AND expression> ->
+			<logical AND expression> .AND. <relational expression>
+			| <relational expression>
+
+	<logical AND expression> -> <relational expression><logical AND expression'>
+
+	<logical AND expression'> -> .AND. <relational expression><logical AND expression'>|e
+			
+	<relational expression> ->
+			<primary a_relational expression> <relational operator> <primary a_relational expression>
+			| <primary s_relational expression> <relational operator> <primary s_relational expression>
+			
+	<primary a_relational expression> ->
+			AVID_T
+			| FPL_T
+			| INL_T
+			
+	<primary s_relational expression> ->
+			<primary string expression>
+			
+			
+FIRST( program ) = { PLATYPUS { }
+
+FIRST(opt_statements) = { FIRST( statements ), e } 
+
+FIRST( statements ) = { FIRST( statement ) }
+
+FIRST( statements' ) = { FIRST( statement ) }
+
+FIRST( statement ) = { FIRST( assignment statement ), FIRST( selection statement ), 
+		FIRST( iteration statement ), FIRST( input statement ), FIRST( output statement ) }
+		
+FIRST( assignment statement ) = { FIRST( assignment expression ) }
+
+FIRST(assignment expression) = { SVID =, AVID = }
+
+FIRST( selection statement) = { IF }
+
+FIRST( iteration statement ) = { USING }
+
+FIRST( input statement ) = { INPUT }
+
+FIRST( variable list ) = { FIRST( variable identifier ) }
+
+FIRST( variable list' ) = { ',',e } //confirm with Svillen on syntax
+
+FIRST( output statement ) = { OUTPUT }
+
+FIRST( output list ) = { FIRST( opt_variable list), STR_T )
+
+FIRST( opt_variable list ) = { FIRST( variable list ), e }
+
+FIRST( arithmetic expression ) = { FIRST( unary arithmetic expression ), FIRST( additive arithmetic expression ) }
+
+FIRST( unary arithmetic expression ) = { -,+ }
+
+FIRST( additive arithmetic expression ) = { FIRST( multiplicative arithmetic expression ) }
+
+FIRST( additive arithmetic expression' ) = { +, -, e }
+
+FIRST( multiplicative arithmetic expression ) = { FIRST( primary arithmetic expression ) }
+
+FIRST( multiplicative arithmetic expression' ) = { *, /, e }
+
+FIRST( primary arithmetic expression ) = { AVID_T, FPL_T, INL_T, FIRST( arithmetic expression ) }
+
+FIRST( string expression ) = { FIRST( primary string expression ) }
+
+FIRST( string expression' ) = { <>, e }
+
+FIRST( primary string expression ) = { SVID_T, STR_T }
+
+FIRST( conditional expression ) = { FIRST( logical OR expression ) }
+
+FIRST( logical OR expression ) = { FIRST( logical AND expression ), FIRST( logical OR expression' ) }
+
+FIRST( logical OR expression' ) = { .OR., e }
+
+FIRST( logical AND expression ) = { FIRST( relational expression ) }
+
+FIRST( logical AND expression' ) = { .AND., e }
+
+FIRST( relational expression ) = { FIRST ( primary a_relational expression ) , FIRST( primary s_relational expression ) }
+
+FIRST( primary s_relational expression ) =  { SVID_T, STR_T }
+
+FIRST ( primary a_relational expression ) = { AVID_T, FPL_T, INL_T }

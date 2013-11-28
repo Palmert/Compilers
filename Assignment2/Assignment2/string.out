@@ -1,0 +1,24 @@
+Reading file string.pls ....Please wait
+
+Printing buffer parameters:
+
+The capacity of the buffer is:  65
+The current size of the buffer is:  64
+
+Printing buffer contents:
+
+!< Should containt ERR_T and SEOF_T as well as "5 Lines"
+"
+1
+2
+3
+
+Scanning source file...
+
+Token		Attribute
+----------------------------------
+ERR_T		"
+1
+2
+3
+SEOF_T
