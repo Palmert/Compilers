@@ -1,7 +1,0 @@
-Part 1: Correct & Complete BNF Grammer //Early comp Oct 15 latest Oct17
-	1.1 Read informal language specs
-	1.2 Read language specs
-	1.3 Ensure they define the same language
-*	1.4 Correct and complete BNF grammer //Hand in on paper only productions. 
-
-Part 2: Implementing the Scanner
