@@ -79,12 +79,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="buffer.c" />
-    <ClCompile Include="play_tt.c" />
+    <ClCompile Include="platy.c" />
     <ClCompile Include="scanner.c" />
     <ClCompile Include="stable.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="buffer.h" />
+    <ClInclude Include="parser.h" />
     <ClInclude Include="stable.h" />
     <ClInclude Include="table.h" />
     <ClInclude Include="token.h" />
