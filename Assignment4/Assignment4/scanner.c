@@ -568,7 +568,7 @@ Token aa_func02(char lexeme[])
 	int kwIndex;		/* Stores index in kw_table */
 	int vid_offset;     /* Temporarily stores offset where vid was installed */
 	
-
+	
 	/* Call iskeyword to find if lexeme is a keyword */
 	kwIndex = iskeyword(lexeme);
 	if( kwIndex >=0)
