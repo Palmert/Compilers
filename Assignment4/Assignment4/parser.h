@@ -3,11 +3,9 @@
 #include "stable.h"
 
 
-<<<<<<< HEAD
+
 #define NO_ATTR -1
-=======
-#define NO_ATTR NULL
->>>>>>> b5989c84ff6c4e6cfef41f1e1182fe1ba13a2855
+
 
 #define ELSE 0
 #define IF 1
