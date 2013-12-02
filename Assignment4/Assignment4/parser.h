@@ -20,7 +20,7 @@ static Token lookahead;
 static Token lookahead_token;
 static Buffer* sc_buf;
 int synerrno;
-extern char* kw_table;
+extern char* kw_table[8];
 
 void parser(Buffer* in_buf);
 void match(int pr_token_code,int pr_token_attribute);
