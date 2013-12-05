@@ -39,6 +39,11 @@ void match(int pr_token_code,int pr_token_attribute)
 	return;
 }
 
+/*********************************************************************************************************
+Function:		program
+Production:		PLAYTPUS {<opt_statements>}
+First:			{ KW_T(PLATYPUS) }
+*********************************************************************************************************/
 void program(void)
 {
 	match(KW_T,PLATYPUS);
@@ -48,7 +53,11 @@ void program(void)
 	gen_incode("PLATY: Program parsed");
 }
 
-
+/*********************************************************************************************************
+Function:		opt_statements
+Production:		<statements>|e
+First:			{ SVID , AVID, KW_T(IF), KW_T(USING) , KW_T(INPUT), KW_T(OUTPUT), e }
+*********************************************************************************************************/
 void opt_statements(void)
 {
 	/* FIRST set: {AVID_T,SVID_T,KW_T(but not PLATYPUS,ELSE,THEN,REPEAT),e} */
@@ -71,11 +80,21 @@ void opt_statements(void)
 	}
 }
 
-
+/*********************************************************************************************************
+Function:		statements
+Production:		<statement><statements'>
+First:			{ SVID , AVID, KW_T(IF), KW_T(USING) , KW_T(INPUT), KW_T(OUTPUT) }
+*********************************************************************************************************/
 void statements(void)
 {
 	statement();statements_p();
 }
+
+/*********************************************************************************************************
+Function:		statements_p
+Production:		<statement><statements'>|e
+First:			{ SVID , AVID, KW_T(IF), KW_T(USING) , KW_T(INPUT), KW_T(OUTPUT) }
+*********************************************************************************************************/
 void statements_p(void)
 {
 	/*FIRST( statements' ) = { SVID , AVID, KW_T(IF), KW_T(USING) , KW_T(INPUT), KW_T(OUTPUT) }*/
@@ -98,6 +117,16 @@ void statements_p(void)
 	}
 
 }
+
+/*********************************************************************************************************
+Function:		statement
+Production:		<assignment statement>
+				|<selection statement>
+				|<iteration statement>
+				|<input statement>
+				|<output statement>
+First:			{ SVID , AVID, KW_T(IF), KW_T(USING) , KW_T(INPUT), KW_T(OUTPUT) }
+*********************************************************************************************************/
 void statement(void)
 {
 	/*FIRST( statement ) = { SVID , AVID, KW_T(IF), KW_T(USING) , KW_T(INPUT), KW_T(OUTPUT) }*/
@@ -115,12 +144,25 @@ void statement(void)
 		}
 	}
 }
+
+/*********************************************************************************************************
+Function:		assignment_statement
+Production:		<assignment expression>;
+First:			{ SVID , AVID }
+*********************************************************************************************************/
 void assignment_statement(void)
 {
 	/*FIRST( assignment statement ) = { SVID , AVID }*/
 	assignment_expression(); match(EOS_T,NO_ATTR);
 	gen_incode("PLATY: Assignment statement parsed");
 }
+
+/*********************************************************************************************************
+Function:		assignment_expression
+Production:		AVID = <arithmetic expression>
+				|SVID = <string expression>
+First:			{ SVID , AVID }
+*********************************************************************************************************/
 void assignment_expression(void)
 {
 	/*FIRST(assignment expression) = { SVID , AVID }*/
@@ -131,7 +173,12 @@ void assignment_expression(void)
 	}
 }
 	
-	
+/*********************************************************************************************************
+Function:		selection_statement
+Production:		IF(<conditional expression>)  THEN <opt_statements>
+				ELSE { opt_statements };
+First:			{ KW_T(IF) }
+*********************************************************************************************************/
 void selection_statement(void)
 {
 	/*FIRST( selection statement) = { KW_T(IF) }*/
@@ -148,6 +195,15 @@ void selection_statement(void)
 	match(EOS_T,NO_ATTR);
 	gen_incode("PLATY: IF statement parsed");
 }
+
+/*********************************************************************************************************
+Function:		iteration_statement
+Production:		USING(<assignment expression>,<conditional expression>,<assignment expression>)
+				REPEAT{
+					<opt_statements>
+				};
+First:			{ KW_T(USING) }
+*********************************************************************************************************/
 void iteration_statement(void)
 {
 	/*FIRST( iteration statement ) = { KW_T(USING) }*/
@@ -166,6 +222,12 @@ void iteration_statement(void)
 	match(EOS_T,NO_ATTR);
 	gen_incode("PLATY: USING statement parsed");
 }
+
+/*********************************************************************************************************
+Function:		input_statement
+Production:		INPUT(<variable list>);
+First:			{ KW_T(INPUT) }
+*********************************************************************************************************/
 void input_statement(void)
 {
 	match(KW_T,INPUT);
@@ -175,6 +237,12 @@ void input_statement(void)
 	match(EOS_T,NO_ATTR);
 	gen_incode("PLATY: INPUT statement parsed");
 }
+
+/*********************************************************************************************************
+Function:		variable_list
+Production:		<variable identifier><variable list'>
+First:			{ SVID , AVID }
+*********************************************************************************************************/
 void variable_list(void)
 {
 	/*FIRST( variable list ) = { SVID , AVID }*/
@@ -182,6 +250,12 @@ void variable_list(void)
 	variable_list_p();
 	gen_incode("PLATY: Variable list parsed");
 }
+
+/*********************************************************************************************************
+Function:		variable_list_p
+Production:		,<variable identifier><variable list'>|e
+First:			{ COM_T,e } 
+*********************************************************************************************************/
 void variable_list_p(void)
 {
 	/*FIRST( variable list' ) = { COM_T,e } */
@@ -192,6 +266,12 @@ void variable_list_p(void)
 	}	
 	
 }
+
+/*********************************************************************************************************
+Function:		variable_identifier
+Production:		<arithmetic variable identifier> | <string variable identifier>
+First:			{ SVID , AVID }
+*********************************************************************************************************/
 void variable_identifier(void)
 {
 	/*FIRST(variable identifier) = { SVID , AVID }*/
@@ -205,6 +285,12 @@ void variable_identifier(void)
 		break;
 	}
 }
+
+/*********************************************************************************************************
+Function:		output_statement
+Production:		OUTPUT(<output list>);
+First:			{ KW_T(OUTPUT) }
+*********************************************************************************************************/
 void output_statement(void)
 {
 	/*FIRST( output statement ) = { KW_T(OUTPUT) }*/
@@ -215,6 +301,12 @@ void output_statement(void)
 	match(EOS_T,NO_ATTR);
 	gen_incode("PLATY: OUTPUT statement parsed");
 }
+
+/*********************************************************************************************************
+Function:		output_list
+Production:		<variable list>|STR_T | e
+First:			{ SVID , AVID ,STR_T, e )
+*********************************************************************************************************/
 void output_list(void)
 {
 	/*FIRST( output list ) = { SVID , AVID ,STR_T, e )*/
@@ -229,6 +321,13 @@ void output_list(void)
 	}
 	
 }
+
+/*********************************************************************************************************
+Function:		arithmetic_expression
+Production:		<unary arithmetic expression>
+				|<additive arithmetic expression>
+First:			{ ART_OP_T(MINUS), ART_OP_T(PLUS) ,AVID_T, FPL_T, INL_T, LPR_T }
+*********************************************************************************************************/
 void arithmetic_expression(void)
 {
 	/*FIRST( arithmetic expression ) = { ART_OP_T(MINUS), ART_OP_T(PLUS) ,AVID_T, FPL_T, INL_T, LPR_T }*/
@@ -248,6 +347,13 @@ void arithmetic_expression(void)
 	}
 	gen_incode("PLATY: Arithmetic expression parsed");
 }
+
+/*********************************************************************************************************
+Function:		unary_arithmetic_expression
+Production:		- <primary arithmetic expression>
+				|+<primary arithmetic expression>
+First:			{ ART_OP_T(MINUS), ART_OP_T(PLUS) }
+*********************************************************************************************************/
 void unary_arithmetic_expression(void)
 {
 	/*FIRST( unary arithmetic expression ) = { ART_OP_T(MINUS), ART_OP_T(PLUS) }*/
@@ -269,6 +375,12 @@ void unary_arithmetic_expression(void)
 		gen_incode("PLATY: Unary arithmetic expression parsed");
 	}	
 }
+
+/*********************************************************************************************************
+Function:		additive_arithmetic_expression
+Production:		<multiplicative arithmetic expression><additive arithmetic expression'>
+First:			{ AVID_T, FPL_T, INL_T, LPR_T }
+*********************************************************************************************************/
 void additive_arithmetic_expression(void)
 {
 	/*FIRST( additive arithmetic expression ) = { AVID_T, FPL_T, INL_T, LPR_T }*/
@@ -276,6 +388,14 @@ void additive_arithmetic_expression(void)
 	additive_arithmetic_expression_p(); 
 	
 }
+
+/*********************************************************************************************************
+Function:		additive_arithmetic_expression_p
+Production:		+<multiplicative arithmetic expression><additive arithmetic expression'>
+				|-<multiplicative arithmetic expression><additive arithmetic expression'>
+				|e
+First:			{ ART_OP_T(PLUS), ART_OP_T(MINUS), e }
+*********************************************************************************************************/
 void additive_arithmetic_expression_p(void)
 {
 	/*FIRST( additive arithmetic expression' ) = { ART_OP_T(PLUS), ART_OP_T(MINUS), e }*/
@@ -300,6 +420,12 @@ void additive_arithmetic_expression_p(void)
 	/*empty*/
 	/*empty*/
 }
+
+/*********************************************************************************************************
+Function:		multiplicative_arithmetic_expression
+Production:		<primary arithmetic expression><multiplicative arithmetic expression'>
+First:			{ AVID_T, FPL_T, INL_T, LPR_T }
+*********************************************************************************************************/
 void multiplicative_arithmetic_expression(void)
 {
 	/*FIRST( multiplicative arithmetic expression ) = { AVID_T, FPL_T, INL_T, LPR_T }*/
@@ -307,6 +433,14 @@ void multiplicative_arithmetic_expression(void)
 	multiplicative_arithmetic_expression_p(); 
 	
 }
+
+/*********************************************************************************************************
+Function:		multiplicative_arithmetic_expression_p
+Production:		* <primary arithmetic expression><multiplicative arithmetic expression'>
+				|/ <primary arithmetic expression><multiplicative arithmetic expression'>
+				|e
+First:			{ ART_OP_T(MULT), ART_OP_T(DIV), e }
+*********************************************************************************************************/
 void multiplicative_arithmetic_expression_p(void)
 {
 	/*FIRST( multiplicative arithmetic expression' ) = { ART_OP_T(MULT), ART_OP_T(DIV), e }*/
@@ -330,6 +464,15 @@ void multiplicative_arithmetic_expression_p(void)
 	}
 	/*empty*/
 }
+
+/*********************************************************************************************************
+Function:		primary_arithmetic_expression
+Production:		  AVID_T
+				| FPL_T
+				| INL_T
+				| (<arithmetic expression>)
+First:			{ AVID_T, FPL_T, INL_T, LPR_T }
+*********************************************************************************************************/
 void primary_arithmetic_expression(void)
 {
 	/*FIRST( primary arithmetic expression ) = { AVID_T, FPL_T, INL_T, LPR_T }*/
@@ -354,6 +497,12 @@ void primary_arithmetic_expression(void)
 	}
 	gen_incode("PLATY: Primary arithmetic expression parsed");
 }
+
+/*********************************************************************************************************
+Function:		string_expression
+Production:		<primary string expression><string expression'>
+First:			{ SVID_T, STR_T }
+*********************************************************************************************************/
 void string_expression(void)
 {
 	/*FIRST( string expression ) = { SVID_T, STR_T}*/
@@ -361,6 +510,13 @@ void string_expression(void)
 	string_expression_p();
 	gen_incode("PLATY: String expression parsed");
 }
+
+/*********************************************************************************************************
+Function:		string_expression_p
+Production:		<> <primary string expression><string expression'>
+				|e
+First:			{ SCC_OP_T, e }
+*********************************************************************************************************/
 void string_expression_p(void)
 {
 	/*FIRST( string expression' ) = { SCC_OP_T, e }*/
@@ -372,6 +528,13 @@ void string_expression_p(void)
 	}
 	
 }
+
+/*********************************************************************************************************
+Function:		primary_string_expression
+Production:		 SVID_T
+				|STR_T
+First:			{ SVID_T, STR_T }
+*********************************************************************************************************/
 void primary_string_expression(void)
 {
 	/*FIRST( primary string expression ) = { SVID_T, STR_T }*/
@@ -388,12 +551,24 @@ void primary_string_expression(void)
 	}
 	gen_incode("PLATY: Primary string expression parsed");
 }
+
+/*********************************************************************************************************
+Function:		conditional_expression
+Production:		<logical OR expression>
+First:			{ AVID_T, FPL_T, INL_T , SVID_T, STR_T }
+*********************************************************************************************************/
 void conditional_expression(void)
 {
 	logical_or_expression();
 	/*FIRST( conditional expression ) = { AVID_T, FPL_T, INL_T , SVID_T, STR_T }*/
 	gen_incode("PLATY: Conditional expression parsed");
 }
+
+/*********************************************************************************************************
+Function:		logical_or_expression
+Production:		<logical AND expression><logical OR expression'>
+First:			{ AVID_T, FPL_T, INL_T , SVID_T, STR_T }
+*********************************************************************************************************/
 void logical_or_expression(void)
 {
 	logical_and_expression();
@@ -401,6 +576,13 @@ void logical_or_expression(void)
 	/*FIRST( logical OR expression ) = { AVID_T, FPL_T, INL_T , SVID_T, STR_T }*/
 	
 }
+
+/*********************************************************************************************************
+Function:		logical_or_expression_p
+Production:		.OR. <logical AND expression><logical OR expression'>
+				|e
+First:			{ LOG_OP_T(OR), e }
+*********************************************************************************************************/
 void logical_or_expression_p(void)
 {
 	/*FIRST( logical OR expression' ) = { LOG_OP_T(OR), e }*/
@@ -409,12 +591,25 @@ void logical_or_expression_p(void)
 		gen_incode("PLATY: Logical OR expression parsed");
 	}	
 }
+
+/*********************************************************************************************************
+Function:		logical_and_expression
+Production:		<relational expression><logical AND expression'>
+First:			{ AVID_T, FPL_T, INL_T , SVID_T, STR_T }
+*********************************************************************************************************/
 void logical_and_expression(void)
 {
 	/*FIRST( logical AND expression ) = { AVID_T, FPL_T, INL_T , SVID_T, STR_T }*/
 	relational_expression();logical_and_expression_p();
 	
 }
+
+/*********************************************************************************************************
+Function:		logical_and_expression_p
+Production:		.AND. <relational expression><logical AND expression'>
+				|e
+First:			{ LOG_OP_T(AND), e }		
+*********************************************************************************************************/
 void logical_and_expression_p(void)
 {
 	/*FIRST( logical AND expression' ) = { LOG_OP_T(AND), e }*/
@@ -426,6 +621,13 @@ void logical_and_expression_p(void)
 	
 
 }
+
+/*********************************************************************************************************
+Function:		relational_expression
+Production:		<primary a_relational expression> <relational operator> <primary a_relational expression>
+				|<primary s_relational expression> <relational operator> <primary s_relational expression>
+First:			{ AVID_T, FPL_T, INL_T , SVID_T, STR_T }
+*********************************************************************************************************/
 void relational_expression(void)
 {
 	/*FIRST( relational expression ) = { AVID_T, FPL_T, INL_T , SVID_T, STR_T }*/
@@ -444,6 +646,14 @@ void relational_expression(void)
 	gen_incode("PLATY: Relational expression parsed");
 
 }
+
+/*********************************************************************************************************
+Function:		primary_a_relational_expression
+Production:		 AVID_T
+				|FPL_T
+				|INL_T
+First:			{ AVID_T, FPL_T, INL_T }
+*********************************************************************************************************/
 void primary_a_relational_expression(void)
 {
 	/*FIRST ( primary a_relational expression ) = { AVID_T, FPL_T, INL_T }*/
@@ -462,6 +672,11 @@ void primary_a_relational_expression(void)
 	gen_incode("PLATY: Primary a_relational expression parsed");
 }
 
+/*********************************************************************************************************
+Function:		primary_s_relational_expression
+Production:		<primary string expression>
+First:			{ SVID_T, STR_T }
+*********************************************************************************************************/
 void primary_s_relational_expression(void)
 {
 	/*FIRST( primary s_relational expression ) =  { SVID_T, STR_T }*/
@@ -469,6 +684,11 @@ void primary_s_relational_expression(void)
 	gen_incode("PLATY: Primary s_relational expression parsed");	
 }
 
+/*********************************************************************************************************
+Function:		relational_operator
+Production:		> | < | == | !=
+First:			{REL_OP_T(GT),REL_OP_T(LT),REL_OP_T(EQ),REL_OP_T(NE)}
+*********************************************************************************************************/
 void relational_operator(void)
 {
 	/*FIRST(relational operator)= {REL_OP_T(GT),REL_OP_T(LT),REL_OP_T(EQ),REL_OP_T(NE)}*/
