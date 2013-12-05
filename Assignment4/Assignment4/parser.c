@@ -7,11 +7,11 @@ extern int line;
 void parser(Buffer* in_buf)
 {
 
-    sc_buf = in_buf;
-    lookahead_token = mlwpar_next_token(sc_buf);
-    program();
-    match(SEOF_T, NO_ATTR);
-    gen_incode("PLATY: Source file parsed");
+	sc_buf = in_buf;
+	lookahead_token = mlwpar_next_token(sc_buf);
+	program();
+	match(SEOF_T, NO_ATTR);
+	gen_incode("PLATY: Source file parsed");
 
 }
 
@@ -128,6 +128,8 @@ void assignment_expression(void)
 	{
 	case SVID_T: match(SVID_T,NO_ATTR); match(ASS_OP_T, NO_ATTR); string_expression(); gen_incode("PLATY: Assignment expression (string) parsed");break;
 	case AVID_T: match(AVID_T,NO_ATTR); match(ASS_OP_T, NO_ATTR); arithmetic_expression(); gen_incode("PLATY: Assignment expression (arithmetic) parsed"); break;
+	default:
+		syn_printe();
 	}
 }
 	
@@ -181,6 +183,7 @@ void variable_list(void)
 	variable_identifier();
 	variable_list_p();
 	gen_incode("PLATY: Variable list parsed");
+	
 }
 void variable_list_p(void)
 {
@@ -188,9 +191,8 @@ void variable_list_p(void)
 	if(lookahead_token.code == COM_T)
 	{
 		match(COM_T,NO_ATTR);
-		variable_identifier();variable_list_p();		
+		variable_identifier();variable_list_p();
 	}	
-	
 }
 void variable_identifier(void)
 {
@@ -203,6 +205,8 @@ void variable_identifier(void)
 	case AVID_T:
 		match(AVID_T,NO_ATTR);
 		break;
+	default:
+		syn_printe();
 	}
 }
 void output_statement(void)
@@ -265,9 +269,14 @@ void unary_arithmetic_expression(void)
 			syn_printe();
 			break;
 		}		
-		primary_arithmetic_expression(); 
-		gen_incode("PLATY: Unary arithmetic expression parsed");
-	}	
+		
+	}
+	else
+	{
+		syn_printe();
+	}
+	primary_arithmetic_expression(); 
+	gen_incode("PLATY: Unary arithmetic expression parsed");
 }
 void additive_arithmetic_expression(void)
 {
@@ -384,6 +393,7 @@ void primary_string_expression(void)
 		match(STR_T, NO_ATTR);
 		break;
 	default:
+		syn_printe();
 		break;
 	}
 	gen_incode("PLATY: Primary string expression parsed");
@@ -440,6 +450,9 @@ void relational_expression(void)
 	case STR_T:
 		primary_s_relational_expression();relational_operator(); primary_s_relational_expression();
 		break;
+	default:
+		syn_printe();
+		break;
 	}
 	gen_incode("PLATY: Relational expression parsed");
 
@@ -457,7 +470,10 @@ void primary_a_relational_expression(void)
 		break;
 	case INL_T:
 		match(INL_T, NO_ATTR);
-		break;	
+		break;
+	default:
+		syn_printe();
+		break;
 	}
 	gen_incode("PLATY: Primary a_relational expression parsed");
 }
@@ -486,11 +502,16 @@ void relational_operator(void)
 				break;
 		}
 	}
+	else
+	{
+		syn_printe();
+	}	
 }
 
 /* Parser error printing function, Assignment 4, F13
  */
-void syn_printe(){
+void syn_printe()
+{
 Token t = lookahead_token;
 
 printf("PLATY: Syntax error:  Line:%3d\n",line);
@@ -510,14 +531,14 @@ switch(t.code){
 		printf("%5.1f\n",t.attribute.flt_value);
 	 break;
 	case INL_T: /* INL_T      5   Integer literal token */
-	        printf("%d\n",t.attribute.get_int);
+			printf("%d\n",t.attribute.get_int);
 	 break;
 	case STR_T:/* STR_T     6   String literal token */
-	        printf("%s\n",b_get_chmemloc(str_LTBL,(short)t.attribute.get_int));
+			printf("%s\n",b_get_chmemloc(str_LTBL,(short)t.attribute.get_int));
 	break;
-        
-        case SCC_OP_T: /* 7   String concatenation operator token */
-	        printf("NA\n" );
+		
+		case SCC_OP_T: /* 7   String concatenation operator token */
+			printf("NA\n" );
 	break;
 	
 	case  ASS_OP_T:/* ASS_OP_T  8   Assignment operator token */
@@ -537,27 +558,27 @@ switch(t.code){
 		printf("NA\n" );
 	break;
 	case  RPR_T: /*RPR_T    13  Right parenthesis token */
-	        printf("NA\n" );
+			printf("NA\n" );
 	break;
 	case LBR_T: /*    14   Left brace token */
-	        printf("NA\n" );
+			printf("NA\n" );
 	break;
 	case RBR_T: /*    15  Right brace token */
-	        printf("NA\n" );
+			printf("NA\n" );
 	break;
 		
 	case KW_T: /*     16   Keyword token */
-	        printf("%s\n",kw_table[t.attribute.get_int]);
+			printf("%s\n",kw_table[t.attribute.get_int]);
 	break;
 	
 	case COM_T: /* 17   Comma token */
-	        printf("NA\n");
+			printf("NA\n");
 	break;
 	case EOS_T: /*    18  End of statement *(semi - colon) */
-	        printf("NA\n" );
+			printf("NA\n" );
 	break; 		
 	default:
-	        printf("PLATY: Scanner error: invalid token code: %d\n", t.code);
+			printf("PLATY: Scanner error: invalid token code: %d\n", t.code);
 	}
 }
 

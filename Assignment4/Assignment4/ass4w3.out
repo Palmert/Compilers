@@ -24,6 +24,8 @@ PLATYPUS !<What is this creature doing here?
 
 Parsing the source file...
 
+PLATY: Syntax error:  Line:  6
+*****  Token code: 16 Attribute: IF
 PLATY: Variable list parsed
 PLATY: Syntax error:  Line:  6
 *****  Token code: 16 Attribute: IF
@@ -35,6 +37,8 @@ PLATY: Assignment statement parsed
 PLATY: Variable list parsed
 PLATY: INPUT statement parsed
 PLATY: Primary a_relational expression parsed
+PLATY: Syntax error:  Line:  9
+*****  Token code:  6 Attribute: begin
 PLATY: Primary a_relational expression parsed
 PLATY: Relational expression parsed
 PLATY: Conditional expression parsed

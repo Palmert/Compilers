@@ -37,6 +37,8 @@ PLATY: Syntax error:  Line:  7
 PLATY: Primary arithmetic expression parsed
 PLATY: Arithmetic expression parsed
 PLATY: Assignment expression (arithmetic) parsed
+PLATY: Syntax error:  Line:  8
+*****  Token code: 13 Attribute: NA
 PLATY: Relational expression parsed
 PLATY: Conditional expression parsed
 PLATY: Primary arithmetic expression parsed
@@ -58,6 +60,8 @@ PLATY: Primary string expression parsed
 PLATY: Primary s_relational expression parsed
 PLATY: Relational expression parsed
 PLATY: Conditional expression parsed
+PLATY: Syntax error:  Line:  9
+*****  Token code: 13 Attribute: NA
 PLATY: Opt_statements parsed
 PLATY: USING statement parsed
 PLATY: Primary arithmetic expression parsed

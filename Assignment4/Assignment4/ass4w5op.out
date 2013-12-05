@@ -37,6 +37,10 @@ PLATY: Syntax error:  Line:  3
 *****  Token code: 11 Attribute: 1
 PLATY: Assignment statement parsed
 PLATY: Primary a_relational expression parsed
+PLATY: Syntax error:  Line:  4
+*****  Token code:  9 Attribute: 0
+PLATY: Syntax error:  Line:  4
+*****  Token code:  9 Attribute: 0
 PLATY: Primary a_relational expression parsed
 PLATY: Relational expression parsed
 PLATY: Conditional expression parsed
@@ -49,6 +53,10 @@ PLATY: Assignment statement parsed
 PLATY: Opt_statements parsed
 PLATY: IF statement parsed
 PLATY: Primary a_relational expression parsed
+PLATY: Syntax error:  Line:  6
+*****  Token code:  9 Attribute: 3
+PLATY: Syntax error:  Line:  6
+*****  Token code:  9 Attribute: 3
 PLATY: Primary a_relational expression parsed
 PLATY: Relational expression parsed
 PLATY: Conditional expression parsed
