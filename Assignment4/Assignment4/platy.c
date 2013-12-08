@@ -53,6 +53,7 @@ extern void parser(Buffer * sc_buf);
 /* For testing purposes */
  extern void scanner_init(Buffer * sc_buf);
 /* extern Token malpar_next_token(Buffer * sc_buf);*/
+ 
 
 void err_printf(char *fmt, ...);
 void display (Buffer *ptrBuffer); 
@@ -257,7 +258,8 @@ void garbage_collect(void){
     printf("\nSyntax errors: %d\n",synerrno);
   printf("\nCollecting garbage...\n");
   b_destroy(sc_buf);
-  b_destroy(str_LTBL);  
+  b_destroy(str_LTBL); 
+
   st_destroy(sym_table);
 }
 

@@ -54,9 +54,9 @@ static Buffer *lex_buf;/*pointer to temporary lexeme buffer*/
 static int char_class(char c);					/* character class function */
 static int get_next_state(int, char, int *);	/* state machine function */
 static int iskeyword(char * kw_lexeme);			/* keywords lookup functuion */
-static double atodbl(char * lexeme);			/* Converts string to double */
+double atodbl(char * lexeme);			/* Converts string to double */
 static long atool(char * lexeme);				/* Converts octal string to decimal value */
-static int atoint(char * lexeme);				/* Converts integer literal string to int value */
+int atoint(char * lexeme);				/* Converts integer literal string to int value */
 
 int scanner_init(Buffer * sc_buf) {
   	if(b_isempty(sc_buf)) return EXIT_FAILURE;/*1*/

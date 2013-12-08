@@ -1,0 +1,42 @@
+Reading file ass4w4.pls ....Please wait
+
+Printing input buffer parameters:
+
+The capacity of the buffer is:  224
+The current size of the buffer is:  223
+
+Printing input buffer contents:
+
+!<This program contains syntax errors
+!<Addition to Murphy's laws:
+!<"In nature, nothing is ever right. Therefore,
+!<if everything is going right ... something is wrong."
+
+PLATYPUS{
+  USING(a=a,a == b * c,c=c)REPEAT{
+   IF(
+
+Parsing the source file...
+
+PLATY: Primary arithmetic expression parsed
+PLATY: Arithmetic expression parsed
+PLATY: Assignment expression (arithmetic) parsed
+PLATY: Primary a_relational expression parsed
+PLATY: Primary a_relational expression parsed
+PLATY: Relational expression parsed
+PLATY: Conditional expression parsed
+PLATY: Syntax error:  Line:  7
+*****  Token code:  9 Attribute: 2
+PLATY: Primary arithmetic expression parsed
+PLATY: Arithmetic expression parsed
+PLATY: Assignment expression (arithmetic) parsed
+PLATY: Syntax error:  Line:  8
+*****  Token code:  1 Attribute: NA
+PLATY: Relational expression parsed
+PLATY: Conditional expression parsed
+PLATY: Syntax error:  Line:  8
+*****  Token code:  1 Attribute: NA
+
+Syntax errors: 2
+
+Collecting garbage...

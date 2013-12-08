@@ -80,7 +80,7 @@ Algorithm:				Set the Token code to ERR_t then set the err_lex attribute to the 
 #define	SEMICLN	 ';'		/* Semicolon symbol constant */
 #define NEG		 '-'		/* Minus symbol sign constant */
 #define POS		 '+'		/* Plus sign symbol constant */
-#define	ASTRX	 '*'		/* Asterix symbol constant */
+#define	ASTRX	 '*'		/* Astrix symbol constant */
 #define FWDSLSH	 '/'		/* Forward slash symbol constant */
 #define NEWLINE  '\n'		/* Newline symbol constant */
 #define PERIOD	 '.'		/* Period symbol constant */
@@ -187,6 +187,8 @@ char * kw_table []= {
                       "THEN",
                       "USING"   
                      };
+
+char precendence_table[] = { FWDSLSH, ASTRX, POS, NEG	};
 
 #endif
                      

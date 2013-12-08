@@ -1,12 +1,12 @@
+
 #include "buffer.h"
 #include "token.h"
 #include "stable.h"
 
 
 
+
 #define NO_ATTR -1
-
-
 #define ELSE 0
 #define IF 1
 #define INPUT 2
@@ -16,18 +16,34 @@
 #define THEN 6
 #define USING 7
 
-static Token lookahead;
+
 static Token lookahead_token;
 static Buffer* sc_buf;
 int synerrno;
 extern char* kw_table[8];
+extern Token mlwpar_next_token(Buffer * sc_buf);
+extern Buffer* str_LTBL;
+extern STD sym_table;
+extern int line;
+extern double atodbl(char * lexeme);
+extern int atoint(char* lexeme);
+
+typedef struct TokenListItem
+{
+	struct TokenListItem *prevTLI;
+	Token currToken;
+	struct TokenListItem *nextTLI;
+}TL;
+
+TL *tkn_list;
+Token stack[150];
+int stackIndex;
 
 void parser(Buffer* in_buf);
 void match(int pr_token_code,int pr_token_attribute);
 void syn_eh(int sync_token_code);
 void syn_printe(void);
-void gen_incode(char* str); //Unsure about parameter name. Says it should be a string
-
+void gen_incode(char* production); 
 void program(void);
 void opt_statements(void);
 void statements(void);
@@ -62,6 +78,12 @@ void relational_expression(void);
 void primary_a_relational_expression(void);
 void primary_s_relational_expression(void);
 void relational_operator(void);
+
+void tl_addt(void);
+void tl_destroy(void);
+void tl_printtl(void);
+void tl_inputtl(void);
+void sem_analyze(void);
 
 
 

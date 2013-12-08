@@ -5,11 +5,4 @@
 
 PLATYPUS{
   USING(a=a,a == b * c,c=c)REPEAT{
-   IF()THEN a=b!=c; ELSE ELSE{};
-    USING(a=a,good# != "a",)REPEAT{};
-    a = (a  badLong89#) + (good badLong89) * (good 7.);
-   };
-  IF (c > 0)THEN ELSE{};
-  OUTPUT("Imagine all the scanners );
- }
-}
+   IF(
