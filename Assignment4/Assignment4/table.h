@@ -188,7 +188,7 @@ char * kw_table []= {
                       "USING"   
                      };
 
-char precendence_table[] = { FWDSLSH, ASTRX, POS, NEG	};
+char precendence_table[] = { FWDSLSH, ASTRX, POS, NEG };
 
 #endif
                      

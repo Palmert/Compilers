@@ -159,8 +159,6 @@ void statement(void)
     {
     case SVID_T:
     case AVID_T:
-		stackIndex = 0;
-		stack[stackIndex++] = lookahead_token;
         assignment_statement();
         break;
     case KW_T:
@@ -189,8 +187,16 @@ Author			Thom Palmer
 *********************************************************************************************************/
 void assignment_statement(void)
 {
-	
+	lvalue = lookahead_token;
     assignment_expression();
+	if(op_stack!=NULL)
+	{
+		while(op_stack->prevstackItem)
+		{
+			tl_addt(pop(&op_stack));
+		}
+		tl_addt(pop(&op_stack));
+	}
     match(EOS_T,NO_ATTR);
 	sem_analyze();
     gen_incode("PLATY: Assignment statement parsed");
@@ -208,17 +214,13 @@ void assignment_expression(void)
     switch(lookahead_token.code)
     {
     case SVID_T:
-		stack[stackIndex++] = lookahead_token;
         match(SVID_T,NO_ATTR);
-		stack[stackIndex++] = lookahead_token;
         match(ASS_OP_T, NO_ATTR);
         string_expression();
         gen_incode("PLATY: Assignment expression (string) parsed");
         break;
     case AVID_T:
-		stack[stackIndex++] = lookahead_token;
         match(AVID_T,NO_ATTR);
-		stack[stackIndex++] = lookahead_token;
         match(ASS_OP_T, NO_ATTR);
         arithmetic_expression();
         gen_incode("PLATY: Assignment expression (arithmetic) parsed");
@@ -330,11 +332,11 @@ void variable_identifier(void)
     switch(lookahead_token.code)
     {
     case SVID_T:
-		tl_addt();
+		tl_addt(lookahead_token);
         match(SVID_T,NO_ATTR);
         break;
     case AVID_T:
-		tl_addt();
+		tl_addt(lookahead_token);
         match(AVID_T,NO_ATTR);
         break;
     default:
@@ -371,7 +373,7 @@ void output_list(void)
         variable_list();
         break;
     case STR_T:
-		tl_addt();
+		tl_addt(lookahead_token);
         match(STR_T,NO_ATTR);      
         break;
     default:
@@ -417,11 +419,21 @@ void unary_arithmetic_expression(void)
         switch(lookahead_token.attribute.get_int)
         {
         case MINUS:
-			stack[stackIndex++] = lookahead_token;
+			while(op_stack != NULL && op_stack->currToken.attribute.get_int != LPR_T 
+				&& (op_stack->currToken.attribute.get_int == MINUS || op_stack->currToken.attribute.get_int == PLUS ))
+			{
+				tl_addt(pop(&op_stack));
+			}
+			op_stack = push(op_stack,lookahead_token);
             match(ART_OP_T,MINUS);
             break;
         case PLUS:
-			stack[stackIndex++] = lookahead_token;
+			while(op_stack != NULL && op_stack->currToken.attribute.get_int != LPR_T 
+				&& (op_stack->currToken.attribute.get_int == MINUS || op_stack->currToken.attribute.get_int == PLUS ))
+			{
+				tl_addt(pop(&op_stack));
+			}
+			op_stack = push(op_stack,lookahead_token);
             match(ART_OP_T,PLUS);
             break;
         default:
@@ -462,14 +474,24 @@ void additive_arithmetic_expression_p(void)
         switch(lookahead_token.attribute.get_int)
         {
         case MINUS:
-			stack[stackIndex++] = lookahead_token;
+			while(op_stack != NULL && op_stack->currToken.attribute.get_int != LPR_T 
+				&& (op_stack->currToken.attribute.get_int == MINUS || op_stack->currToken.attribute.get_int == PLUS ))
+			{
+				tl_addt(pop(&op_stack));
+			}
+			op_stack = push(op_stack,lookahead_token);
             match(ART_OP_T,MINUS);
             multiplicative_arithmetic_expression();
             additive_arithmetic_expression_p();
             gen_incode("PLATY: Additive arithmetic expression parsed");
             break;
         case PLUS:
-			stack[stackIndex++] = lookahead_token;
+			while(op_stack != NULL && op_stack->currToken.attribute.get_int != LPR_T 
+				&& (op_stack->currToken.attribute.get_int == MINUS || op_stack->currToken.attribute.get_int == PLUS ))
+			{
+				tl_addt(pop(&op_stack));
+			}
+			op_stack = push(op_stack,lookahead_token);
             match(ART_OP_T,PLUS);
             multiplicative_arithmetic_expression();
             additive_arithmetic_expression_p();
@@ -506,14 +528,24 @@ void multiplicative_arithmetic_expression_p(void)
         switch(lookahead_token.attribute.get_int)
         {
         case MULT:
-			stack[stackIndex++] = lookahead_token;
+			while(op_stack != NULL && op_stack->currToken.attribute.get_int != LPR_T 
+				&& (op_stack->currToken.attribute.get_int == MULT || op_stack->currToken.attribute.get_int == DIV ))
+			{
+				tl_addt(pop(&op_stack));
+			}
+			push(op_stack,lookahead_token);
             match(ART_OP_T,MULT);
             primary_arithmetic_expression();
             multiplicative_arithmetic_expression_p();
             gen_incode("PLATY: Multiplicative arithmetic expression parsed");
             break;
         case DIV:
-			stack[stackIndex++] = lookahead_token;
+			while(op_stack != NULL && op_stack->currToken.attribute.get_int != LPR_T 
+				&& (op_stack->currToken.attribute.get_int == MULT || op_stack->currToken.attribute.get_int == DIV ))
+			{
+				tl_addt(pop(&op_stack));
+			}
+			push(op_stack,lookahead_token);
             match(ART_OP_T,DIV);
             primary_arithmetic_expression();
             multiplicative_arithmetic_expression_p();
@@ -537,22 +569,25 @@ void primary_arithmetic_expression(void)
     switch(lookahead_token.code)
     {
     case AVID_T:
-		stack[stackIndex++] = lookahead_token;
+		tl_addt(lookahead_token);
         match(AVID_T,NO_ATTR);
         break;
     case FPL_T:
-		stack[stackIndex++] = lookahead_token;
+		tl_addt(lookahead_token);
         match(FPL_T,NO_ATTR);
         break;
     case INL_T:
-		stack[stackIndex++] = lookahead_token;
+		tl_addt(lookahead_token);
         match(INL_T,NO_ATTR);
         break;
     case LPR_T:
-		stack[stackIndex++] = lookahead_token;
+		push(op_stack,lookahead_token);
         match(LPR_T,NO_ATTR);
         arithmetic_expression();
-		stack[stackIndex++] = lookahead_token;
+		while(op_stack->currToken.code != LPR_T)
+		{
+			tl_addt(pop(&op_stack));
+		}
         match(RPR_T, NO_ATTR);
         break;
     default:
@@ -583,7 +618,7 @@ void string_expression_p(void)
 {
     if(lookahead_token.code == SCC_OP_T)
     {
-		stack[stackIndex++] = lookahead_token;
+		//tl_addt(lookahead_token);
         match(SCC_OP_T, NO_ATTR);
         primary_string_expression();
         string_expression_p();
@@ -601,11 +636,11 @@ void primary_string_expression(void)
     switch(lookahead_token.code)
     {
     case SVID_T:
-		stack[stackIndex++] = lookahead_token;
+		tl_addt(lookahead_token);
         match(SVID_T, NO_ATTR);
         break;
     case STR_T:
-		stack[stackIndex++] = lookahead_token;
+		tl_addt(lookahead_token);
         match(STR_T, NO_ATTR);
         break;
     default:
@@ -906,7 +941,6 @@ void gen_incode( char* production )
 	if(strcmp(production,"OUTPUT") == 0)
 	{
 		tl_printtl();
-		//printf("%s", b_get_chmemloc(str_LTBL,lookahead_token.attribute.str_offset));
 		tl_destroy();
 		return;
 	}
@@ -922,7 +956,7 @@ void tl_createtl(void)
 {
 	
 }
-void tl_addt(void)
+void tl_addt( Token new_token )
 {
 	TL* tempTL;
 	if(tkn_list == NULL)
@@ -947,7 +981,7 @@ void tl_addt(void)
 	tempTL->nextTLI = (TL *)malloc(sizeof(TL));
 	tempTL->nextTLI->prevTLI = tempTL;	
 	tempTL = tempTL->nextTLI;
-	tempTL->currToken = lookahead_token;	
+	tempTL->currToken = new_token;	
 	tempTL->nextTLI = NULL;	
 }
 void tl_printtl(void)
@@ -1019,51 +1053,109 @@ void tl_destroy(void)
 		}
 		tempTL = tempTL->nextTLI;
 	}
-
 	free(tempTL);
-	
 }
 
 void sem_analyze(void)
 {
-	InitialValue tempResult;
-	
-	while(stackIndex>0)
-	{
-		switch(stack[stackIndex].code)
+	InitialValue tempResult;	
+	Token newValue = psfx_parse();
+
+		switch(newValue.code)
 		{
 		case FPL_T: 
-			tempResult.fpl_val = stack[stackIndex].attribute.flt_value;
-			st_update_type(sym_table, stack[0].attribute.vid_offset, 'F');
+			tempResult.fpl_val = newValue.attribute.flt_value;
+			st_update_type(sym_table, lvalue.attribute.vid_offset, 'F');
+			break;
 		case INL_T:
-			tempResult.int_val = stack[stackIndex].attribute.int_value;
-			st_update_type(sym_table, stack[0].attribute.vid_offset, 'I');
+			tempResult.int_val = newValue.attribute.int_value;
+			st_update_type(sym_table,lvalue.attribute.vid_offset, 'I');
 			break;
 		case STR_T:
-			tempResult.str_offset = stack[stackIndex].attribute.str_offset;		
+			tempResult.str_offset = newValue.attribute.str_offset;		
 			break;
-		case ART_OP_T:
-			switch(stack[stackIndex].attribute.get_int)
-			{
-			case PLUS:
-				break;
-			case MINUS:
-				break;
-			case MULT:
-				break;
-			case DIV:
-				break;
-			}
-			break;
-		case ASS_OP_T:
-			break;
-		}
-		--stackIndex;
-	}
-	
-	st_update_value(sym_table,stack[0].attribute.vid_offset, tempResult);
+		}		
+		st_update_value(sym_table, lvalue.attribute.vid_offset, tempResult);
+		tl_destroy();
 }
 
+Token psfx_parse(void)
+{
+	Token resultToken;
+	TL* tempTL = tkn_list;
+	Token opA;
+	Token opB;
+	int nullFound = 0;
+
+	while(!nullFound)
+	{
+		if(!tempTL->nextTLI)
+		{
+			++nullFound;
+		}
+		switch(tempTL->currToken.code)
+		{
+		case FPL_T:
+		case INL_T:
+		case AVID_T:
+			tkn_stack = push(tkn_stack,tempTL->currToken);
+			resultToken.code = FPL_T;
+			
+			break;
+		case SVID_T:
+			break;
+		case ART_OP_T:
+			opB = pop(&tkn_stack);
+			if(tkn_stack)
+			opA = pop(&tkn_stack);
+			else{
+				opA.attribute.flt_value = 0.0;
+			}
+			switch(tempTL->currToken.attribute.get_int)
+			{
+			case MINUS:
+				if(opA.code == AVID_T && opB.code == AVID_T)
+				{
+					resultToken.attribute.flt_value =sym_table.pstvr[opA.attribute.vid_offset].i_value.fpl_val - sym_table.pstvr[opB.attribute.vid_offset].i_value.fpl_val;
+				}
+				if(opA.code != AVID_T && opB.code == AVID_T)
+				{
+					resultToken.attribute.flt_value = opA.attribute.flt_value - sym_table.pstvr[opB.attribute.vid_offset].i_value.fpl_val;
+				}
+				if(opA.code != AVID_T && opB.code != AVID_T)
+				{
+					resultToken.attribute.flt_value = opA.attribute.flt_value - opB.attribute.flt_value;
+				}
+				break;
+			case PLUS:
+				if(opA.code == AVID_T && opB.code == AVID_T)
+				{
+					resultToken.attribute.flt_value =sym_table.pstvr[opA.attribute.vid_offset].i_value.fpl_val + sym_table.pstvr[opB.attribute.vid_offset].i_value.fpl_val;
+				}
+				if(opA.code != AVID_T && opB.code == AVID_T)
+				{
+					resultToken.attribute.flt_value = opA.attribute.flt_value + sym_table.pstvr[opB.attribute.vid_offset].i_value.fpl_val;
+				}
+				if(opA.code != AVID_T && opB.code != AVID_T)
+				{
+					resultToken.attribute.flt_value = opA.attribute.flt_value + opB.attribute.flt_value;
+				}
+				break;
+			case MULT:
+				resultToken.attribute.flt_value = opA.attribute.flt_value * opB.attribute.flt_value;
+				break;
+			case DIV:
+				resultToken.attribute.flt_value = opA.attribute.flt_value / opB.attribute.flt_value;
+				break;
+			}
+			tkn_stack = push(tkn_stack,resultToken);
+			break;
+		}
+		tempTL = tempTL->nextTLI;
+	
+	}
+	return resultToken;
+}
 void tl_inputtl(void)
 {
 	TL* tempTL = tkn_list;
@@ -1151,3 +1243,41 @@ void tl_inputtl(void)
 	}
 	
 }
+
+
+TS* push( TS* stack, Token currToken)
+{
+	TS* temp = NULL;
+	if(stack == NULL)
+	{
+		stack = (TS*)malloc(sizeof(TS));
+		if(stack != NULL)
+		{
+			stack->currToken = currToken;
+			stack->prevstackItem = NULL;
+		}
+		return stack;
+	}
+	temp = stack;
+	stack = (TS*)malloc(sizeof(TS));	
+	if(stack != NULL)
+	{
+		stack->currToken = currToken;
+		stack->prevstackItem = temp;
+		return stack;
+	}
+}
+
+Token pop( TS** stack )
+{
+	TS* temp;
+	Token currToken;
+	temp = (*stack)->prevstackItem;
+	currToken = (*stack)->currToken;
+	free(*stack);
+	*stack = NULL;
+	if(temp!=NULL)
+	*stack = temp;
+	return currToken;
+}
+

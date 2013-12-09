@@ -35,8 +35,19 @@ typedef struct TokenListItem
 	struct TokenListItem *nextTLI;
 }TL;
 
+typedef struct TokenStack
+{
+	Token currToken;
+	struct TokenStack *prevstackItem;
+}TS;
+
+
 TL *tkn_list;
-Token stack[150];
+TS *tkn_stack;
+TS *op_stack;
+TS *postfix_stack;
+Token lvalue;
+
 int stackIndex;
 
 void parser(Buffer* in_buf);
@@ -79,11 +90,18 @@ void primary_a_relational_expression(void);
 void primary_s_relational_expression(void);
 void relational_operator(void);
 
-void tl_addt(void);
+void tl_addt(Token);
 void tl_destroy(void);
 void tl_printtl(void);
 void tl_inputtl(void);
+
 void sem_analyze(void);
+TS* push(TS* stack, Token currToken);
+Token pop(TS** stack);
+void createStack(TS* stack);
+Token psfx_parse(void);
+
+
 
 
 
