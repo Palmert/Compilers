@@ -474,24 +474,36 @@ void additive_arithmetic_expression_p(void)
         switch(lookahead_token.attribute.get_int)
         {
         case MINUS:
-			while(op_stack != NULL && op_stack->currToken.attribute.get_int != LPR_T 
-				&& (op_stack->currToken.attribute.get_int == MINUS || op_stack->currToken.attribute.get_int == PLUS ))
+			if(!op_stack || op_stack->currToken.code == LPR_T  )
+			{
+				op_stack = push(op_stack,lookahead_token);
+			}
+			else
+			{			
+			while(op_stack != NULL && op_stack->currToken.code != LPR_T )
 			{
 				tl_addt(pop(&op_stack));
 			}
 			op_stack = push(op_stack,lookahead_token);
+			}
             match(ART_OP_T,MINUS);
             multiplicative_arithmetic_expression();
             additive_arithmetic_expression_p();
             gen_incode("PLATY: Additive arithmetic expression parsed");
             break;
         case PLUS:
-			while(op_stack != NULL && op_stack->currToken.attribute.get_int != LPR_T 
-				&& (op_stack->currToken.attribute.get_int == MINUS || op_stack->currToken.attribute.get_int == PLUS ))
+			if(!op_stack || op_stack->currToken.code == LPR_T  )
+			{
+				op_stack = push(op_stack,lookahead_token);
+			}
+			else
+			{
+			while(op_stack != NULL && op_stack->currToken.code != LPR_T )
 			{
 				tl_addt(pop(&op_stack));
 			}
 			op_stack = push(op_stack,lookahead_token);
+			}
             match(ART_OP_T,PLUS);
             multiplicative_arithmetic_expression();
             additive_arithmetic_expression_p();
@@ -528,24 +540,38 @@ void multiplicative_arithmetic_expression_p(void)
         switch(lookahead_token.attribute.get_int)
         {
         case MULT:
-			while(op_stack != NULL && op_stack->currToken.attribute.get_int != LPR_T 
+			if(!op_stack || op_stack->currToken.code == LPR_T  )
+			{
+				op_stack = push(op_stack,lookahead_token);
+			}
+			else
+			{
+			while(op_stack != NULL && op_stack->currToken.code != LPR_T 
 				&& (op_stack->currToken.attribute.get_int == MULT || op_stack->currToken.attribute.get_int == DIV ))
 			{
 				tl_addt(pop(&op_stack));
 			}
-			push(op_stack,lookahead_token);
+			op_stack = push(op_stack,lookahead_token);
+			}
             match(ART_OP_T,MULT);
             primary_arithmetic_expression();
             multiplicative_arithmetic_expression_p();
             gen_incode("PLATY: Multiplicative arithmetic expression parsed");
             break;
         case DIV:
-			while(op_stack != NULL && op_stack->currToken.attribute.get_int != LPR_T 
+			if(!op_stack || op_stack->currToken.code == LPR_T  )
+			{
+				op_stack = push(op_stack,lookahead_token);
+			}
+			else
+			{
+			while(op_stack != NULL && op_stack->currToken.code != LPR_T 
 				&& (op_stack->currToken.attribute.get_int == MULT || op_stack->currToken.attribute.get_int == DIV ))
 			{
 				tl_addt(pop(&op_stack));
 			}
-			push(op_stack,lookahead_token);
+			op_stack = push(op_stack,lookahead_token);
+			}
             match(ART_OP_T,DIV);
             primary_arithmetic_expression();
             multiplicative_arithmetic_expression_p();
@@ -581,13 +607,14 @@ void primary_arithmetic_expression(void)
         match(INL_T,NO_ATTR);
         break;
     case LPR_T:
-		push(op_stack,lookahead_token);
+		op_stack = push(op_stack,lookahead_token);
         match(LPR_T,NO_ATTR);
         arithmetic_expression();
 		while(op_stack->currToken.code != LPR_T)
 		{
 			tl_addt(pop(&op_stack));
 		}
+		pop(&op_stack);
         match(RPR_T, NO_ATTR);
         break;
     default:
@@ -1142,10 +1169,32 @@ Token psfx_parse(void)
 				}
 				break;
 			case MULT:
-				resultToken.attribute.flt_value = opA.attribute.flt_value * opB.attribute.flt_value;
+				if(opA.code == AVID_T && opB.code == AVID_T)
+				{
+					resultToken.attribute.flt_value =sym_table.pstvr[opA.attribute.vid_offset].i_value.fpl_val * sym_table.pstvr[opB.attribute.vid_offset].i_value.fpl_val;
+				}
+				if(opA.code != AVID_T && opB.code == AVID_T)
+				{
+					resultToken.attribute.flt_value = opA.attribute.flt_value * sym_table.pstvr[opB.attribute.vid_offset].i_value.fpl_val;
+				}
+				if(opA.code != AVID_T && opB.code != AVID_T)
+				{
+					resultToken.attribute.flt_value = opA.attribute.flt_value * opB.attribute.flt_value;
+				}
 				break;
 			case DIV:
-				resultToken.attribute.flt_value = opA.attribute.flt_value / opB.attribute.flt_value;
+				if(opA.code == AVID_T && opB.code == AVID_T)
+				{
+					resultToken.attribute.flt_value =sym_table.pstvr[opA.attribute.vid_offset].i_value.fpl_val / sym_table.pstvr[opB.attribute.vid_offset].i_value.fpl_val;
+				}
+				if(opA.code != AVID_T && opB.code == AVID_T)
+				{
+					resultToken.attribute.flt_value = opA.attribute.flt_value / sym_table.pstvr[opB.attribute.vid_offset].i_value.fpl_val;
+				}
+				if(opA.code != AVID_T && opB.code != AVID_T)
+				{
+					resultToken.attribute.flt_value = opA.attribute.flt_value / opB.attribute.flt_value;
+				}
 				break;
 			}
 			tkn_stack = push(tkn_stack,resultToken);
