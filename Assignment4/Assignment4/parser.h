@@ -102,7 +102,7 @@ void createStack(TS* stack);
 
 
 Token psfx_parse(TL* tempTL);
-Token psfx_parse_relop(TL* tempTL);
+int psfx_parse_relop(TL* tempTL);
 int exec_cond_s(TL* tempTL);
 
 

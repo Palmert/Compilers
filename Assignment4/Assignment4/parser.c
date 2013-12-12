@@ -14,19 +14,10 @@ Algorithm:				Get the next token in the file, call program(), call match to ensu
 **********************************************************************************************************/
 void parser(Buffer* in_buf)
 {
-	int resultfalse = 1 == 0;
-	int resultRelTrue = 1 > 0;
-	int resultOpOr = 1 || 0;
-	int resultOpAND = 1 && 0;
-	printf("\nResult of Logical OR Expression 1||0: [ %d ]\n", resultOpOr);
-	printf("\nResult of Relational Expression True: [ %d ]\n", resultRelTrue);
-	printf("\nResult of Logical AND Expression 1&&0: [ %d ]\n", resultOpAND);
-	printf("\nResult of Relational Expression False: [ %d ]\n", resultfalse);
 	sc_buf = in_buf;
     lookahead_token = mlwpar_next_token(sc_buf);
     program();
     match(SEOF_T, NO_ATTR);
-
     //gen_incode("PLATY: Source file parsed");
 }
 /**********************************************************************************************************
@@ -706,6 +697,14 @@ Author:			Chris Whitten
 void conditional_expression(void)
 {
     logical_or_expression();
+	if(op_stack!=NULL)
+	{
+		while(op_stack->prevstackItem)
+		{
+			tl_addt(pop(&op_stack));
+		}
+		tl_addt(pop(&op_stack));
+	}
     //gen_incode("PLATY: Conditional expression parsed");
 }
 /*********************************************************************************************************
@@ -730,7 +729,18 @@ void logical_or_expression_p(void)
 {
     if(lookahead_token.code == LOG_OP_T && lookahead_token.attribute.get_int == OR)
     {
-		tl_addt(lookahead_token);
+		if(!op_stack)
+		{
+			op_stack = push(op_stack,lookahead_token);
+		}
+		else
+		{			
+			while(op_stack != NULL && (op_stack->currToken.code == LOG_OP_T || op_stack->currToken.code == REL_OP_T ))
+			{
+				tl_addt(pop(&op_stack));
+			}
+			op_stack = push(op_stack,lookahead_token);
+		}
         match(LOG_OP_T, OR);
         logical_and_expression();
         logical_or_expression_p();
@@ -759,7 +769,18 @@ void logical_and_expression_p(void)
 {
     if(lookahead_token.code == LOG_OP_T && lookahead_token.attribute.get_int == AND)
     {
-		tl_addt(lookahead_token);
+		if(!op_stack)
+		{
+			op_stack = push(op_stack,lookahead_token);
+		}
+		else
+		{			
+			while(op_stack != NULL && ((op_stack->currToken.code == LOG_OP_T && op_stack->currToken.attribute.get_int == AND) || op_stack->currToken.code == REL_OP_T ))
+			{
+				tl_addt(pop(&op_stack));
+			}
+			op_stack = push(op_stack,lookahead_token);
+		}
         match(LOG_OP_T, AND);
         relational_expression();
         logical_and_expression_p();
@@ -850,19 +871,63 @@ void relational_operator(void)
         switch(lookahead_token.attribute.get_int)
         {
         case LT:
-			tl_addt(lookahead_token);
+			if(!op_stack)
+			{
+				op_stack = push(op_stack,lookahead_token);
+			}
+			else
+			{			
+				while(op_stack != NULL && op_stack->currToken.code == REL_OP_T)
+				{
+					tl_addt(pop(&op_stack));
+				}
+				op_stack = push(op_stack,lookahead_token);
+			}
             match(REL_OP_T, LT);
             break;
         case GT:
-			tl_addt(lookahead_token);
+			if(!op_stack)
+			{
+				op_stack = push(op_stack,lookahead_token);
+			}
+			else
+			{			
+				while(op_stack != NULL && op_stack->currToken.code == REL_OP_T)
+				{
+					tl_addt(pop(&op_stack));
+				}
+				op_stack = push(op_stack,lookahead_token);
+			}
             match(REL_OP_T, GT);
             break;
         case EQ:
-			tl_addt(lookahead_token);
+			if(!op_stack)
+			{
+				op_stack = push(op_stack,lookahead_token);
+			}
+			else
+			{			
+				while(op_stack != NULL && op_stack->currToken.code == REL_OP_T)
+				{
+					tl_addt(pop(&op_stack));
+				}
+				op_stack = push(op_stack,lookahead_token);
+			}
             match(REL_OP_T,EQ);
             break;
         case NE:
-			tl_addt(lookahead_token);
+			if(!op_stack)
+			{
+				op_stack = push(op_stack,lookahead_token);
+			}
+			else
+			{			
+				while(op_stack != NULL && op_stack->currToken.code == REL_OP_T)
+				{
+					tl_addt(pop(&op_stack));
+				}
+				op_stack = push(op_stack,lookahead_token);
+			}
             match(REL_OP_T,NE);
             break;
         }
@@ -1037,8 +1102,12 @@ void gen_incode( int code )
 			break;
 		case IF:
 			tempTL = tempTL->nextTLI;
-			psfx_parse_relop(tempTL);
+			i=psfx_parse_relop(tempTL);			
+			printf("Conditional Result == [ %d ]\n",i);
+	
+			break;
 		case USING:
+			break;
 		case ASS_OP_T:
 			tempTL = tempTL->nextTLI;
 			sem_analyze(tempTL);
@@ -1481,7 +1550,7 @@ int exec_cond_s(TL* tempTL)
 	return result;
 }
 
-Token psfx_parse_relop(TL* tempTL)
+int psfx_parse_relop(TL* tempTL)
 {
 	Token resultToken;
 	Token opA;
@@ -1491,7 +1560,7 @@ Token psfx_parse_relop(TL* tempTL)
 
 	while(!nullFound)
 	{
-		if(!tempTL->nextTLI || tempTL->currToken.code == EOS_T)
+		if(!tempTL->nextTLI || tempTL->currToken.code == ASS_OP_T || tempTL->currToken.code == KW_T)
 		{
 			++nullFound;
 		}
@@ -1505,6 +1574,7 @@ Token psfx_parse_relop(TL* tempTL)
 			resultToken.code = INL_T;			
 			break;
 		case SVID_T:
+			tkn_stack = push(tkn_stack,tempTL->currToken);
 			break;
 		case REL_OP_T:
 			opB = pop(&tkn_stack);
@@ -1516,8 +1586,9 @@ Token psfx_parse_relop(TL* tempTL)
 			}
 			switch(tempTL->currToken.attribute.get_int)
 			{
-				++arrFlag;
+				
 			case EQ:
+				++arrFlag;
 				if(opA.code == AVID_T && opB.code == AVID_T)
 				{
 					resultToken.attribute.int_value = opA.attribute.int_value == opB.attribute.int_value;
@@ -1532,6 +1603,7 @@ Token psfx_parse_relop(TL* tempTL)
 				}
 				break;
 			case NE:
+				++arrFlag;
 				if(opA.code == AVID_T && opB.code == AVID_T)
 				{
 					resultToken.attribute.int_value =sym_table.pstvr[opA.attribute.vid_offset].i_value.fpl_val != sym_table.pstvr[opB.attribute.vid_offset].i_value.fpl_val;
@@ -1546,6 +1618,7 @@ Token psfx_parse_relop(TL* tempTL)
 				}
 				break;
 			case GT:
+				++arrFlag;
 				if(opA.code == AVID_T && opB.code == AVID_T)
 				{
 					resultToken.attribute.int_value =sym_table.pstvr[opA.attribute.vid_offset].i_value.fpl_val > sym_table.pstvr[opB.attribute.vid_offset].i_value.fpl_val;
@@ -1560,6 +1633,7 @@ Token psfx_parse_relop(TL* tempTL)
 				}
 				break;
 			case LT:
+				++arrFlag;
 				if(opA.code == AVID_T && opB.code == AVID_T)
 				{
 					resultToken.attribute.int_value =sym_table.pstvr[opA.attribute.vid_offset].i_value.fpl_val < sym_table.pstvr[opB.attribute.vid_offset].i_value.fpl_val;
@@ -1570,12 +1644,30 @@ Token psfx_parse_relop(TL* tempTL)
 				}
 				if(opA.code != AVID_T && opB.code != AVID_T)
 				{
-					resultToken.attribute.int_value < opA.attribute.flt_value / opB.attribute.flt_value;
+					resultToken.attribute.int_value = opA.attribute.flt_value < opB.attribute.flt_value;
 				}
 				break;				
-			}
-			tkn_stack = push(tkn_stack,resultToken);
+			}	
+			op_stack = push(op_stack,resultToken);
+			break;
+			case LOG_OP_T:
+				opB = pop(&op_stack);
+				opA = pop(&op_stack);
+				if(tempTL->currToken.attribute.get_int == AND)
+				{
+					++arrFlag;
+					resultToken.attribute.int_value = opA.attribute.int_value && opB.attribute.int_value;
+				}
+				else
+				{
+					++arrFlag;
+					resultToken.attribute.int_value = opA.attribute.int_value || opB.attribute.int_value;
+				}
+				op_stack = push(op_stack,resultToken);
+				break;
+				
 		}
+		
 		tempTL = tempTL->nextTLI;
 
 	}
@@ -1583,6 +1675,7 @@ Token psfx_parse_relop(TL* tempTL)
 	{
 		resultToken = pop(&tkn_stack);
 	}
-	return resultToken;
+	return resultToken.attribute.get_int;
 }
+
 
