@@ -188,6 +188,7 @@ Author			Thom Palmer
 *********************************************************************************************************/
 void assignment_statement(void)
 {
+	lvalue = lookahead_token;
     assignment_expression();
 	if(op_stack!=NULL)
 	{
@@ -216,7 +217,6 @@ void assignment_expression(void)
     switch(lookahead_token.code)
     {
     case SVID_T:
-		tl_addt(lookahead_token);
         match(SVID_T,NO_ATTR);
 		tl_addt(lookahead_token);
         match(ASS_OP_T, NO_ATTR);
@@ -224,7 +224,6 @@ void assignment_expression(void)
         //gen_incode("PLATY: Assignment expression (string) parsed");
         break;
     case AVID_T:
-		tl_addt(lookahead_token);
         match(AVID_T,NO_ATTR);
 		tl_addt(lookahead_token);
         match(ASS_OP_T, NO_ATTR);
@@ -297,11 +296,14 @@ Author			Thom Palmer
 *********************************************************************************************************/
 void input_statement(void)
 {
+	tl_addt(lookahead_token);
     match(KW_T,INPUT);
     match(LPR_T,NO_ATTR);
     variable_list();
     match(RPR_T,NO_ATTR);
+	tl_addt(lookahead_token);
     match(EOS_T,NO_ATTR);
+	if(tkn_list->currToken.code == KW_T && tkn_list->currToken.attribute.get_int == INPUT)
     gen_incode(INPUT);
 }
 /*********************************************************************************************************
@@ -1085,7 +1087,9 @@ void gen_incode( int code )
 				tempTL = tempTL->nextTLI;
 			}
 			tempTL = tempTL->nextTLI;
-			code = tempTL->currToken.code;
+			if(tempTL->currToken.code == EOS_T && tempTL->nextTLI)
+			tempTL = tempTL->nextTLI;
+			code = tempTL->currToken.attribute.get_int;
 			break;
 		case INPUT:
 			tl_inputtl(tempTL);
@@ -1099,17 +1103,30 @@ void gen_incode( int code )
 				tempTL = tempTL->nextTLI;
 			}
 			tempTL = tempTL->nextTLI;
-			code = tempTL->currToken.code;
+			if(tempTL->currToken.code == EOS_T && tempTL->nextTLI)
+			tempTL = tempTL->nextTLI;
+			code = tempTL->currToken.attribute.get_int;
 			break;
 		case IF:
 			tempTL = tempTL->nextTLI;
 			if(psfx_parse_relop(tempTL))
 			{
-				while(tempTL->nextTLI && tempTL);
+				while(tempTL->nextTLI && (tempTL->currToken.code != KW_T || tempTL->currToken.attribute.get_int != THEN))
+				{
+					tempTL = tempTL->nextTLI;
+				}
+				tempTL = tempTL->nextTLI;
+				code = tempTL->currToken.attribute.get_int;
 			}
 			else
 			{
 
+				while(tempTL->nextTLI && (tempTL->currToken.code != KW_T || tempTL->currToken.attribute.get_int != ELSE))
+				{
+					tempTL = tempTL->nextTLI;
+				}
+				tempTL = tempTL->nextTLI;
+				code = tempTL->currToken.attribute.get_int;
 			}
 	
 			break;
@@ -1134,6 +1151,7 @@ void gen_incode( int code )
 		if(tempTL->nextTLI)
 			tempTL = tempTL->nextTLI;
 	}
+	tl_destroy();
     printf("\nToken code = [ %d ]\n",code);
 }
 
@@ -1244,7 +1262,6 @@ void sem_analyze(TL* tempTL)
 {
 	InitialValue tempResult;	
 	Token newValue = psfx_parse(tempTL);
-	lvalue = tempTL->prevTLI->currToken;
 
 		switch(newValue.code)
 		{
@@ -1373,7 +1390,7 @@ void tl_inputtl(TL* tempTL)
 	int i = 0;
 	InitialValue inputValue;
 	int dataType = INL_T;
-	while(tempTL->nextTLI)
+	while(tempTL->nextTLI && tempTL->currToken.code !=EOS_T)
 	{	
 		switch (tempTL->currToken.code)
 		{
