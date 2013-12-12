@@ -188,7 +188,6 @@ Author			Thom Palmer
 *********************************************************************************************************/
 void assignment_statement(void)
 {
-	lvalue = lookahead_token;
     assignment_expression();
 	if(op_stack!=NULL)
 	{
@@ -217,6 +216,7 @@ void assignment_expression(void)
     switch(lookahead_token.code)
     {
     case SVID_T:
+		tl_addt(lookahead_token);
         match(SVID_T,NO_ATTR);
 		tl_addt(lookahead_token);
         match(ASS_OP_T, NO_ATTR);
@@ -224,6 +224,7 @@ void assignment_expression(void)
         //gen_incode("PLATY: Assignment expression (string) parsed");
         break;
     case AVID_T:
+		tl_addt(lookahead_token);
         match(AVID_T,NO_ATTR);
 		tl_addt(lookahead_token);
         match(ASS_OP_T, NO_ATTR);
@@ -1102,8 +1103,14 @@ void gen_incode( int code )
 			break;
 		case IF:
 			tempTL = tempTL->nextTLI;
-			i=psfx_parse_relop(tempTL);			
-			printf("Conditional Result == [ %d ]\n",i);
+			if(psfx_parse_relop(tempTL))
+			{
+				while(tempTL->nextTLI && tempTL);
+			}
+			else
+			{
+
+			}
 	
 			break;
 		case USING:
@@ -1237,6 +1244,7 @@ void sem_analyze(TL* tempTL)
 {
 	InitialValue tempResult;	
 	Token newValue = psfx_parse(tempTL);
+	lvalue = tempTL->prevTLI->currToken;
 
 		switch(newValue.code)
 		{
