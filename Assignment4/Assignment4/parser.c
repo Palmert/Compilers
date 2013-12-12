@@ -1316,13 +1316,16 @@ Token psfx_parse(TL* tempTL)
 				++arrFlag;
 			case MINUS:
 				if(opA.code == AVID_T && opB.code == AVID_T)
-				{
-					
+				{					
 					resultToken.attribute.flt_value =sym_table.pstvr[opA.attribute.vid_offset].i_value.fpl_val - sym_table.pstvr[opB.attribute.vid_offset].i_value.fpl_val;
 				}
 				if(opA.code != AVID_T && opB.code == AVID_T)
 				{
 					resultToken.attribute.flt_value = opA.attribute.flt_value - sym_table.pstvr[opB.attribute.vid_offset].i_value.fpl_val;
+				}
+				if(opA.code == AVID_T && opB.code != AVID_T)
+				{
+					resultToken.attribute.flt_value = sym_table.pstvr[opA.attribute.vid_offset].i_value.fpl_val - opB.attribute.flt_value;
 				}
 				if(opA.code != AVID_T && opB.code != AVID_T)
 				{
@@ -1338,6 +1341,10 @@ Token psfx_parse(TL* tempTL)
 				{
 					resultToken.attribute.flt_value = opA.attribute.flt_value + sym_table.pstvr[opB.attribute.vid_offset].i_value.fpl_val;
 				}
+				if(opA.code == AVID_T && opB.code != AVID_T)
+				{
+					resultToken.attribute.flt_value = sym_table.pstvr[opA.attribute.vid_offset].i_value.fpl_val + opB.attribute.flt_value;
+				}
 				if(opA.code != AVID_T && opB.code != AVID_T)
 				{
 					resultToken.attribute.flt_value = opA.attribute.flt_value + opB.attribute.flt_value;
@@ -1352,6 +1359,10 @@ Token psfx_parse(TL* tempTL)
 				{
 					resultToken.attribute.flt_value = opA.attribute.flt_value * sym_table.pstvr[opB.attribute.vid_offset].i_value.fpl_val;
 				}
+				if(opA.code == AVID_T && opB.code != AVID_T)
+				{
+					resultToken.attribute.flt_value = sym_table.pstvr[opA.attribute.vid_offset].i_value.fpl_val * opB.attribute.flt_value;
+				}
 				if(opA.code != AVID_T && opB.code != AVID_T)
 				{
 					resultToken.attribute.flt_value = opA.attribute.flt_value * opB.attribute.flt_value;
@@ -1365,6 +1376,10 @@ Token psfx_parse(TL* tempTL)
 				if(opA.code != AVID_T && opB.code == AVID_T)
 				{
 					resultToken.attribute.flt_value = opA.attribute.flt_value / sym_table.pstvr[opB.attribute.vid_offset].i_value.fpl_val;
+				}
+				if(opA.code == AVID_T && opB.code != AVID_T)
+				{
+					resultToken.attribute.flt_value = sym_table.pstvr[opA.attribute.vid_offset].i_value.fpl_val / opB.attribute.flt_value;
 				}
 				if(opA.code != AVID_T && opB.code != AVID_T)
 				{
