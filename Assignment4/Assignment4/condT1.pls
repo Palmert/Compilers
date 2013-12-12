@@ -1,0 +1,5 @@
+PLATYPUS {
+IF( 1 == 1 .AND. 2 < 1 .AND. 1==1 .OR. 1< 3) THEN OUTPUT("SUCCESS");
+ELSE{ OUTPUT("FAILURE"); };
+}
+ 

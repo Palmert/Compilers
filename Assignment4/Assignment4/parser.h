@@ -54,7 +54,7 @@ void parser(Buffer* in_buf);
 void match(int pr_token_code,int pr_token_attribute);
 void syn_eh(int sync_token_code);
 void syn_printe(void);
-void gen_incode(char* production); 
+void gen_incode(int code); 
 void program(void);
 void opt_statements(void);
 void statements(void);
@@ -92,14 +92,18 @@ void relational_operator(void);
 
 void tl_addt(Token);
 void tl_destroy(void);
-void tl_printtl(void);
-void tl_inputtl(void);
+void tl_printtl(TL* tempTL);
+void tl_inputtl(TL* tempTL);
 
-void sem_analyze(void);
+void sem_analyze(TL* tempTL);
 TS* push(TS* stack, Token currToken);
 Token pop(TS** stack);
 void createStack(TS* stack);
-Token psfx_parse(void);
+
+
+Token psfx_parse(TL* tempTL);
+Token psfx_parse_relop(TL* tempTL);
+int exec_cond_s(TL* tempTL);
 
 
 

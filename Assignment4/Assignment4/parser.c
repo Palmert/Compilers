@@ -14,11 +14,20 @@ Algorithm:				Get the next token in the file, call program(), call match to ensu
 **********************************************************************************************************/
 void parser(Buffer* in_buf)
 {
+	int resultfalse = 1 == 0;
+	int resultRelTrue = 1 > 0;
+	int resultOpOr = 1 || 0;
+	int resultOpAND = 1 && 0;
+	printf("\nResult of Logical OR Expression 1||0: [ %d ]\n", resultOpOr);
+	printf("\nResult of Relational Expression True: [ %d ]\n", resultRelTrue);
+	printf("\nResult of Logical AND Expression 1&&0: [ %d ]\n", resultOpAND);
+	printf("\nResult of Relational Expression False: [ %d ]\n", resultfalse);
 	sc_buf = in_buf;
     lookahead_token = mlwpar_next_token(sc_buf);
     program();
     match(SEOF_T, NO_ATTR);
-    gen_incode("PLATY: Source file parsed");
+
+    //gen_incode("PLATY: Source file parsed");
 }
 /**********************************************************************************************************
 Purpose:				Check to see if the next token matches the one we are expecting. 
@@ -73,7 +82,7 @@ void program(void)
     match(LBR_T,NO_ATTR);
     opt_statements();
     match(RBR_T,NO_ATTR);
-    gen_incode("PLATY: Program parsed");
+    //gen_incode("PLATY: Program parsed");
 }
 /*********************************************************************************************************
 Production:		opt_statements
@@ -100,7 +109,8 @@ void opt_statements(void)
             break;
         }
     default: /* empty string - optional statements*/
-        gen_incode("PLATY: Opt_statements parsed");
+		break;
+        //gen_incode("PLATY: Opt_statements parsed");
     }
 }
 /*********************************************************************************************************
@@ -197,9 +207,11 @@ void assignment_statement(void)
 		}
 		tl_addt(pop(&op_stack));
 	}
+	tl_addt(lookahead_token);
     match(EOS_T,NO_ATTR);
-	sem_analyze();
-    gen_incode("PLATY: Assignment statement parsed");
+	gen_incode(ASS_OP_T);
+	
+    //gen_incode("PLATY: Assignment statement parsed");
 
 }
 /*********************************************************************************************************
@@ -215,15 +227,17 @@ void assignment_expression(void)
     {
     case SVID_T:
         match(SVID_T,NO_ATTR);
+		tl_addt(lookahead_token);
         match(ASS_OP_T, NO_ATTR);
         string_expression();
-        gen_incode("PLATY: Assignment expression (string) parsed");
+        //gen_incode("PLATY: Assignment expression (string) parsed");
         break;
     case AVID_T:
         match(AVID_T,NO_ATTR);
+		tl_addt(lookahead_token);
         match(ASS_OP_T, NO_ATTR);
         arithmetic_expression();
-        gen_incode("PLATY: Assignment expression (arithmetic) parsed");
+        //gen_incode("PLATY: Assignment expression (arithmetic) parsed");
         break;
     default:
         syn_printe();
@@ -238,18 +252,22 @@ Author			Christopher Whitten
 *********************************************************************************************************/
 void selection_statement(void)
 {
+	tl_addt(lookahead_token);
     match(KW_T, IF);
     match(LPR_T, NO_ATTR );
     conditional_expression();
     match(RPR_T,NO_ATTR);
+	tl_addt(lookahead_token);
     match(KW_T, THEN);
     opt_statements();
+	tl_addt(lookahead_token);
     match(KW_T,ELSE);
     match(LBR_T, NO_ATTR);
     opt_statements();
     match(RBR_T,NO_ATTR);
+	tl_addt(lookahead_token);
     match(EOS_T,NO_ATTR);
-    gen_incode("PLATY: IF statement parsed");
+    gen_incode(IF);
 }
 /*********************************************************************************************************
 Production:		iteration_statement
@@ -275,7 +293,7 @@ void iteration_statement(void)
     opt_statements();
     match(RBR_T,NO_ATTR);
     match(EOS_T,NO_ATTR);
-    gen_incode("PLATY: USING statement parsed");
+    //gen_incode("PLATY: USING statement parsed");
 }
 
 
@@ -292,7 +310,7 @@ void input_statement(void)
     variable_list();
     match(RPR_T,NO_ATTR);
     match(EOS_T,NO_ATTR);
-    gen_incode("INPUT");
+    gen_incode(INPUT);
 }
 /*********************************************************************************************************
 Production:		variable_list
@@ -304,7 +322,7 @@ void variable_list(void)
 {
     variable_identifier();
     variable_list_p();
-    gen_incode("PLATY: Variable list parsed");
+    //gen_incode("PLATY: Variable list parsed");
 }
 /*********************************************************************************************************
 Production:		variable_list_p
@@ -351,12 +369,15 @@ Author:			Thom Palmer
 *********************************************************************************************************/
 void output_statement(void)
 {	
+	tl_addt(lookahead_token);
     match(KW_T,OUTPUT);	
     match(LPR_T,NO_ATTR);
     output_list();	
-    match(RPR_T,NO_ATTR);	
+    match(RPR_T,NO_ATTR);
+	tl_addt(lookahead_token);
     match(EOS_T,NO_ATTR);
-    gen_incode("OUTPUT");
+	if(tkn_list->currToken.code == KW_T && tkn_list->currToken.attribute.get_int == OUTPUT)
+    gen_incode(OUTPUT);
 }
 /*********************************************************************************************************
 Production:		output_list
@@ -377,7 +398,7 @@ void output_list(void)
         match(STR_T,NO_ATTR);      
         break;
     default:
-        gen_incode("PLATY: Output list (empty) parsed");
+        //gen_incode("PLATY: Output list (empty) parsed");
         break;
     }
 }
@@ -403,7 +424,7 @@ void arithmetic_expression(void)
             unary_arithmetic_expression();
         break;
     }
-    gen_incode("PLATY: Arithmetic expression parsed");
+    //gen_incode("PLATY: Arithmetic expression parsed");
 }
 /*********************************************************************************************************
 Production:		unary_arithmetic_expression
@@ -446,7 +467,7 @@ void unary_arithmetic_expression(void)
         syn_printe();
     }
     primary_arithmetic_expression();
-    gen_incode("PLATY: Unary arithmetic expression parsed");
+    //gen_incode("PLATY: Unary arithmetic expression parsed");
 }
 /*********************************************************************************************************
 Production:		additive_arithmetic_expression
@@ -489,7 +510,7 @@ void additive_arithmetic_expression_p(void)
             match(ART_OP_T,MINUS);
             multiplicative_arithmetic_expression();
             additive_arithmetic_expression_p();
-            gen_incode("PLATY: Additive arithmetic expression parsed");
+            //gen_incode("PLATY: Additive arithmetic expression parsed");
             break;
         case PLUS:
 			if(!op_stack || op_stack->currToken.code == LPR_T  )
@@ -507,7 +528,7 @@ void additive_arithmetic_expression_p(void)
             match(ART_OP_T,PLUS);
             multiplicative_arithmetic_expression();
             additive_arithmetic_expression_p();
-            gen_incode("PLATY: Additive arithmetic expression parsed");
+            //gen_incode("PLATY: Additive arithmetic expression parsed");
             break;
         }
     }
@@ -556,7 +577,7 @@ void multiplicative_arithmetic_expression_p(void)
             match(ART_OP_T,MULT);
             primary_arithmetic_expression();
             multiplicative_arithmetic_expression_p();
-            gen_incode("PLATY: Multiplicative arithmetic expression parsed");
+            //gen_incode("PLATY: Multiplicative arithmetic expression parsed");
             break;
         case DIV:
 			if(!op_stack || op_stack->currToken.code == LPR_T  )
@@ -575,7 +596,7 @@ void multiplicative_arithmetic_expression_p(void)
             match(ART_OP_T,DIV);
             primary_arithmetic_expression();
             multiplicative_arithmetic_expression_p();
-            gen_incode("PLATY: Multiplicative arithmetic expression parsed");
+           // gen_incode("PLATY: Multiplicative arithmetic expression parsed");
             break;
         }
     }
@@ -620,7 +641,7 @@ void primary_arithmetic_expression(void)
     default:
         syn_printe();
     }
-    gen_incode("PLATY: Primary arithmetic expression parsed");
+    //gen_incode("PLATY: Primary arithmetic expression parsed");
 }
 /*********************************************************************************************************
 Production:		string_expression
@@ -632,7 +653,7 @@ void string_expression(void)
 {
     primary_string_expression();
     string_expression_p();
-    gen_incode("PLATY: String expression parsed");
+    //gen_incode("PLATY: String expression parsed");
 }
 /*********************************************************************************************************
 Production:		string_expression_p
@@ -674,7 +695,7 @@ void primary_string_expression(void)
         syn_printe();
         break;
     }
-    gen_incode("PLATY: Primary string expression parsed");
+    //gen_incode("PLATY: Primary string expression parsed");
 }
 /*********************************************************************************************************
 Production:		conditional_expression
@@ -685,7 +706,7 @@ Author:			Chris Whitten
 void conditional_expression(void)
 {
     logical_or_expression();
-    gen_incode("PLATY: Conditional expression parsed");
+    //gen_incode("PLATY: Conditional expression parsed");
 }
 /*********************************************************************************************************
 Production:		logical_or_expression
@@ -709,10 +730,11 @@ void logical_or_expression_p(void)
 {
     if(lookahead_token.code == LOG_OP_T && lookahead_token.attribute.get_int == OR)
     {
+		tl_addt(lookahead_token);
         match(LOG_OP_T, OR);
         logical_and_expression();
         logical_or_expression_p();
-        gen_incode("PLATY: Logical OR expression parsed");
+        //gen_incode("PLATY: Logical OR expression parsed");
     }
 }
 /*********************************************************************************************************
@@ -737,10 +759,11 @@ void logical_and_expression_p(void)
 {
     if(lookahead_token.code == LOG_OP_T && lookahead_token.attribute.get_int == AND)
     {
+		tl_addt(lookahead_token);
         match(LOG_OP_T, AND);
         relational_expression();
         logical_and_expression_p();
-        gen_incode("PLATY: Logical AND expression parsed");
+        //gen_incode("PLATY: Logical AND expression parsed");
     }
 }
 /*********************************************************************************************************
@@ -771,7 +794,7 @@ void relational_expression(void)
         syn_printe();
         break;
     }
-    gen_incode("PLATY: Relational expression parsed");
+    //gen_incode("PLATY: Relational expression parsed");
 }
 /*********************************************************************************************************
 Production:		primary_a_relational_expression
@@ -786,19 +809,22 @@ void primary_a_relational_expression(void)
     switch (lookahead_token.code)
     {
     case AVID_T :
+		tl_addt(lookahead_token);
         match(AVID_T, NO_ATTR);
         break;
     case FPL_T:
+		tl_addt(lookahead_token);
         match(FPL_T, NO_ATTR);
         break;
     case INL_T:
+		tl_addt(lookahead_token);
         match(INL_T, NO_ATTR);
         break;
     default:
         syn_printe();
         break;
     }
-    gen_incode("PLATY: Primary a_relational expression parsed");
+    //gen_incode("PLATY: Primary a_relational expression parsed");
 }
 /*********************************************************************************************************
 Production:		primary_s_relational_expression
@@ -809,7 +835,7 @@ Author:			Thom Palmer
 void primary_s_relational_expression(void)
 {
     primary_string_expression();
-    gen_incode("PLATY: Primary s_relational expression parsed");
+    //gen_incode("PLATY: Primary s_relational expression parsed");
 }
 /*********************************************************************************************************
 Production:		relational_operator
@@ -824,15 +850,19 @@ void relational_operator(void)
         switch(lookahead_token.attribute.get_int)
         {
         case LT:
+			tl_addt(lookahead_token);
             match(REL_OP_T, LT);
             break;
         case GT:
+			tl_addt(lookahead_token);
             match(REL_OP_T, GT);
             break;
         case EQ:
+			tl_addt(lookahead_token);
             match(REL_OP_T,EQ);
             break;
         case NE:
+			tl_addt(lookahead_token);
             match(REL_OP_T,NE);
             break;
         }
@@ -963,20 +993,72 @@ Called functions:		printf()
 Parameters:				char* production
 Return value:			none		
 **********************************************************************************************************/
-void gen_incode( char* production )
+void gen_incode( int code )
 {
-	if(strcmp(production,"OUTPUT") == 0)
+	TL* tempTL = tkn_list;
+	int nullNotFound = 1;
+	int i;
+
+	while(nullNotFound)
 	{
-		tl_printtl();
-		tl_destroy();
-		return;
+		if(tempTL->nextTLI == NULL)
+		{
+			nullNotFound = 0 ;
+		}
+		switch(code)
+		{
+		case OUTPUT:
+			tl_printtl(tempTL);
+			if(tempTL->prevTLI == NULL)
+			{
+				tl_destroy();
+				return;
+			}
+			while(tempTL->nextTLI && tempTL->currToken.code != EOS_T)
+			{
+				tempTL = tempTL->nextTLI;
+			}
+			tempTL = tempTL->nextTLI;
+			code = tempTL->currToken.code;
+			break;
+		case INPUT:
+			tl_inputtl(tempTL);
+			if(tempTL->prevTLI == NULL)
+			{
+				tl_destroy();
+				return;
+			}
+			while(tempTL->nextTLI && tempTL->currToken.code != EOS_T)
+			{
+				tempTL = tempTL->nextTLI;
+			}
+			tempTL = tempTL->nextTLI;
+			code = tempTL->currToken.code;
+			break;
+		case IF:
+			tempTL = tempTL->nextTLI;
+			psfx_parse_relop(tempTL);
+		case USING:
+		case ASS_OP_T:
+			tempTL = tempTL->nextTLI;
+			sem_analyze(tempTL);
+			if(tempTL->prevTLI->prevTLI == NULL)
+			{
+				tl_destroy();
+				return;
+			}
+			
+			break;
+		case REL_OP_T:
+			
+			break;
+		default:
+			break;
+		}
+		if(tempTL->nextTLI)
+			tempTL = tempTL->nextTLI;
 	}
-	if(strcmp(production,"INPUT")==0) 
-	{
-		tl_inputtl();
-		tl_destroy();
-	}
-    printf("%s\n",production);
+    printf("\nToken code = [ %d ]\n",code);
 }
 
 void tl_createtl(void)
@@ -1011,11 +1093,10 @@ void tl_addt( Token new_token )
 	tempTL->currToken = new_token;	
 	tempTL->nextTLI = NULL;	
 }
-void tl_printtl(void)
+void tl_printtl(TL* tempTL)
 {
-	TL* tempTL = tkn_list;
-	
-	while(tempTL->nextTLI)
+
+	while(tempTL->nextTLI && tempTL->currToken.code != EOS_T)
 	{	
 		switch (tempTL->currToken.code)
 		{
@@ -1083,10 +1164,10 @@ void tl_destroy(void)
 	free(tempTL);
 }
 
-void sem_analyze(void)
+void sem_analyze(TL* tempTL)
 {
 	InitialValue tempResult;	
-	Token newValue = psfx_parse();
+	Token newValue = psfx_parse(tempTL);
 
 		switch(newValue.code)
 		{
@@ -1103,20 +1184,19 @@ void sem_analyze(void)
 			break;
 		}		
 		st_update_value(sym_table, lvalue.attribute.vid_offset, tempResult);
-		tl_destroy();
 }
 
-Token psfx_parse(void)
+Token psfx_parse(TL* tempTL)
 {
 	Token resultToken;
-	TL* tempTL = tkn_list;
 	Token opA;
 	Token opB;
 	int nullFound = 0;
+	int arrFlag = 0;
 
 	while(!nullFound)
 	{
-		if(!tempTL->nextTLI)
+		if(!tempTL->nextTLI || tempTL->currToken.code == EOS_T)
 		{
 			++nullFound;
 		}
@@ -1126,8 +1206,7 @@ Token psfx_parse(void)
 		case INL_T:
 		case AVID_T:
 			tkn_stack = push(tkn_stack,tempTL->currToken);
-			resultToken.code = FPL_T;
-			
+			resultToken.code = FPL_T;			
 			break;
 		case SVID_T:
 			break;
@@ -1140,9 +1219,11 @@ Token psfx_parse(void)
 			}
 			switch(tempTL->currToken.attribute.get_int)
 			{
+				++arrFlag;
 			case MINUS:
 				if(opA.code == AVID_T && opB.code == AVID_T)
 				{
+					
 					resultToken.attribute.flt_value =sym_table.pstvr[opA.attribute.vid_offset].i_value.fpl_val - sym_table.pstvr[opB.attribute.vid_offset].i_value.fpl_val;
 				}
 				if(opA.code != AVID_T && opB.code == AVID_T)
@@ -1195,19 +1276,22 @@ Token psfx_parse(void)
 				{
 					resultToken.attribute.flt_value = opA.attribute.flt_value / opB.attribute.flt_value;
 				}
-				break;
+				break;				
 			}
 			tkn_stack = push(tkn_stack,resultToken);
-			break;
 		}
 		tempTL = tempTL->nextTLI;
 	
 	}
+	if(arrFlag == 0)
+	{
+		resultToken = pop(&tkn_stack);
+	}
 	return resultToken;
 }
-void tl_inputtl(void)
+
+void tl_inputtl(TL* tempTL)
 {
-	TL* tempTL = tkn_list;
 	char input [80];
 	int i = 0;
 	InitialValue inputValue;
@@ -1328,5 +1412,177 @@ Token pop( TS** stack )
 	if(temp!=NULL)
 	*stack = temp;
 	return currToken;
+}
+
+int exec_cond_s(TL* tempTL)
+{
+	Token rel_exp[4];
+	unsigned int i;
+	TL *temp_tk_list = tempTL;
+	int nullNotFound = 0;
+	int result = 0;
+
+	while(nullNotFound || temp_tk_list->currToken.code != KW_T)
+	{
+		if(!temp_tk_list->nextTLI)
+		{
+			++nullNotFound;
+		}
+		for(i = 0; i<4;i++)
+		{
+			rel_exp[i] = temp_tk_list->currToken;
+			if(temp_tk_list->nextTLI)
+			temp_tk_list = temp_tk_list->nextTLI;
+		}
+		switch(rel_exp[1].attribute.get_int)
+		{
+		case LT:
+			if(rel_exp[0].attribute.get_int < rel_exp[2].attribute.get_int)
+				result = 1;
+			else
+				result = 0;
+			break;
+		case GT:
+			if(rel_exp[0].attribute.get_int > rel_exp[2].attribute.get_int)
+				result = 1;
+			else
+				result = 0;
+			break;
+		case EQ:
+			if(rel_exp[0].attribute.get_int == rel_exp[2].attribute.get_int)
+				result = 1;
+			else
+				result = 0;
+			break;
+		case NE:
+			if(rel_exp[0].attribute.get_int != rel_exp[2].attribute.get_int)
+				result = 1;
+			else
+				result = 0;
+			break;
+		}
+		if(rel_exp[3].code == LOG_OP_T)
+			switch(rel_exp[3].attribute.get_int)
+			{
+			case AND:
+				if(result == 0)
+				{
+					return result;
+				}
+				break;
+			case OR:
+				if(result == 1)
+				{
+					return result;
+				}
+				break;
+			}
+	}
+	return result;
+}
+
+Token psfx_parse_relop(TL* tempTL)
+{
+	Token resultToken;
+	Token opA;
+	Token opB;
+	int nullFound = 0;
+	int arrFlag = 0;
+
+	while(!nullFound)
+	{
+		if(!tempTL->nextTLI || tempTL->currToken.code == EOS_T)
+		{
+			++nullFound;
+		}
+
+		switch(tempTL->currToken.code)
+		{
+		case FPL_T:
+		case INL_T:
+		case AVID_T:
+			tkn_stack = push(tkn_stack,tempTL->currToken);
+			resultToken.code = INL_T;			
+			break;
+		case SVID_T:
+			break;
+		case REL_OP_T:
+			opB = pop(&tkn_stack);
+			if(tkn_stack)
+				opA = pop(&tkn_stack);
+			else{
+				opA.code = AVID_T;
+				opA.attribute.int_value = 0;
+			}
+			switch(tempTL->currToken.attribute.get_int)
+			{
+				++arrFlag;
+			case EQ:
+				if(opA.code == AVID_T && opB.code == AVID_T)
+				{
+					resultToken.attribute.int_value = opA.attribute.int_value == opB.attribute.int_value;
+				}
+				if(opA.code != AVID_T && opB.code == AVID_T)
+				{
+					resultToken.attribute.int_value = opA.attribute.flt_value == sym_table.pstvr[opB.attribute.vid_offset].i_value.fpl_val;
+				}
+				if(opA.code != AVID_T && opB.code != AVID_T)
+				{
+					resultToken.attribute.int_value = opA.attribute.flt_value == opB.attribute.flt_value;
+				}
+				break;
+			case NE:
+				if(opA.code == AVID_T && opB.code == AVID_T)
+				{
+					resultToken.attribute.int_value =sym_table.pstvr[opA.attribute.vid_offset].i_value.fpl_val != sym_table.pstvr[opB.attribute.vid_offset].i_value.fpl_val;
+				}
+				if(opA.code != AVID_T && opB.code == AVID_T)
+				{
+					resultToken.attribute.int_value = opA.attribute.flt_value != sym_table.pstvr[opB.attribute.vid_offset].i_value.fpl_val;
+				}
+				if(opA.code != AVID_T && opB.code != AVID_T)
+				{
+					resultToken.attribute.int_value = opA.attribute.flt_value != opB.attribute.flt_value;
+				}
+				break;
+			case GT:
+				if(opA.code == AVID_T && opB.code == AVID_T)
+				{
+					resultToken.attribute.int_value =sym_table.pstvr[opA.attribute.vid_offset].i_value.fpl_val > sym_table.pstvr[opB.attribute.vid_offset].i_value.fpl_val;
+				}
+				if(opA.code != AVID_T && opB.code == AVID_T)
+				{
+					resultToken.attribute.int_value = opA.attribute.flt_value > sym_table.pstvr[opB.attribute.vid_offset].i_value.fpl_val;
+				}
+				if(opA.code != AVID_T && opB.code != AVID_T)
+				{
+					resultToken.attribute.int_value = opA.attribute.flt_value > opB.attribute.flt_value;
+				}
+				break;
+			case LT:
+				if(opA.code == AVID_T && opB.code == AVID_T)
+				{
+					resultToken.attribute.int_value =sym_table.pstvr[opA.attribute.vid_offset].i_value.fpl_val < sym_table.pstvr[opB.attribute.vid_offset].i_value.fpl_val;
+				}
+				if(opA.code != AVID_T && opB.code == AVID_T)
+				{
+					resultToken.attribute.int_value = opA.attribute.flt_value < sym_table.pstvr[opB.attribute.vid_offset].i_value.fpl_val;
+				}
+				if(opA.code != AVID_T && opB.code != AVID_T)
+				{
+					resultToken.attribute.int_value < opA.attribute.flt_value / opB.attribute.flt_value;
+				}
+				break;				
+			}
+			tkn_stack = push(tkn_stack,resultToken);
+		}
+		tempTL = tempTL->nextTLI;
+
+	}
+	if(arrFlag == 0)
+	{
+		resultToken = pop(&tkn_stack);
+	}
+	return resultToken;
 }
 
