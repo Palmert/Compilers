@@ -188,18 +188,10 @@ Author			Thom Palmer
 *********************************************************************************************************/
 void assignment_statement(void)
 {
-	lvalue = lookahead_token;
     assignment_expression();
-	if(op_stack!=NULL)
-	{
-		while(op_stack->prevstackItem)
-		{
-			tl_addt(pop(&op_stack));
-		}
-		tl_addt(pop(&op_stack));
-	}
-	tl_addt(lookahead_token);
+	tl_addt(lookahead_token, usingDepth, ifDepth);
     match(EOS_T,NO_ATTR);
+	if((tkn_list->currToken.code == AVID_T || tkn_list->currToken.code == SVID_T) && tkn_list->nextTLI->currToken.code == ASS_OP_T)
 	gen_incode(ASS_OP_T);
 	
     //gen_incode("PLATY: Assignment statement parsed");
@@ -217,15 +209,17 @@ void assignment_expression(void)
     switch(lookahead_token.code)
     {
     case SVID_T:
+		tl_addt(lookahead_token, usingDepth, ifDepth);
         match(SVID_T,NO_ATTR);
-		tl_addt(lookahead_token);
+		tl_addt(lookahead_token, usingDepth, ifDepth);
         match(ASS_OP_T, NO_ATTR);
         string_expression();
         //gen_incode("PLATY: Assignment expression (string) parsed");
         break;
     case AVID_T:
+		tl_addt(lookahead_token, usingDepth, ifDepth);
         match(AVID_T,NO_ATTR);
-		tl_addt(lookahead_token);
+		tl_addt(lookahead_token, usingDepth, ifDepth);
         match(ASS_OP_T, NO_ATTR);
         arithmetic_expression();
         //gen_incode("PLATY: Assignment expression (arithmetic) parsed");
@@ -233,6 +227,13 @@ void assignment_expression(void)
     default:
         syn_printe();
     }
+	if(op_stack!=NULL)
+	{
+		while(op_stack)
+		{
+			tl_addt(pop(&op_stack), usingDepth, ifDepth);
+		}
+	}
 }
 /*********************************************************************************************************
 Production:		selection_statement
@@ -243,21 +244,22 @@ Author			Christopher Whitten
 *********************************************************************************************************/
 void selection_statement(void)
 {
-	tl_addt(lookahead_token);
+	tl_addt(lookahead_token, usingDepth, ++ifDepth);
     match(KW_T, IF);
     match(LPR_T, NO_ATTR );
     conditional_expression();
     match(RPR_T,NO_ATTR);
-	tl_addt(lookahead_token);
+	tl_addt(lookahead_token, usingDepth, ifDepth);
     match(KW_T, THEN);
     opt_statements();
-	tl_addt(lookahead_token);
+	tl_addt(lookahead_token, usingDepth, ifDepth);
     match(KW_T,ELSE);
     match(LBR_T, NO_ATTR);
     opt_statements();
     match(RBR_T,NO_ATTR);
-	tl_addt(lookahead_token);
+	tl_addt(lookahead_token, usingDepth, --ifDepth);
     match(EOS_T,NO_ATTR);
+	if(tkn_list->currToken.code == KW_T && tkn_list->currToken.attribute.get_int == IF && ifDepth == 0)
     gen_incode(IF);
 }
 /*********************************************************************************************************
@@ -271,20 +273,25 @@ Author			Christopher Whitten
 *********************************************************************************************************/
 void iteration_statement(void)
 {
+	tl_addt(lookahead_token, ++usingDepth, ifDepth);
     match(KW_T,USING);
     match(LPR_T,NO_ATTR);
     assignment_expression();
+	tl_addt(lookahead_token, usingDepth, ifDepth);
     match(COM_T, NO_ATTR);
     conditional_expression();
     match(COM_T, NO_ATTR);
     assignment_expression();
     match(RPR_T,NO_ATTR);
+	tl_addt(lookahead_token, usingDepth, ifDepth);
     match(KW_T,REPEAT);
     match(LBR_T,NO_ATTR);
     opt_statements();
     match(RBR_T,NO_ATTR);
+	tl_addt(lookahead_token, --usingDepth, ifDepth);
     match(EOS_T,NO_ATTR);
-    //gen_incode("PLATY: USING statement parsed");
+	if(tkn_list->currToken.code == KW_T && tkn_list->currToken.attribute.get_int == USING && usingDepth == 0)
+    gen_incode(USING);
 }
 
 
@@ -296,12 +303,12 @@ Author			Thom Palmer
 *********************************************************************************************************/
 void input_statement(void)
 {
-	tl_addt(lookahead_token);
+	tl_addt(lookahead_token, usingDepth, ifDepth);
     match(KW_T,INPUT);
     match(LPR_T,NO_ATTR);
     variable_list();
     match(RPR_T,NO_ATTR);
-	tl_addt(lookahead_token);
+	tl_addt(lookahead_token, usingDepth, ifDepth);
     match(EOS_T,NO_ATTR);
 	if(tkn_list->currToken.code == KW_T && tkn_list->currToken.attribute.get_int == INPUT)
     gen_incode(INPUT);
@@ -344,11 +351,11 @@ void variable_identifier(void)
     switch(lookahead_token.code)
     {
     case SVID_T:
-		tl_addt(lookahead_token);
+		tl_addt(lookahead_token, usingDepth, ifDepth);
         match(SVID_T,NO_ATTR);
         break;
     case AVID_T:
-		tl_addt(lookahead_token);
+		tl_addt(lookahead_token, usingDepth, ifDepth);
         match(AVID_T,NO_ATTR);
         break;
     default:
@@ -363,12 +370,12 @@ Author:			Thom Palmer
 *********************************************************************************************************/
 void output_statement(void)
 {	
-	tl_addt(lookahead_token);
+	tl_addt(lookahead_token, usingDepth, ifDepth);
     match(KW_T,OUTPUT);	
     match(LPR_T,NO_ATTR);
     output_list();	
     match(RPR_T,NO_ATTR);
-	tl_addt(lookahead_token);
+	tl_addt(lookahead_token, usingDepth, ifDepth);
     match(EOS_T,NO_ATTR);
 	if(tkn_list->currToken.code == KW_T && tkn_list->currToken.attribute.get_int == OUTPUT)
     gen_incode(OUTPUT);
@@ -388,7 +395,7 @@ void output_list(void)
         variable_list();
         break;
     case STR_T:
-		tl_addt(lookahead_token);
+		tl_addt(lookahead_token, usingDepth, ifDepth);
         match(STR_T,NO_ATTR);      
         break;
     default:
@@ -419,6 +426,7 @@ void arithmetic_expression(void)
         break;
     }
     //gen_incode("PLATY: Arithmetic expression parsed");
+	
 }
 /*********************************************************************************************************
 Production:		unary_arithmetic_expression
@@ -437,7 +445,7 @@ void unary_arithmetic_expression(void)
 			while(op_stack != NULL && op_stack->currToken.attribute.get_int != LPR_T 
 				&& (op_stack->currToken.attribute.get_int == MINUS || op_stack->currToken.attribute.get_int == PLUS ))
 			{
-				tl_addt(pop(&op_stack));
+				tl_addt(pop(&op_stack),usingDepth,ifDepth);
 			}
 			op_stack = push(op_stack,lookahead_token);
             match(ART_OP_T,MINUS);
@@ -446,7 +454,7 @@ void unary_arithmetic_expression(void)
 			while(op_stack != NULL && op_stack->currToken.attribute.get_int != LPR_T 
 				&& (op_stack->currToken.attribute.get_int == MINUS || op_stack->currToken.attribute.get_int == PLUS ))
 			{
-				tl_addt(pop(&op_stack));
+				tl_addt(pop(&op_stack), usingDepth, ifDepth);
 			}
 			op_stack = push(op_stack,lookahead_token);
             match(ART_OP_T,PLUS);
@@ -497,7 +505,7 @@ void additive_arithmetic_expression_p(void)
 			{			
 			while(op_stack != NULL && op_stack->currToken.code != LPR_T )
 			{
-				tl_addt(pop(&op_stack));
+				tl_addt(pop(&op_stack), usingDepth, ifDepth);
 			}
 			op_stack = push(op_stack,lookahead_token);
 			}
@@ -515,7 +523,7 @@ void additive_arithmetic_expression_p(void)
 			{
 			while(op_stack != NULL && op_stack->currToken.code != LPR_T )
 			{
-				tl_addt(pop(&op_stack));
+				tl_addt(pop(&op_stack), usingDepth, ifDepth);
 			}
 			op_stack = push(op_stack,lookahead_token);
 			}
@@ -564,7 +572,7 @@ void multiplicative_arithmetic_expression_p(void)
 			while(op_stack != NULL && op_stack->currToken.code != LPR_T 
 				&& (op_stack->currToken.attribute.get_int == MULT || op_stack->currToken.attribute.get_int == DIV ))
 			{
-				tl_addt(pop(&op_stack));
+				tl_addt(pop(&op_stack), usingDepth, ifDepth);
 			}
 			op_stack = push(op_stack,lookahead_token);
 			}
@@ -583,7 +591,7 @@ void multiplicative_arithmetic_expression_p(void)
 			while(op_stack != NULL && op_stack->currToken.code != LPR_T 
 				&& (op_stack->currToken.attribute.get_int == MULT || op_stack->currToken.attribute.get_int == DIV ))
 			{
-				tl_addt(pop(&op_stack));
+				tl_addt(pop(&op_stack), usingDepth, ifDepth);
 			}
 			op_stack = push(op_stack,lookahead_token);
 			}
@@ -610,15 +618,15 @@ void primary_arithmetic_expression(void)
     switch(lookahead_token.code)
     {
     case AVID_T:
-		tl_addt(lookahead_token);
+		tl_addt(lookahead_token, usingDepth, ifDepth);
         match(AVID_T,NO_ATTR);
         break;
     case FPL_T:
-		tl_addt(lookahead_token);
+		tl_addt(lookahead_token, usingDepth, ifDepth);
         match(FPL_T,NO_ATTR);
         break;
     case INL_T:
-		tl_addt(lookahead_token);
+		tl_addt(lookahead_token, usingDepth, ifDepth);
         match(INL_T,NO_ATTR);
         break;
     case LPR_T:
@@ -627,7 +635,7 @@ void primary_arithmetic_expression(void)
         arithmetic_expression();
 		while(op_stack->currToken.code != LPR_T)
 		{
-			tl_addt(pop(&op_stack));
+			tl_addt(pop(&op_stack), usingDepth, ifDepth);
 		}
 		pop(&op_stack);
         match(RPR_T, NO_ATTR);
@@ -660,7 +668,7 @@ void string_expression_p(void)
 {
     if(lookahead_token.code == SCC_OP_T)
     {
-		//tl_addt(lookahead_token);
+		op_stack = push(op_stack,lookahead_token);		
         match(SCC_OP_T, NO_ATTR);
         primary_string_expression();
         string_expression_p();
@@ -678,11 +686,11 @@ void primary_string_expression(void)
     switch(lookahead_token.code)
     {
     case SVID_T:
-		tl_addt(lookahead_token);
+		tl_addt(lookahead_token, usingDepth, ifDepth);
         match(SVID_T, NO_ATTR);
         break;
     case STR_T:
-		tl_addt(lookahead_token);
+		tl_addt(lookahead_token, usingDepth, ifDepth);
         match(STR_T, NO_ATTR);
         break;
     default:
@@ -704,9 +712,9 @@ void conditional_expression(void)
 	{
 		while(op_stack->prevstackItem)
 		{
-			tl_addt(pop(&op_stack));
+			tl_addt(pop(&op_stack), usingDepth, ifDepth);
 		}
-		tl_addt(pop(&op_stack));
+		tl_addt(pop(&op_stack), usingDepth, ifDepth);
 	}
     //gen_incode("PLATY: Conditional expression parsed");
 }
@@ -740,7 +748,7 @@ void logical_or_expression_p(void)
 		{			
 			while(op_stack != NULL && (op_stack->currToken.code == LOG_OP_T || op_stack->currToken.code == REL_OP_T ))
 			{
-				tl_addt(pop(&op_stack));
+				tl_addt(pop(&op_stack), usingDepth, ifDepth);
 			}
 			op_stack = push(op_stack,lookahead_token);
 		}
@@ -780,7 +788,7 @@ void logical_and_expression_p(void)
 		{			
 			while(op_stack != NULL && ((op_stack->currToken.code == LOG_OP_T && op_stack->currToken.attribute.get_int == AND) || op_stack->currToken.code == REL_OP_T ))
 			{
-				tl_addt(pop(&op_stack));
+				tl_addt(pop(&op_stack), usingDepth, ifDepth);
 			}
 			op_stack = push(op_stack,lookahead_token);
 		}
@@ -833,15 +841,15 @@ void primary_a_relational_expression(void)
     switch (lookahead_token.code)
     {
     case AVID_T :
-		tl_addt(lookahead_token);
+		tl_addt(lookahead_token, usingDepth, ifDepth);
         match(AVID_T, NO_ATTR);
         break;
     case FPL_T:
-		tl_addt(lookahead_token);
+		tl_addt(lookahead_token, usingDepth, ifDepth);
         match(FPL_T, NO_ATTR);
         break;
     case INL_T:
-		tl_addt(lookahead_token);
+		tl_addt(lookahead_token, usingDepth, ifDepth);
         match(INL_T, NO_ATTR);
         break;
     default:
@@ -882,7 +890,7 @@ void relational_operator(void)
 			{			
 				while(op_stack != NULL && op_stack->currToken.code == REL_OP_T)
 				{
-					tl_addt(pop(&op_stack));
+					tl_addt(pop(&op_stack), usingDepth, ifDepth);
 				}
 				op_stack = push(op_stack,lookahead_token);
 			}
@@ -897,7 +905,7 @@ void relational_operator(void)
 			{			
 				while(op_stack != NULL && op_stack->currToken.code == REL_OP_T)
 				{
-					tl_addt(pop(&op_stack));
+					tl_addt(pop(&op_stack), usingDepth, ifDepth);
 				}
 				op_stack = push(op_stack,lookahead_token);
 			}
@@ -912,7 +920,7 @@ void relational_operator(void)
 			{			
 				while(op_stack != NULL && op_stack->currToken.code == REL_OP_T)
 				{
-					tl_addt(pop(&op_stack));
+					tl_addt(pop(&op_stack), usingDepth, ifDepth);
 				}
 				op_stack = push(op_stack,lookahead_token);
 			}
@@ -927,7 +935,7 @@ void relational_operator(void)
 			{			
 				while(op_stack != NULL && op_stack->currToken.code == REL_OP_T)
 				{
-					tl_addt(pop(&op_stack));
+					tl_addt(pop(&op_stack), usingDepth, ifDepth);
 				}
 				op_stack = push(op_stack,lookahead_token);
 			}
@@ -1065,31 +1073,82 @@ void gen_incode( int code )
 {
 	TL* tempTL = tkn_list;
 	int nullNotFound = 1;
-	int i;
-
-	while(nullNotFound)
+	int usingIndex = 0;
+	int currifDepth = 0;
+	int currUsingDepth = 0;
+	int isTrue = 0;
+	
+	while(code != -1)
 	{
-		if(tempTL->nextTLI == NULL)
-		{
-			nullNotFound = 0 ;
-		}
 		switch(code)
 		{
-		case OUTPUT:
+		case EOS_T:
+			if(currUsingDepth)
+			{
+ 				while(tempTL->currToken.code != KW_T || tempTL->currToken.attribute.get_int != USING || tempTL->usingDepth != currUsingDepth)
+				{
+					tempTL = tempTL->prevTLI;
+				}
+				code = tempTL->currToken.attribute.get_int;
+				break;
+			}
+			tempTL = tempTL->nextTLI;
+			if(!tempTL)
+			{
+				code = -1;
+				break;
+			}
+			if(tempTL->currToken.code == KW_T)
+				code = tempTL->currToken.attribute.get_int;
+			else
+			{
+				if(tempTL->currToken.code == INPUT || tempTL->currToken.code == OUTPUT)
+					tempTL = tempTL->nextTLI;
+				code = tempTL->currToken.code;
+			}
+			break;			
+		case ELSE:
+			tempTL = tempTL->nextTLI;
+			if(tempTL->currToken.code != EOS_T)
+			{
+				while(tempTL->currToken.code != EOS_T || tempTL->nextTLI->currToken.code != EOS_T)
+				{
+					tempTL = tempTL->nextTLI;
+				}
+			}
+			if(tempTL->nextTLI)
+			tempTL = tempTL->nextTLI;
+			if(tempTL->nextTLI)
+			tempTL = tempTL->nextTLI;
+			if(tempTL->currToken.code == KW_T)
+				code = tempTL->currToken.attribute.get_int;
+			else
+			{
+				if(tempTL->currToken.code == INPUT || tempTL->currToken.code == OUTPUT)
+					tempTL = tempTL->nextTLI;
+				code = tempTL->currToken.code;
+			}
+			break;			
+		case OUTPUT:			
 			tl_printtl(tempTL);
 			if(tempTL->prevTLI == NULL)
 			{
 				tl_destroy();
 				return;
 			}
-			while(tempTL->nextTLI && tempTL->currToken.code != EOS_T)
+			while(tempTL->currToken.code != EOS_T)
 			{
 				tempTL = tempTL->nextTLI;
 			}
 			tempTL = tempTL->nextTLI;
-			if(tempTL->currToken.code == EOS_T && tempTL->nextTLI)
-			tempTL = tempTL->nextTLI;
-			code = tempTL->currToken.attribute.get_int;
+			if(tempTL->currToken.code == KW_T)
+				code = tempTL->currToken.attribute.get_int;
+			else
+			{
+				if(tempTL->currToken.code == INPUT || tempTL->currToken.code == OUTPUT)
+					tempTL = tempTL->nextTLI;
+				code = tempTL->currToken.code;
+			}
 			break;
 		case INPUT:
 			tl_inputtl(tempTL);
@@ -1098,68 +1157,175 @@ void gen_incode( int code )
 				tl_destroy();
 				return;
 			}
-			while(tempTL->nextTLI && tempTL->currToken.code != EOS_T)
+			while(tempTL->currToken.code != EOS_T)
 			{
 				tempTL = tempTL->nextTLI;
 			}
 			tempTL = tempTL->nextTLI;
-			if(tempTL->currToken.code == EOS_T && tempTL->nextTLI)
+			if(tempTL->currToken.code == KW_T)
+				code = tempTL->currToken.attribute.get_int;
+			else
+			{
+				if(tempTL->currToken.code == INPUT || tempTL->currToken.code == OUTPUT)
+					tempTL = tempTL->nextTLI;
+				code = tempTL->currToken.code;
+			}
+			break;			
+		case THEN:
 			tempTL = tempTL->nextTLI;
-			code = tempTL->currToken.attribute.get_int;
-			break;
+			if(tempTL->currToken.code == KW_T)
+				code = tempTL->currToken.attribute.get_int;
+			else
+			{
+				if(tempTL->currToken.code == INPUT || tempTL->currToken.code == OUTPUT)
+					tempTL = tempTL->nextTLI;
+				code = tempTL->currToken.code;
+			}
+			break;				
 		case IF:
+			if(tempTL->ifDepth<0)
+				printf("HERE");
+			currifDepth = tempTL->ifDepth;
 			tempTL = tempTL->nextTLI;
 			if(psfx_parse_relop(tempTL))
 			{
-				while(tempTL->nextTLI && (tempTL->currToken.code != KW_T || tempTL->currToken.attribute.get_int != THEN))
+				while(tempTL->currToken.code != KW_T || tempTL->currToken.attribute.get_int != THEN)
 				{
 					tempTL = tempTL->nextTLI;
 				}
-				tempTL = tempTL->nextTLI;
-				code = tempTL->currToken.attribute.get_int;
+				if(tempTL->currToken.code == KW_T)
+					code = tempTL->currToken.attribute.get_int;
+				else
+				{
+					if(tempTL->currToken.code == INPUT || tempTL->currToken.code == OUTPUT)
+						tempTL = tempTL->nextTLI;
+					code = tempTL->currToken.code;
+				}
+				break;				
 			}
 			else
 			{
-
-				while(tempTL->nextTLI && (tempTL->currToken.code != KW_T || tempTL->currToken.attribute.get_int != ELSE))
+				while(tempTL->currToken.code != KW_T || tempTL->currToken.attribute.get_int != ELSE || tempTL->ifDepth != currifDepth)
 				{
 					tempTL = tempTL->nextTLI;
 				}
 				tempTL = tempTL->nextTLI;
-				code = tempTL->currToken.attribute.get_int;
+				if(tempTL->currToken.code == KW_T)
+					code = tempTL->currToken.attribute.get_int;
+				else
+				{
+					if(tempTL->currToken.code == INPUT || tempTL->currToken.code == OUTPUT)
+						tempTL = tempTL->nextTLI;
+					code = tempTL->currToken.code;
+				}
+				break;				
 			}
-	
-			break;
-		case USING:
+		case USING:	
+			currUsingDepth = tempTL->usingDepth;
+			while(tempTL->currToken.code != ASS_OP_T)
+			{
+				tempTL = tempTL->nextTLI;
+			}
+			if(usingIndex > 0)
+			{
+				tempTL = tempTL->nextTLI;
+				while(tempTL->currToken.code != ASS_OP_T)
+				{
+					tempTL = tempTL->nextTLI;
+				}
+			}			
+			sem_analyze(tempTL);
+			if( usingIndex > 0)
+			{
+				while(tempTL->currToken.code != KW_T || tempTL->currToken.attribute. get_int != USING)
+				{
+					tempTL = tempTL->prevTLI;
+				}
+			}
+			++usingIndex;
+			while(tempTL->currToken.code != COM_T)
+			{
+				tempTL = tempTL->nextTLI;
+			}
+			tempTL = tempTL->nextTLI;
+			isTrue = psfx_parse_relop(tempTL);
+			while(tempTL->currToken.code != KW_T || tempTL->currToken.attribute.get_int != REPEAT)
+			{
+				tempTL = tempTL->nextTLI;
+			}
+			if(isTrue)
+			{
+				tempTL = tempTL->nextTLI;
+				if(tempTL->currToken.code == KW_T)
+					code = tempTL->currToken.attribute.get_int;
+				else
+				{
+					if(tempTL->currToken.code == INPUT || tempTL->currToken.code == OUTPUT)
+						tempTL = tempTL->nextTLI;
+					code = tempTL->currToken.code;
+				}
+				break;
+			}
+			else
+			{
+				tempTL = tempTL->nextTLI;
+				if(tempTL->currToken.code != EOS_T)
+				{					
+					while(tempTL->currToken.code != EOS_T || tempTL->nextTLI->currToken.code != EOS_T  || tempTL->usingDepth == currUsingDepth)
+					{						
+						tempTL = tempTL->nextTLI;
+					}				
+					tempTL = tempTL->nextTLI;
+					if(tempTL->nextTLI == NULL)
+					{
+						usingDepth = 0;
+						code = -1;
+						break;
+					}
+				}
+				if(tempTL->currToken.code == KW_T)
+					code = tempTL->currToken.attribute.get_int;
+				else
+				{
+					if(tempTL->currToken.code == INPUT || tempTL->currToken.code == OUTPUT)
+					tempTL = tempTL->nextTLI;
+					usingIndex = 0;
+					--currUsingDepth;
+					code = tempTL->currToken.code;
+				}
+			}		
 			break;
 		case ASS_OP_T:
-			tempTL = tempTL->nextTLI;
+			if(tempTL->currToken.code != ASS_OP_T)
+				tempTL = tempTL->nextTLI;
 			sem_analyze(tempTL);
 			if(tempTL->prevTLI->prevTLI == NULL)
 			{
 				tl_destroy();
 				return;
 			}
-			
-			break;
-		case REL_OP_T:
-			
+			while(tempTL->currToken.code != EOS_T)
+			{
+				tempTL = tempTL->nextTLI;
+			}
+			tempTL = tempTL->nextTLI;
+			if(tempTL->currToken.code == KW_T)
+				code = tempTL->currToken.attribute.get_int;
+			else
+			{
+				if(tempTL->currToken.code == INPUT || tempTL->currToken.code == OUTPUT)
+					tempTL = tempTL->nextTLI;
+				code = tempTL->currToken.code;
+			}
 			break;
 		default:
 			break;
 		}
-		if(tempTL->nextTLI)
-			tempTL = tempTL->nextTLI;
 	}
 	tl_destroy();
-    printf("\nToken code = [ %d ]\n",code);
 }
 
-void tl_createtl(void)
-{
-	
-}
-void tl_addt( Token new_token )
+void tl_addt( Token new_token, int usingDepth, int ifDepth )
 {
 	TL* tempTL;
 	if(tkn_list == NULL)
@@ -1171,6 +1337,8 @@ void tl_addt( Token new_token )
 		}
 		tkn_list->prevTLI = NULL;
 		tkn_list->currToken = lookahead_token;
+		tkn_list->ifDepth = ifDepth;
+		tkn_list->usingDepth = usingDepth;
 		tkn_list->nextTLI = NULL;
 		return;
 	}
@@ -1179,18 +1347,19 @@ void tl_addt( Token new_token )
 	while(tempTL->nextTLI)
 	{	
 		tempTL = tempTL->nextTLI;
-	}
-	
+	}	
 	tempTL->nextTLI = (TL *)malloc(sizeof(TL));
 	tempTL->nextTLI->prevTLI = tempTL;	
 	tempTL = tempTL->nextTLI;
 	tempTL->currToken = new_token;	
+	tempTL-> ifDepth = ifDepth;
+	tempTL->usingDepth = usingDepth;
 	tempTL->nextTLI = NULL;	
 }
+
 void tl_printtl(TL* tempTL)
 {
-
-	while(tempTL->nextTLI && tempTL->currToken.code != EOS_T)
+	while(tempTL && tempTL->currToken.code != EOS_T)
 	{	
 		switch (tempTL->currToken.code)
 		{
@@ -1204,7 +1373,7 @@ void tl_printtl(TL* tempTL)
 			switch(st_get_type(sym_table,tempTL->currToken.attribute.vid_offset))
 			{
 			case 'F':
-				printf("%f",sym_table.pstvr[tempTL->currToken.attribute.vid_offset].i_value.fpl_val);
+				printf("%.3f",sym_table.pstvr[tempTL->currToken.attribute.vid_offset].i_value.fpl_val);
 				break;
 			case'I':
 				printf("%d", sym_table.pstvr[tempTL->currToken.attribute.vid_offset].i_value.int_val);
@@ -1215,29 +1384,6 @@ void tl_printtl(TL* tempTL)
 			break;
 		}
 		tempTL = tempTL->nextTLI;
-	}
-	switch (tempTL->currToken.code)
-	{
-	case SVID_T:
-		printf("%s",b_get_chmemloc(str_LTBL, sym_table.pstvr[tempTL->currToken.attribute.vid_offset].i_value.str_offset));
-		break;
-
-	case STR_T:
-		printf("%s",b_get_chmemloc(str_LTBL, tempTL->currToken.attribute.str_offset));
-		break;
-	case AVID_T:
-		switch(st_get_type(sym_table,tempTL->currToken.attribute.vid_offset))
-		{
-		case 'F':
-			printf("%f",sym_table.pstvr[tempTL->currToken.attribute.vid_offset].i_value.fpl_val);
-			break;
-		case'I':
-			printf("%d", sym_table.pstvr[tempTL->currToken.attribute.vid_offset].i_value.int_val);
-			break;
-		}
-		break;
-	default:
-		break;
 	}
 }
 
@@ -1261,140 +1407,222 @@ void tl_destroy(void)
 void sem_analyze(TL* tempTL)
 {
 	InitialValue tempResult;	
-	Token newValue = psfx_parse(tempTL);
-
-		switch(newValue.code)
+	Token newValue;
+	lvalue = tempTL->prevTLI->currToken;
+	tempTL = tempTL->nextTLI;
+	newValue = psfx_parse(tempTL);
+	switch(newValue.code)
+	{
+	case FPL_T:		
+		if(st_get_type(sym_table,lvalue.attribute.vid_offset) != FLT)
+		if(st_update_type(sym_table, lvalue.attribute.vid_offset, FLT) == ERR_PRV_UPDTD)
 		{
-		case FPL_T: 
-			tempResult.fpl_val = newValue.attribute.flt_value;
-			st_update_type(sym_table, lvalue.attribute.vid_offset, 'F');
+			tempResult.int_val = (int)newValue.attribute.flt_value;
 			break;
-		case INL_T:
-			tempResult.int_val = newValue.attribute.int_value;
-			st_update_type(sym_table,lvalue.attribute.vid_offset, 'I');
+		}
+		tempResult.fpl_val = newValue.attribute.flt_value;		
+		break;
+	case INL_T:
+		if(st_get_type(sym_table,lvalue.attribute.vid_offset) != INT)
+		if (st_update_type(sym_table,lvalue.attribute.vid_offset, INT) == ERR_PRV_UPDTD)
+		{
+			tempResult.fpl_val = (float)newValue.attribute.int_value;
 			break;
-		case STR_T:
-			tempResult.str_offset = newValue.attribute.str_offset;		
-			break;
-		}		
-		st_update_value(sym_table, lvalue.attribute.vid_offset, tempResult);
+		}
+		tempResult.int_val = newValue.attribute.int_value;		
+		break;
+	case STR_T:
+		tempResult.str_offset = newValue.attribute.str_offset;		
+		break;
+	case AVID_T:
+		if(st_get_type(sym_table, newValue.attribute.vid_offset) == INT)
+		{
+			if(st_get_type(sym_table, lvalue.attribute.vid_offset)!= INT)
+			if (st_update_type(sym_table,lvalue.attribute.vid_offset, INT) == ERR_PRV_UPDTD)
+			{
+				tempResult.fpl_val = (float)sym_table.pstvr[newValue.attribute.vid_offset].i_value.int_val;
+				break;
+			}
+			tempResult.int_val = sym_table.pstvr[newValue.attribute.vid_offset].i_value.int_val;
+		}
+		else 
+		{
+			if(st_get_type(sym_table, lvalue.attribute.vid_offset)!= FLT)
+			if(st_update_type(sym_table, lvalue.attribute.vid_offset, FLT) == ERR_PRV_UPDTD)
+			{
+				tempResult.int_val = (int)sym_table.pstvr[newValue.attribute.vid_offset].i_value.fpl_val;
+				break;
+			}
+			tempResult.fpl_val = sym_table.pstvr[newValue.attribute.vid_offset].i_value.fpl_val;
+		}					
+		break;
+	case SVID_T:
+		tempResult.str_offset = sym_table.pstvr[newValue.attribute.vid_offset].i_value.str_offset;
+		break;
+
+	}		
+	st_update_value(sym_table, lvalue.attribute.vid_offset, tempResult);
 }
 
 Token psfx_parse(TL* tempTL)
 {
 	Token resultToken;
-	Token opA;
-	Token opB;
+	Token tempToken;
+	float operands[2];
+	char **stringOperands = (char**)malloc(2*sizeof(char*));
+	int i;
+	int j;
 	int nullFound = 0;
 	int arrFlag = 0;
+	int resultCode = 0;
 
-	while(!nullFound)
+	resultToken.code = FPL_T;
+
+	while(tempTL)
 	{
-		if(!tempTL->nextTLI || tempTL->currToken.code == EOS_T)
+		if(tempTL->currToken.code == EOS_T || tempTL->currToken.code == COM_T || tempTL->currToken.code == KW_T)
 		{
-			++nullFound;
+			break;
 		}
 		switch(tempTL->currToken.code)
 		{
 		case FPL_T:
-		case INL_T:
-		case AVID_T:
-			tkn_stack = push(tkn_stack,tempTL->currToken);
-			resultToken.code = FPL_T;			
+			resultCode = FPL_T;
+			tkn_stack = push(tkn_stack,tempTL->currToken);	
 			break;
-		case SVID_T:
+		case INL_T:
+			if(resultCode != FPL_T)
+			resultCode = INL_T;
+			tkn_stack = push(tkn_stack,tempTL->currToken);	
+			break;
+		case AVID_T:
+			if(st_get_type(sym_table, tempTL->currToken.attribute.vid_offset) == INT)
+			{
+				if(resultCode != FPL_T)
+					resultCode = INL_T;
+			}
+			else
+			{
+				resultCode = FPL_T;
+			}
+			tkn_stack = push(tkn_stack,tempTL->currToken);	
+			break;
+		case STR_T:	
+			tkn_stack = push(tkn_stack,tempTL->currToken);	
+			break;
+		case SVID_T:			
+			tkn_stack = push(tkn_stack,tempTL->currToken);	
 			break;
 		case ART_OP_T:
-			opB = pop(&tkn_stack);
-			if(tkn_stack)
-			opA = pop(&tkn_stack);
-			else{
-				opA.attribute.flt_value = 0.0;
-			}
-			switch(tempTL->currToken.attribute.get_int)
+			for(i= 0; i < 2; i++ )
 			{
-				++arrFlag;
+				if(!tkn_stack)
+				{
+					operands[i] = 0.0;
+					break;
+				}
+				tempToken = pop(&tkn_stack);			
+				switch(tempToken.code)
+				{
+				case FPL_T:
+					operands[i] = tempToken.attribute.flt_value;
+					break;
+				case INL_T:
+					operands[i] = tempToken.attribute.int_value;
+					break;
+				case AVID_T:
+					if(st_get_type(sym_table, tempToken.attribute.vid_offset) == INT)
+					{
+						operands[i] = (float)sym_table.pstvr[tempToken.attribute.vid_offset].i_value.int_val;
+					}else
+					{
+						operands[i] = sym_table.pstvr[tempToken.attribute.vid_offset].i_value.fpl_val;
+					}					
+					break;
+				}				
+			}			
+			switch(tempTL->currToken.attribute.get_int)
+			{				
 			case MINUS:
-				if(opA.code == AVID_T && opB.code == AVID_T)
-				{					
-					resultToken.attribute.flt_value =sym_table.pstvr[opA.attribute.vid_offset].i_value.fpl_val - sym_table.pstvr[opB.attribute.vid_offset].i_value.fpl_val;
-				}
-				if(opA.code != AVID_T && opB.code == AVID_T)
-				{
-					resultToken.attribute.flt_value = opA.attribute.flt_value - sym_table.pstvr[opB.attribute.vid_offset].i_value.fpl_val;
-				}
-				if(opA.code == AVID_T && opB.code != AVID_T)
-				{
-					resultToken.attribute.flt_value = sym_table.pstvr[opA.attribute.vid_offset].i_value.fpl_val - opB.attribute.flt_value;
-				}
-				if(opA.code != AVID_T && opB.code != AVID_T)
-				{
-					resultToken.attribute.flt_value = opA.attribute.flt_value - opB.attribute.flt_value;
-				}
+				resultToken.attribute.flt_value = operands[1] - operands[0];		
+				++arrFlag;
 				break;
 			case PLUS:
-				if(opA.code == AVID_T && opB.code == AVID_T)
-				{
-					resultToken.attribute.flt_value =sym_table.pstvr[opA.attribute.vid_offset].i_value.fpl_val + sym_table.pstvr[opB.attribute.vid_offset].i_value.fpl_val;
-				}
-				if(opA.code != AVID_T && opB.code == AVID_T)
-				{
-					resultToken.attribute.flt_value = opA.attribute.flt_value + sym_table.pstvr[opB.attribute.vid_offset].i_value.fpl_val;
-				}
-				if(opA.code == AVID_T && opB.code != AVID_T)
-				{
-					resultToken.attribute.flt_value = sym_table.pstvr[opA.attribute.vid_offset].i_value.fpl_val + opB.attribute.flt_value;
-				}
-				if(opA.code != AVID_T && opB.code != AVID_T)
-				{
-					resultToken.attribute.flt_value = opA.attribute.flt_value + opB.attribute.flt_value;
-				}
+				resultToken.attribute.flt_value = operands[1] + operands[0];	
+				++arrFlag;
 				break;
 			case MULT:
-				if(opA.code == AVID_T && opB.code == AVID_T)
-				{
-					resultToken.attribute.flt_value =sym_table.pstvr[opA.attribute.vid_offset].i_value.fpl_val * sym_table.pstvr[opB.attribute.vid_offset].i_value.fpl_val;
-				}
-				if(opA.code != AVID_T && opB.code == AVID_T)
-				{
-					resultToken.attribute.flt_value = opA.attribute.flt_value * sym_table.pstvr[opB.attribute.vid_offset].i_value.fpl_val;
-				}
-				if(opA.code == AVID_T && opB.code != AVID_T)
-				{
-					resultToken.attribute.flt_value = sym_table.pstvr[opA.attribute.vid_offset].i_value.fpl_val * opB.attribute.flt_value;
-				}
-				if(opA.code != AVID_T && opB.code != AVID_T)
-				{
-					resultToken.attribute.flt_value = opA.attribute.flt_value * opB.attribute.flt_value;
-				}
+				resultToken.attribute.flt_value = operands[1] * operands[0];
+				++arrFlag;
 				break;
+
 			case DIV:
-				if(opA.code == AVID_T && opB.code == AVID_T)
-				{
-					resultToken.attribute.flt_value =sym_table.pstvr[opA.attribute.vid_offset].i_value.fpl_val / sym_table.pstvr[opB.attribute.vid_offset].i_value.fpl_val;
-				}
-				if(opA.code != AVID_T && opB.code == AVID_T)
-				{
-					resultToken.attribute.flt_value = opA.attribute.flt_value / sym_table.pstvr[opB.attribute.vid_offset].i_value.fpl_val;
-				}
-				if(opA.code == AVID_T && opB.code != AVID_T)
-				{
-					resultToken.attribute.flt_value = sym_table.pstvr[opA.attribute.vid_offset].i_value.fpl_val / opB.attribute.flt_value;
-				}
-				if(opA.code != AVID_T && opB.code != AVID_T)
-				{
-					resultToken.attribute.flt_value = opA.attribute.flt_value / opB.attribute.flt_value;
-				}
-				break;				
-			}
+				resultToken.attribute.flt_value = operands[1] / operands[0];
+				++arrFlag;
+				break;
+			}			
 			tkn_stack = push(tkn_stack,resultToken);
+			break;
+		case SCC_OP_T:
+			++arrFlag;
+			for(i = 0; i<2; i++)
+			{
+				if(!tkn_stack)
+				{				
+					stringOperands[i] = NULL;
+					break;
+				}
+				tempToken = pop(&tkn_stack);		
+				switch(tempToken.code)
+				{
+				case STR_T:
+					stringOperands[i] = (char*)malloc(sizeof(char)*strlen(b_get_chmemloc(str_LTBL,tempToken.attribute.str_offset)+1));
+					strcpy(stringOperands[i],b_get_chmemloc(str_LTBL,tempToken.attribute.str_offset));
+					resultToken.code = STR_T;
+					break;
+				case SVID_T:
+					if( sym_table.pstvr[tempToken.attribute.vid_offset].i_value.str_offset == -1)
+					{
+						stringOperands[i]= "\0";
+					}
+					else
+					{					
+					stringOperands[i] = (char*)malloc(sizeof(char)*strlen(b_get_chmemloc(str_LTBL, sym_table.pstvr[tempToken.attribute.vid_offset].i_value.str_offset)+1));
+					strcpy(stringOperands[i],b_get_chmemloc(str_LTBL, sym_table.pstvr[tempToken.attribute.vid_offset].i_value.str_offset));
+					}
+					resultToken.code = STR_T;
+					break;
+				}				
+			}
+			resultToken.attribute.str_offset = b_getsize(str_LTBL);
+			for(i = 1; i>=0; i--)
+			{
+				for(j = 0; j<strlen(stringOperands[i]); j++)
+				{
+					b_addc(str_LTBL,stringOperands[i][j]);
+				}
+			}
+			b_addc(str_LTBL,'\0');
+			tkn_stack = push(tkn_stack,resultToken);
+			break;		
 		}
+		
 		tempTL = tempTL->nextTLI;
-	
 	}
+	free((char**)stringOperands);
 	if(arrFlag == 0)
 	{
 		resultToken = pop(&tkn_stack);
+		return resultToken;
+	}
+
+	
+	
+	stringOperands = NULL;
+	if(resultCode == INL_T)
+	{
+		resultToken.code = INL_T;
+		resultToken.attribute.int_value = (int)resultToken.attribute.flt_value;
 	}
 	return resultToken;
 }
@@ -1405,7 +1633,7 @@ void tl_inputtl(TL* tempTL)
 	int i = 0;
 	InitialValue inputValue;
 	int dataType = INL_T;
-	while(tempTL->nextTLI && tempTL->currToken.code !=EOS_T)
+	while(tempTL->nextTLI || tempTL->currToken.code !=EOS_T)
 	{	
 		switch (tempTL->currToken.code)
 		{
@@ -1413,10 +1641,9 @@ void tl_inputtl(TL* tempTL)
 			scanf("%s",input);
 			inputValue.str_offset = b_getsize(str_LTBL);
 			st_update_value(sym_table,tempTL->currToken.attribute.vid_offset,inputValue);
-			i=0;
-			while(i<strlen(input)+1)
+			for(i = 0;i<strlen(input)+1; i++)
 			{
-				b_addc(str_LTBL,input[i++]);
+				b_addc(str_LTBL,input[i]);
 			}		
 			break;
 		case AVID_T:
@@ -1430,60 +1657,36 @@ void tl_inputtl(TL* tempTL)
 			}
 			if(dataType == FPL_T)
 			{
-				st_update_type(sym_table,tempTL->currToken.attribute.vid_offset,'F');
-				inputValue.fpl_val = atodbl(input);
+				if(st_get_type(sym_table, tempTL->currToken.attribute.vid_offset) == FLT)
+				{
+					inputValue.fpl_val = atodbl(input);
+				}else
+				{
+					if(st_update_type(sym_table,tempTL->currToken.attribute.vid_offset,FLT) == ERR_PRV_UPDTD )
+						inputValue.int_val = atoi(input);
+					else
+						inputValue.fpl_val = atodbl(input);
+				}
 				st_update_value(sym_table,tempTL->currToken.attribute.vid_offset,inputValue);
 			}
 			else
 			{
-				st_update_type(sym_table,tempTL->currToken.attribute.vid_offset,'I');
-				inputValue.int_val = atoint(input);
+				if(st_get_type(sym_table, tempTL->currToken.attribute.vid_offset) == INT)
+				{
+					inputValue.int_val = atoint(input);
+				}else
+				{
+					if(st_update_type(sym_table,tempTL->currToken.attribute.vid_offset,INT) == ERR_PRV_UPDTD)
+						inputValue.fpl_val = atof(input);
+					else
+						inputValue.int_val = atoint(input);
+				}
 				st_update_value(sym_table,tempTL->currToken.attribute.vid_offset,inputValue);
 			}
-			break;
-		
+			break;		
 		}
 		tempTL = tempTL->nextTLI;
-
 	}
-	switch (tempTL->currToken.code)
-	{
-	case SVID_T:
-		scanf("%s",input);	
-		inputValue.str_offset = b_getsize(str_LTBL);
-		st_update_value(sym_table,tempTL->currToken.attribute.vid_offset,inputValue);
-		i=0;
-		while(i<strlen(input)+1)
-		{
-			b_addc(str_LTBL,input[i++]);
-		}				
-		break;
-	case AVID_T:
-		scanf("%s",input);
-		for(i=0;i<strlen(input)+1;i++)
-		{
-			if(input[i] == '.')
-			{
-				dataType = FPL_T;
-			}
-		}
-		if(dataType == FPL_T)
-		{
-			st_update_type(sym_table,tempTL->currToken.attribute.vid_offset,'F');
-			inputValue.fpl_val = atodbl(input);
-			st_update_value(sym_table,tempTL->currToken.attribute.vid_offset,inputValue);
-		}
-		else
-		{
-			st_update_type(sym_table,tempTL->currToken.attribute.vid_offset,'I');
-			inputValue.int_val = atoint(input);
-			st_update_value(sym_table,tempTL->currToken.attribute.vid_offset,inputValue);
-		}
-		break;
-	default:
-		break;
-	}
-	
 }
 
 
@@ -1593,129 +1796,159 @@ int exec_cond_s(TL* tempTL)
 int psfx_parse_relop(TL* tempTL)
 {
 	Token resultToken;
-	Token opA;
-	Token opB;
+	Token tempToken;
+	int operands[2];
+	char **stringOperands = (char**)malloc(2*sizeof(char*));
 	int nullFound = 0;
+	int i;
+	int strCmp = 0;
 	int arrFlag = 0;
 
-	while(!nullFound)
+	while(tempTL)
 	{
-		if(!tempTL->nextTLI || tempTL->currToken.code == ASS_OP_T || tempTL->currToken.code == KW_T)
+		if(tempTL->currToken.code == ASS_OP_T || tempTL->currToken.code == KW_T || tempTL->currToken.code == COM_T)
 		{
-			++nullFound;
+			break;
 		}
-
 		switch(tempTL->currToken.code)
 		{
 		case FPL_T:
 		case INL_T:
 		case AVID_T:
-			tkn_stack = push(tkn_stack,tempTL->currToken);
-			resultToken.code = INL_T;			
-			break;
 		case SVID_T:
+		case STR_T:
 			tkn_stack = push(tkn_stack,tempTL->currToken);
+			resultToken.code = INL_T;
 			break;
 		case REL_OP_T:
-			opB = pop(&tkn_stack);
-			if(tkn_stack)
-				opA = pop(&tkn_stack);
-			else{
-				opA.code = AVID_T;
-				opA.attribute.int_value = 0;
-			}
-			switch(tempTL->currToken.attribute.get_int)
+			for(i= 0; i < 2; i++ )
 			{
-				
+				if(!tkn_stack)
+				{
+					operands[i] = 0.0;
+					stringOperands = NULL;
+					break;
+				}
+				tempToken = pop(&tkn_stack);			
+				switch(tempToken.code)
+				{
+				case FPL_T:
+					operands[i] = tempToken.attribute.flt_value;
+					break;
+				case INL_T:
+					operands[i] = tempToken.attribute.int_value;
+					break;
+				case AVID_T:
+					if(st_get_type(sym_table, tempToken.attribute.vid_offset) == INT)
+					{
+						operands[i] = sym_table.pstvr[tempToken.attribute.vid_offset].i_value.int_val;
+					}else
+					{
+						operands[i] = sym_table.pstvr[tempToken.attribute.vid_offset].i_value.fpl_val;
+					}					
+					break;
+				case STR_T:
+					++strCmp;
+					stringOperands[i] = (char*)malloc(sizeof(char)*strlen(b_get_chmemloc(str_LTBL,tempToken.attribute.str_offset)+1));
+					strcpy(stringOperands[i],b_get_chmemloc(str_LTBL,tempToken.attribute.str_offset));
+					break;
+				case SVID_T:
+					++strCmp;
+					if(sym_table.pstvr[tempToken.attribute.vid_offset].i_value.str_offset == -1)
+					{
+						stringOperands[i] = "";
+					}
+					else
+					{
+						stringOperands[i] = (char*)malloc(sizeof(char)*strlen(b_get_chmemloc(str_LTBL, sym_table.pstvr[tempToken.attribute.vid_offset].i_value.str_offset)+1));
+						strcpy(stringOperands[i],b_get_chmemloc(str_LTBL, sym_table.pstvr[tempToken.attribute.vid_offset].i_value.str_offset));
+					}				
+					break;
+				}							
+			}			
+			switch(tempTL->currToken.attribute.get_int)
+			{				
 			case EQ:
 				++arrFlag;
-				if(opA.code == AVID_T && opB.code == AVID_T)
+				if(strCmp)
 				{
-					resultToken.attribute.int_value = opA.attribute.int_value == opB.attribute.int_value;
+					if(strcmp(stringOperands[1],stringOperands[0]) == 0)
+						resultToken.attribute.int_value = 1;
+					else
+						resultToken.attribute.int_value = 0;
 				}
-				if(opA.code != AVID_T && opB.code == AVID_T)
-				{
-					resultToken.attribute.int_value = opA.attribute.flt_value == sym_table.pstvr[opB.attribute.vid_offset].i_value.fpl_val;
-				}
-				if(opA.code != AVID_T && opB.code != AVID_T)
-				{
-					resultToken.attribute.int_value = opA.attribute.flt_value == opB.attribute.flt_value;
-				}
+				else
+					resultToken.attribute.int_value = operands[1] == operands[0];	
 				break;
 			case NE:
 				++arrFlag;
-				if(opA.code == AVID_T && opB.code == AVID_T)
+				if(strCmp)
 				{
-					resultToken.attribute.int_value =sym_table.pstvr[opA.attribute.vid_offset].i_value.fpl_val != sym_table.pstvr[opB.attribute.vid_offset].i_value.fpl_val;
+						if(strcmp(stringOperands[1], stringOperands[0]) != 0 )
+							resultToken.attribute.int_value = 1;
+						else
+							resultToken.attribute.int_value = 0;
+
 				}
-				if(opA.code != AVID_T && opB.code == AVID_T)
-				{
-					resultToken.attribute.int_value = opA.attribute.flt_value != sym_table.pstvr[opB.attribute.vid_offset].i_value.fpl_val;
-				}
-				if(opA.code != AVID_T && opB.code != AVID_T)
-				{
-					resultToken.attribute.int_value = opA.attribute.flt_value != opB.attribute.flt_value;
-				}
+				else
+					resultToken.attribute.int_value = operands[1] != operands[0];
 				break;
 			case GT:
 				++arrFlag;
-				if(opA.code == AVID_T && opB.code == AVID_T)
+				if(strCmp)
 				{
-					resultToken.attribute.int_value =sym_table.pstvr[opA.attribute.vid_offset].i_value.fpl_val > sym_table.pstvr[opB.attribute.vid_offset].i_value.fpl_val;
+					if(strcmp(stringOperands[1],stringOperands[0]) > 0)
+						resultToken.attribute.int_value = 1;
+					else
+						resultToken.attribute.int_value = 0;
 				}
-				if(opA.code != AVID_T && opB.code == AVID_T)
-				{
-					resultToken.attribute.int_value = opA.attribute.flt_value > sym_table.pstvr[opB.attribute.vid_offset].i_value.fpl_val;
-				}
-				if(opA.code != AVID_T && opB.code != AVID_T)
-				{
-					resultToken.attribute.int_value = opA.attribute.flt_value > opB.attribute.flt_value;
-				}
+				else
+					resultToken.attribute.int_value = operands[1] > operands[0];	
 				break;
 			case LT:
 				++arrFlag;
-				if(opA.code == AVID_T && opB.code == AVID_T)
+				if(strCmp)
 				{
-					resultToken.attribute.int_value =sym_table.pstvr[opA.attribute.vid_offset].i_value.fpl_val < sym_table.pstvr[opB.attribute.vid_offset].i_value.fpl_val;
+					if(strcmp(stringOperands[1],stringOperands[0]) < 0)
+						resultToken.attribute.int_value = 1;
+					else
+						resultToken.attribute.int_value = 0;
 				}
-				if(opA.code != AVID_T && opB.code == AVID_T)
-				{
-					resultToken.attribute.int_value = opA.attribute.flt_value < sym_table.pstvr[opB.attribute.vid_offset].i_value.fpl_val;
-				}
-				if(opA.code != AVID_T && opB.code != AVID_T)
-				{
-					resultToken.attribute.int_value = opA.attribute.flt_value < opB.attribute.flt_value;
-				}
+				else
+					resultToken.attribute.int_value = operands[1] < operands[0];	
 				break;				
 			}	
 			op_stack = push(op_stack,resultToken);
 			break;
 			case LOG_OP_T:
-				opB = pop(&op_stack);
-				opA = pop(&op_stack);
+				for(i = 0; i < 2 ; i++)
+				{
+					resultToken = pop(&op_stack);
+					operands[i] =  resultToken.attribute.int_value;
+				}
 				if(tempTL->currToken.attribute.get_int == AND)
 				{
 					++arrFlag;
-					resultToken.attribute.int_value = opA.attribute.int_value && opB.attribute.int_value;
+					resultToken.attribute.int_value = operands[1] && operands[0];
 				}
 				else
 				{
 					++arrFlag;
-					resultToken.attribute.int_value = opA.attribute.int_value || opB.attribute.int_value;
+					resultToken.attribute.int_value = operands[1] ||operands[0];
 				}
 				op_stack = push(op_stack,resultToken);
 				break;
 				
-		}
-		
+		}		
 		tempTL = tempTL->nextTLI;
-
 	}
+	free((char**)stringOperands);
 	if(arrFlag == 0)
 	{
 		resultToken = pop(&tkn_stack);
 	}
 	return resultToken.attribute.get_int;
 }
+
 
 

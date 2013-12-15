@@ -301,12 +301,12 @@ History/Versions:		10.18.13
 Called functions:		b_destroy(), free()
 Parameters:				STD sym_table
 Return value:			void
-Algorithm:				Check to ensure both dynamically allocated stuctures have valid pointers before 
+Algorithm:				Check to ensure both dynamically allocated structures have valid pointers before 
 						freeing the memory. We thought this was safer then checking the size.
 **********************************************************************************************************/
 void st_destroy(STD sym_table)
 {
-	/* Even though b_destroy handles NULL this check avoids creating an unnessecary stack frame */
+	/* Even though b_destroy handles NULL this check avoids creating an unnecessary stack frame */
 	if(sym_table.plsBD)
 	{
 		b_destroy(sym_table.plsBD);

@@ -1,4 +1,13 @@
-
+/*********************************************************************************************************
+File name:		parser.h
+Compiler:		MS Visual Studio 2010
+Authors:		Thom Palmer - 040 713 234 and Chris Whitten - 040 611 350 
+Course:			CST 8152 - Compilers, Lab Section: 401
+Assignment:		Assignment 4 
+Date:			December 5th, 2013
+Professor:		Sv. Ranev
+Purpose:		Declare all the variables and functions in which are to be used in parser.c
+*********************************************************************************************************/
 #include "buffer.h"
 #include "token.h"
 #include "stable.h"
@@ -6,15 +15,15 @@
 
 
 
-#define NO_ATTR -1
-#define ELSE 0
-#define IF 1
-#define INPUT 2
-#define OUTPUT 3
-#define PLATYPUS 4
-#define REPEAT 5
-#define THEN 6
-#define USING 7
+#define NO_ATTR -1		/* Used to indicate if the token doesn't have an attribute associated with it. */
+#define ELSE 0			/* Represents the index value in the kw_table for ELSE */
+#define IF 1			/* Represents the index value in the kw_table for IF */
+#define INPUT 2			/* Represents the index value in the kw_table for INPUT */
+#define OUTPUT 3		/* Represents the index value in the kw_table for OUTPUT */
+#define PLATYPUS 4		/* Represents the index value in the kw_table for PLATYPUS */
+#define REPEAT 5		/* Represents the index value in the kw_table for REPEAT */
+#define THEN 6			/* Represents the index value in the kw_table for THEN */	
+#define USING 7			/* Represents the index value in the kw_table for USING */
 
 
 static Token lookahead_token;
@@ -32,6 +41,8 @@ typedef struct TokenListItem
 {
 	struct TokenListItem *prevTLI;
 	Token currToken;
+	int usingDepth;
+	int ifDepth;
 	struct TokenListItem *nextTLI;
 }TL;
 
@@ -47,8 +58,8 @@ TS *tkn_stack;
 TS *op_stack;
 TS *postfix_stack;
 Token lvalue;
-
-int stackIndex;
+int usingDepth = 0;
+int ifDepth = 0;
 
 void parser(Buffer* in_buf);
 void match(int pr_token_code,int pr_token_attribute);
@@ -90,7 +101,7 @@ void primary_a_relational_expression(void);
 void primary_s_relational_expression(void);
 void relational_operator(void);
 
-void tl_addt(Token);
+void tl_addt(Token currentToken, int usingDepth, int ifDepth);
 void tl_destroy(void);
 void tl_printtl(TL* tempTL);
 void tl_inputtl(TL* tempTL);

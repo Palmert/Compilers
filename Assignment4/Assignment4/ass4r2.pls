@@ -4,15 +4,16 @@
 !<"Parsing is passing." S^R & Compilers' law
 
 PLATYPUS{
- a=-01;
+ a=1.0;
  b=+0.;
  INPUT(c);
  INPUT(d,e,f);
  c=((d+e)/a)*f-(((d-e)*a)/f);
+ OUTPUT(c);
  USING(a = a,a!=b .OR. c==d .AND. e<f .OR. a>0,c = e)REPEAT{
-   IF(a==1 .AND. b==0.0)THEN
-    c=-(5.9);
-   ELSE {c=-c;};  
+  
+    OUTPUT("HERE");
+	a = -1.0;
  };   
  OUTPUT();
  OUTPUT("Results: ");

@@ -15,8 +15,5 @@ PLATYPUS{}
 
 Parsing the source file...
 
-PLATY: Opt_statements parsed
-PLATY: Program parsed
-PLATY: Source file parsed
 
 Collecting garbage...

@@ -21,21 +21,10 @@ Parsing the source file...
 
 PLATY: Syntax error:  Line:  7
 *****  Token code:  0 Attribute: _
-PLATY: Primary arithmetic expression parsed
 PLATY: Syntax error:  Line:  7
 *****  Token code:  0 Attribute: .
-PLATY: Primary arithmetic expression parsed
-PLATY: Unary arithmetic expression parsed
-PLATY: Arithmetic expression parsed
-PLATY: Primary arithmetic expression parsed
-PLATY: Additive arithmetic expression parsed
-PLATY: Arithmetic expression parsed
-PLATY: Assignment expression (arithmetic) parsed
-PLATY: Assignment statement parsed
-PLATY: Program parsed
 PLATY: Syntax error:  Line:  8
 *****  Token code: 18 Attribute: NA
-PLATY: Source file parsed
 
 Syntax errors: 3
 

@@ -2,17 +2,17 @@
 !< The program is "lexically" and "syntactically" correct
 !< and should not produce any error
 PLATYPUS {
- 
  a=+0.0;
- 
+OUTPUT(a);
  sum008 = 7.87050 ;
+ OUTPUT(sum008);
  INPUT(a,sum008); 
- USING(i = 0,i < 32767 .OR. i == 077777,i = i + 02 )REPEAT{
-   a=
-   a*i/0.5
-   ;
-   sum008 = sum008 + a - 1 ;
+
+ USING(i = 0,i< 32767 .OR. i== 077777, i = i+ 02 )REPEAT{
+   a=a*i/0.5;
+   sum008 = sum008 + a - 1;
  };
+OUTPUT("OUTSIDE LOOP");
  IF(text# == "")THEN
    text# = "prog" <> "ram";
  ELSE {

@@ -19,37 +19,10 @@ OUTPUT("If there is a possibility of several things going wrong,
 
 Parsing the source file...
 
-PLATY: Output list (string literal) parsed
-PLATY: OUTPUT statement parsed
-PLATY: Primary arithmetic expression parsed
-PLATY: Primary arithmetic expression parsed
-PLATY: Additive arithmetic expression parsed
-PLATY: Arithmetic expression parsed
-PLATY: Primary arithmetic expression parsed
-PLATY: Unary arithmetic expression parsed
-PLATY: Arithmetic expression parsed
-PLATY: Primary arithmetic expression parsed
-PLATY: Primary arithmetic expression parsed
-PLATY: Multiplicative arithmetic expression parsed
-PLATY: Primary arithmetic expression parsed
-PLATY: Primary arithmetic expression parsed
-PLATY: Additive arithmetic expression parsed
-PLATY: Arithmetic expression parsed
-PLATY: Primary arithmetic expression parsed
-PLATY: Primary arithmetic expression parsed
-PLATY: Multiplicative arithmetic expression parsed
-PLATY: Arithmetic expression parsed
-PLATY: Primary arithmetic expression parsed
-PLATY: Primary arithmetic expression parsed
-PLATY: Multiplicative arithmetic expression parsed
-PLATY: Additive arithmetic expression parsed
-PLATY: Arithmetic expression parsed
-PLATY: Assignment expression (arithmetic) parsed
-PLATY: Syntax error:  Line:  8
+If there is a possibility of several things going wrong,
+         the one that will cause the most damage will be the first
+         one to go wrong. Murphy's lawPLATY: Syntax error:  Line:  8
 *****  Token code: 13 Attribute: NA
-PLATY: Assignment statement parsed
-PLATY: Program parsed
-PLATY: Source file parsed
 
 Syntax errors: 1
 

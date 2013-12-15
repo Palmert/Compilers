@@ -1,14 +1,8 @@
-PLATYPUS { 
-a = 5.0;
-a = a +5.0;
-OUTPUT(a);
-OUTPUT("
-");
-b = 5.0 + 5.0;
-c = b + 5.0;
-OUTPUT(b);
-OUTPUT("
-");
-OUTPUT(c); 
- }
- 
+!< Nested IF Test
+PLATYPUS{
+a = 1;
+b = 2;
+c = 3;
+d = 4;
+IF(a==1)THEN OUTPUT("FIRST IF"); IF(b==2)THEN OUTPUT(" SECOND IF"); IF(c==3)THEN OUTPUT(" THIRD IF"); IF(d!=4)THEN OUTPUT(" FOURTH IF"); ELSE{OUTPUT("FOURTH FAIL");}; ELSE{OUTPUT("THIRD FAIL");}; ELSE{OUTPUT("SECOND FAIL");}; ELSE{ OUTPUT("FIRST IF FAIL");};
+}
